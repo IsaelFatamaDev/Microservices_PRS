@@ -1,0 +1,95 @@
+spring:
+     r2dbc:
+          url: r2dbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:sistemajass}
+          username: ${DB_USER}
+          password: ${DB_PASSWORD}
+          pool:
+               initial-size: 10
+               max-size: 50
+               max-idle-time: 30m
+
+     flyway:
+          enabled: true
+          url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:sistemajass}
+          user: ${DB_USER}
+          password: ${DB_PASSWORD}
+          locations: classpath:db/migration
+
+     rabbitmq:
+          host: ${RABBITMQ_HOST:rabbitmq}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USER}
+          password: ${RABBITMQ_PASSWORD}
+          publisher-confirm-type: correlated
+          publisher-returns: true
+
+webclient:
+     connect-timeout: 3000
+     read-timeout: 5000
+     write-timeout: 5000
+     services:
+          authentication:
+               base-url: http://vg-ms-authentication:8082
+          organization:
+               base-url: http://vg-ms-organizations:8083
+          notification:
+               base-url: http://vg-ms-notifications:8090
+
+resilience4j:
+     circuitbreaker:
+          configs:
+               default:
+                    register-health-indicator: true
+                    sliding-window-size: 20
+                    minimum-number-of-calls: 10
+                    wait-duration-in-open-state: 30s
+                    failure-rate-threshold: 50
+                    slow-call-duration-threshold: 2s
+                    slow-call-rate-threshold: 80
+          instances:
+               authenticationService:
+                    base-config: default
+               organizationService:
+                    base-config: default
+               notificationService:
+                    base-config: default
+                    slow-call-duration-threshold: 5s
+
+     retry:
+          configs:
+               default:
+                    max-attempts: 3
+                    wait-duration: 1s
+                    enable-exponential-backoff: true
+                    exponential-backoff-multiplier: 2
+          instances:
+               authenticationService:
+                    base-config: default
+               organizationService:
+                    base-config: default
+               notificationService:
+                    base-config: default
+
+     timelimiter:
+          configs:
+               default:
+                    timeout-duration: 3s
+          instances:
+               authenticationService:
+                    base-config: default
+               organizationService:
+                    base-config: default
+               notificationService:
+                    timeout-duration: 10s
+
+logging:
+     level:
+          root: WARN
+          pe.edu.vallegrande: INFO
+          org.springframework.r2dbc: WARN
+
+springdoc:
+     api-docs:
+          enabled: false
+     swagger-ui:
+          enabled: false

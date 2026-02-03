@@ -1,0 +1,82 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/sistemajass
+    username: sistemajass_user
+    password: SISTEMAJASS
+    pool:
+      initial-size: 5
+      max-size: 20
+
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://localhost:5432/sistemajass
+    user: sistemajass_user
+    password: SISTEMAJASS
+    locations: classpath:db/migration
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    publisher-confirm-type: correlated
+
+webclient:
+  connect-timeout: 5000
+  read-timeout: 10000
+  write-timeout: 10000
+  services:
+    authentication:
+      base-url: http://localhost:8082
+    organization:
+      base-url: http://localhost:8083
+    notification:
+      base-url: http://localhost:8090
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 50
+    instances:
+      authenticationService:
+        base-config: default
+      organizationService:
+        base-config: default
+      notificationService:
+        base-config: default
+
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+    instances:
+      authenticationService:
+        base-config: default
+      organizationService:
+        base-config: default
+      notificationService:
+        base-config: default
+
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 5s
+    instances:
+      authenticationService:
+        base-config: default
+      organizationService:
+        base-config: default
+      notificationService:
+        timeout-duration: 10s
+
+logging:
+  level:
+    pe.edu.vallegrande: DEBUG
+    org.springframework.r2dbc: DEBUG

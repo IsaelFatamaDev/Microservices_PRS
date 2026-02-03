@@ -1,0 +1,88 @@
+############################
+# Java / Build
+############################
+**/target/
+**/out/
+**/*.class
+**/*.jar
+**/*.war
+**/*.ear
+**/*.log
+
+############################
+# Maven
+############################
+**/.mvn/wrapper/maven-wrapper.jar
+**/.mvn/timing.properties
+
+############################
+# Gradle
+############################
+**/.gradle/
+**/build/
+**/gradlew
+**/gradlew.bat
+
+############################
+# Tests (si NO quieres subirlos)
+############################
+**/src/test/
+**/*Test.java
+**/*Tests.java
+**/*IT.java
+
+############################
+# IDEs
+############################
+# IntelliJ IDEA
+**/.idea/
+**/*.iml
+**/*.iws
+
+# VS Code
+**/.vscode/
+
+# Eclipse
+**/.project
+**/.classpath
+**/.settings/
+
+############################
+# Sistema Operativo
+############################
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+desktop.ini
+
+############################
+# Logs & temp
+############################
+**/logs/
+**/*.tmp
+**/*.swp
+
+############################
+# Env & secrets
+############################
+**/.env
+**/*.env
+**/application-local.yml
+**/application-local.properties
+
+############################
+# Docker
+############################
+**/docker-compose.override.yml
+
+############################
+# Node (si algún micro usa frontend)
+############################
+**/node_modules/
+**/dist/
+**/npm-debug.log
+**/yarn-error.log
