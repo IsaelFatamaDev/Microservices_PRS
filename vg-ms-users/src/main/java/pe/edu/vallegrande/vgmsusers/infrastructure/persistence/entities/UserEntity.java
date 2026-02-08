@@ -5,20 +5,26 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
 @Table("users")
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class UserEntity {
+public class UserEntity implements Persistable<String> {
 
     @Id
     private String id;
+
+    @Transient
+    @Builder.Default
+    private boolean newEntity = true;
 
     @Column("organization_id")
     private String organizationId;
@@ -67,4 +73,17 @@ public class UserEntity {
 
     @Column("role")
     private String role;
+
+    @Override
+    public boolean isNew() {
+        return newEntity;
+    }
+
+    /**
+     * Marca la entidad como persistida (no nueva).
+     * Se llama automáticamente después de leer desde BD.
+     */
+    public void setNotNew() {
+        this.newEntity = false;
+    }
 }

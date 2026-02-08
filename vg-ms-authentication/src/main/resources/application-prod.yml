@@ -1,3 +1,61 @@
+keycloak:
+  auth-server-url: https://lab.vallegrande.edu.pe/jass/keycloak
+  realm: sistema-jass
+  client-id: jass-backend
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  admin:
+    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+    password: ${KEYCLOAK_ADMIN_PASSWORD}
+  token-endpoint: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/token
+  userinfo-endpoint: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/userinfo
+  logout-endpoint: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/logout
+  introspect-endpoint: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/token/introspect
+  jwks-uri: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/certs
+  revocation-endpoint: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/revoke
+  admin-api-url: https://lab.vallegrande.edu.pe/jass/keycloak/admin/realms/sistema-jass
+
 spring:
-  application:
-    name: vg-ms-authentication
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+
+services:
+  users:
+    url: ${USERS_SERVICE_URL:http://vg-ms-users:8081}
+    timeout: 10000
+
+logging:
+  level:
+    root: WARN
+    pe.edu.vallegrande: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.keycloak: WARN
+    io.github.resilience4j: INFO
+
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      keycloakService:
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 20
+      usersService:
+        wait-duration-in-open-state: 20s
+        sliding-window-size: 15
+
+  timelimiter:
+    instances:
+      keycloakService:
+        timeout-duration: 15s
+      usersService:
+        timeout-duration: 10s

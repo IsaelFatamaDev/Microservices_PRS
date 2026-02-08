@@ -10,6 +10,8 @@ public interface IGetUserUseCase {
 
     Mono<User> findByDocumentNumber(String documentNumber);
 
+    Mono<User> findByEmail(String email);
+
     Flux<User> findAllActive();
 
     Flux<User> findAll();

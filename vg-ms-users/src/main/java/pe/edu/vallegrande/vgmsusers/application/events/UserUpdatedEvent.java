@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 
 @Data
@@ -17,7 +17,7 @@ public class UserUpdatedEvent {
     @Builder.Default
     private String eventType = "USER_UPDATED";
     private String eventId;
-    private LocalDateTime timestamp;
+    private Instant timestamp;
 
     private String userId;
     private String organizationId;

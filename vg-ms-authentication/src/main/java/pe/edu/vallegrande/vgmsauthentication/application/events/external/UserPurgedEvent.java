@@ -1,5 +1,6 @@
 package pe.edu.vallegrande.vgmsauthentication.application.events.external;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserPurgedEvent {
     private String userId;
     private Instant timestamp;

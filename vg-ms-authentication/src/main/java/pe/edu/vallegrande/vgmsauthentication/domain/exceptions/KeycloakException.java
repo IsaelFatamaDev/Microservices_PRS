@@ -1,7 +1,5 @@
 package pe.edu.vallegrande.vgmsauthentication.domain.exceptions;
 
-import java.security.Key;
-
 public class KeycloakException extends DomainException {
     public KeycloakException(String message) {
         super(message, "KEYCLOAK_ERROR", 503);
@@ -11,14 +9,15 @@ public class KeycloakException extends DomainException {
         super(message, cause, "KEYCLOAK_ERROR", 503);
     }
 
-    public static KeycloakException connectionError(){
+    public static KeycloakException connectionError() {
         return new KeycloakException("Error connecting to Keycloak");
     }
-    public static KeycloakException configurationError(String detail){
+
+    public static KeycloakException configurationError(String detail) {
         return new KeycloakException("Keycloak configuration error: " + detail);
     }
 
-    public static  KeycloakException userCreationFailed(String reason){
+    public static KeycloakException userCreationFailed(String reason) {
         return new KeycloakException("Failed to create user in keycloak: " + reason);
     }
 }

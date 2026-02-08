@@ -16,6 +16,8 @@ public interface IUserRepository {
 
     Mono<User> findByDocumentNumber(String documentNumber);
 
+    Mono<User> findByEmail(String email);
+
     Flux<User> findAll();
 
     Flux<User> findByOrganizationId(String organizationId);

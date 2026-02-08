@@ -1,5 +1,6 @@
 package pe.edu.vallegrande.vgmsauthentication.application.events.external;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,13 +12,14 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserCreatedEvent {
 
     private String userId;
+    private String email;
     private String firstName;
     private String lastName;
-    private String temporaryPassword;
-
+    private String documentNumber;
     private String role;
 
     private String organizationId;

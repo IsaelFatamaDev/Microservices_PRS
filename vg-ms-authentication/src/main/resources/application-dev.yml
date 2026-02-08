@@ -1,41 +1,43 @@
 keycloak:
-  auth-server-url: http://localhost:9090
-  realm: sistema-jass
-  client-id: jass-backend
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:v9Va17BviHlyhaKtluR1tlvIryRDmNIy}
-  admin:
-    username: admin
-    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
-  token-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token
-  user-info-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/userinfo
-  logout-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/logout
-  intropect-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token/introspect
-  jwks-uri: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs
-  admin-api-url: ${keycloak.auth-server-url}/admin/realms/${keycloak.realm}
+     auth-server-url: http://localhost:9090
+     realm: sistema-jass
+     client-id: jass-backend
+     client-secret: ${KEYCLOAK_CLIENT_SECRET:t4kyYflBZjLcYJBqEG4qf3JesF8dEsMB}
+     admin:
+          client-id: jass-backend
+          client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:t4kyYflBZjLcYJBqEG4qf3JesF8dEsMB}
+          username: admin
+          password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+     token-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token
+     userinfo-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/userinfo
+     logout-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/logout
+     introspect-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token/introspect
+     jwks-uri: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/certs
+     admin-api-url: ${keycloak.auth-server-url}/admin/realms/${keycloak.realm}
 
 spring:
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-    publisher-confirm-type: correlated
+     rabbitmq:
+          host: localhost
+          port: 5672
+          username: guest
+          password: guest
+          publisher-confirm-type: correlated
 
 services:
-  users:
-    url: http://localhost:8081
-    timeout: 5000
+     users:
+          url: http://localhost:8081
+          timeout: 5000
 logging:
-  level:
-    root: info
-    pe.edu.vallegrande: debug
-    org.springframework.web: debug
-    org.springframework.security: debug
-    org.keycloak: debug
-    io.github.resilience4j: debug
-    org.springframework.amqp: debug
+     level:
+          root: info
+          pe.edu.vallegrande: debug
+          org.springframework.web: debug
+          org.springframework.security: debug
+          org.keycloak: debug
+          io.github.resilience4j: debug
+          org.springframework.amqp: debug
 
 springdoc:
-  swagger-ui:
-    enabled: true
-    try-it-out-enabled: true
+     swagger-ui:
+          enabled: true
+          try-it-out-enabled: true

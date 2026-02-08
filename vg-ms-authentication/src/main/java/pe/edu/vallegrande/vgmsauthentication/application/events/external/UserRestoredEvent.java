@@ -1,5 +1,6 @@
 package pe.edu.vallegrande.vgmsauthentication.application.events.external;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +12,10 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRestoredEvent {
     private String userId;
     private Instant timestamp;
 
-    private static final String ROUTING_KEY = "user.restored";
+    public static final String ROUTING_KEY = "user.restored";
 }

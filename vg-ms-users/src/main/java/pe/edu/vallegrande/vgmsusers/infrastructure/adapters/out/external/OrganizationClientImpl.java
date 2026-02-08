@@ -21,6 +21,9 @@ public class OrganizationClientImpl implements IOrganizationClient {
     @Value("${webclient.services.organization.base-url}")
     private String organizationServiceUrl;
 
+    @Value("${webclient.services.organization.skip-validation:false}")
+    private boolean skipValidation;
+
     private static final String SERVICE_NAME = "organizationService";
 
     @Override
@@ -77,19 +80,18 @@ public class OrganizationClientImpl implements IOrganizationClient {
     public Mono<Boolean> validateHierarchy(String organizationId, String zoneId, String streetId) {
         log.debug("Validating hierarchy: org={}, zone={}, street={}", organizationId, zoneId, streetId);
 
-        return existsOrganization(organizationId)
-            .flatMap(orgExists -> {
-                if (!orgExists) {
-                    return Mono.just(false);
-                }
-                return existsZone(organizationId, zoneId);
-            })
-            .flatMap(zoneExists -> {
-                if (!zoneExists) {
-                    return Mono.just(false);
-                }
-                return existsStreet(zoneId, streetId);
-            });
+        if (skipValidation) {
+            log.warn("DEV MODE: Skipping organization hierarchy validation");
+            return Mono.just(true);
+        }
+
+        return webClientBuilder.build()
+            .get()
+            .uri(organizationServiceUrl + "/api/v1/organizations/{orgId}/zones/{zoneId}/streets/{streetId}/validate",
+                organizationId, zoneId, streetId)
+            .retrieve()
+            .bodyToMono(Boolean.class)
+            .defaultIfEmpty(false);
     }
 
     private Mono<Boolean> existsOrganizationFallback(String organizationId, Throwable t) {

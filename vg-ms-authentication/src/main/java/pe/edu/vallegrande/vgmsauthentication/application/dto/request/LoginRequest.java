@@ -19,7 +19,7 @@ public class LoginRequest {
     private String password;
 
     @Builder.Default
-    private String clientId = "jass-web-client";
+    private String clientId = "jass-backend";
 
     @Builder.Default
     private boolean rememberMe = false;

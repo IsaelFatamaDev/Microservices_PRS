@@ -12,6 +12,7 @@ public interface UserR2dbcRepository extends R2dbcRepository<UserEntity, String>
 
     Mono<UserEntity> findByDocumentNumber(String documentNumber);
 
+    Mono<UserEntity> findByEmail(String email);
 
     Mono<Boolean> existsByDocumentNumber(String documentNumber);
 

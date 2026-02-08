@@ -83,6 +83,13 @@ public class UserRest {
             .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), USER_FOUND)));
     }
 
+    @GetMapping("/email/{email}")
+    public Mono<ResponseEntity<ApiResponse<UserResponse>>> getUserByEmail(@Parameter(description = "Email del usuario") @PathVariable String email) {
+        log.info("GET /users/email/{} - Getting user by email", email);
+        return getUserUseCase.findByEmail(email)
+            .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), USER_FOUND)));
+    }
+
     @GetMapping
     public Mono<ResponseEntity<ApiResponse<List<UserResponse>>>> getAllActiveUser() {
         log.info("GET /users - Getting all active users");

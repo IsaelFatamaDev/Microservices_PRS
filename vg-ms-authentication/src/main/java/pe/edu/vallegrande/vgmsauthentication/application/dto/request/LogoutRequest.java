@@ -14,5 +14,5 @@ public class LogoutRequest {
     private String refreshToken;
 
     @Builder.Default
-    private String clientId = "jass-web-client";
+    private String clientId = "jass-backend";
 }

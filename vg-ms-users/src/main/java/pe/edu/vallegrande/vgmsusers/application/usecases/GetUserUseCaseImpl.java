@@ -34,6 +34,13 @@ public class GetUserUseCaseImpl implements IGetUserUseCase {
     }
 
     @Override
+    public Mono<User> findByEmail(String email) {
+        log.debug("Finding user by email: {}", email);
+        return userRepository.findByEmail(email)
+            .switchIfEmpty(Mono.error(UserNotFoundException.byEmail(email)));
+    }
+
+    @Override
     public Flux<User> findAllActive() {
         log.debug("Finding all active users");
         return userRepository.findByRecordStatus(RecordStatus.ACTIVE.name());
