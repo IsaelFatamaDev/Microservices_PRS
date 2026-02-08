@@ -1,9 +1,11 @@
 package pe.edu.vallegrande.vgmsorganizations.domain.ports.out.organization;
 
+import org.springframework.stereotype.Repository;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.Organization;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Repository
 public interface IOrganizationRepository {
     Mono<Organization> save(Organization organization);
 
