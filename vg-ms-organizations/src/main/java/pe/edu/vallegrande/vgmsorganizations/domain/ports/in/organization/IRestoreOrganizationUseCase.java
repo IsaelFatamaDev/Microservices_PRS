@@ -1,7 +1,8 @@
 package pe.edu.vallegrande.vgmsorganizations.domain.ports.in.organization;
 
-import org.springframework.stereotype.Service;
+import pe.edu.vallegrande.vgmsorganizations.domain.models.Organization;
+import reactor.core.publisher.Mono;
 
-@Service
 public interface IRestoreOrganizationUseCase {
+    Mono<Organization> execute(String id, String restoredBy);
 }

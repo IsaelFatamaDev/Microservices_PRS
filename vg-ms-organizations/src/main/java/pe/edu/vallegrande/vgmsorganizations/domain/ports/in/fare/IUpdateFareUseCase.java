@@ -1,7 +1,8 @@
 package pe.edu.vallegrande.vgmsorganizations.domain.ports.in.fare;
 
-import org.springframework.stereotype.Service;
+import pe.edu.vallegrande.vgmsorganizations.domain.models.Fare;
+import reactor.core.publisher.Mono;
 
-@Service
 public interface IUpdateFareUseCase {
+    Mono<Fare> execute(String id, Fare changes, String updatedBy);
 }

@@ -1,7 +1,8 @@
 package pe.edu.vallegrande.vgmsorganizations.domain.ports.in.parameter;
 
-import org.springframework.stereotype.Service;
+import pe.edu.vallegrande.vgmsorganizations.domain.models.Parameter;
+import reactor.core.publisher.Mono;
 
-@Service
 public interface IDeleteParameterUseCase {
+    Mono<Parameter> execute(String id, String deletedBy, String reason);
 }
