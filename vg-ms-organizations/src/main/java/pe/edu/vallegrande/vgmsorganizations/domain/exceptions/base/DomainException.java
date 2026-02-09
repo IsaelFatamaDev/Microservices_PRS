@@ -3,7 +3,7 @@ package pe.edu.vallegrande.vgmsorganizations.domain.exceptions.base;
 public abstract class DomainException extends RuntimeException {
 
     private final String errorCode;
-    private final int httpStatus;
+    private final Integer httpStatus;
 
     protected DomainException(String message, String errorCode, int httpStatus) {
         super(message);
@@ -15,5 +15,13 @@ public abstract class DomainException extends RuntimeException {
         super(message, cause);
         this.errorCode = errorCode;
         this.httpStatus = httpStatus;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public Integer getHttpStatus() {
+        return httpStatus;
     }
 }

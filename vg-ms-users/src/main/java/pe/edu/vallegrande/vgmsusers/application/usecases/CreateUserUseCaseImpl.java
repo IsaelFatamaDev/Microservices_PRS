@@ -35,7 +35,7 @@ public class CreateUserUseCaseImpl implements ICreateUserUseCase {
 
         return validateRoleAuthorization(user)
             .then(validateDocumentNotExists(user.getDocumentNumber()))
-            .then(validateOrganizationHierarchy(user))
+            .then(validateOrganizationHierarchyIfNeeded(user))
             .then(Mono.fromCallable(() -> {
                 user.validateContact();
                 return user;
@@ -88,6 +88,16 @@ public class CreateUserUseCaseImpl implements ICreateUserUseCase {
                 }
                 return Mono.empty();
             });
+    }
+
+    private Mono<Void> validateOrganizationHierarchyIfNeeded(User user) {
+        // SUPER_ADMIN no requiere validación de organización
+        if (user.getRole() == pe.edu.vallegrande.vgmsusers.domain.models.valueobjects.Role.SUPER_ADMIN) {
+            log.info("Skipping organization validation for SUPER_ADMIN");
+            return Mono.empty();
+        }
+
+        return validateOrganizationHierarchy(user);
     }
 
     private Mono<Void> validateOrganizationHierarchy(User user) {

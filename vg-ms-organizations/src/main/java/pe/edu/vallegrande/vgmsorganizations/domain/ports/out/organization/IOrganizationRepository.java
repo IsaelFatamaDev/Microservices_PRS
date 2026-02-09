@@ -1,11 +1,10 @@
 package pe.edu.vallegrande.vgmsorganizations.domain.ports.out.organization;
 
-import org.springframework.stereotype.Repository;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.Organization;
+import pe.edu.vallegrande.vgmsorganizations.domain.models.valueobjects.RecordStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Repository
 public interface IOrganizationRepository {
     Mono<Organization> save(Organization organization);
 
@@ -18,6 +17,8 @@ public interface IOrganizationRepository {
     Flux<Organization> findAll();
 
     Flux<Organization> findByRecordStatus(String status);
+
+    Flux<Organization> findByRecordStatus(RecordStatus status);
 
     Mono<Boolean> existsByOrganizationName(String name);
 

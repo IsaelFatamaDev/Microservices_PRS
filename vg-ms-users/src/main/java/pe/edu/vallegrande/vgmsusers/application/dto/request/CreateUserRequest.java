@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateUserRequest {
 
-    @NotBlank(message = "El ID de la organización es obligatorio")
     private String organizationId;
 
     @NotBlank(message = "El nombre es obligatorio")
@@ -34,20 +33,17 @@ public class CreateUserRequest {
     @Pattern(regexp = "^[A-Za-z0-9]{8,20}$", message = "Documento inválido")
     private String documentNumber;
 
-    @Email(message = "El email debe ser válido (opcional)")
+    @Email(message = "El email debe ser válido")
     private String email;
 
     @Pattern(regexp = "^9\\d{8}$", message = "El teléfono debe de ser válido (opcional)")
     private String phone;
 
-    @NotBlank(message = "La dirección es obligatoria")
     @Size(max = 250, message = "La dirección no puede exceder de los 250 carácteres")
     private String address;
 
-    @NotBlank(message = "La zona es obligatoria")
     private String zoneId;
 
-    @NotBlank(message = "La calle es obligatoria")
     private String streetId;
 
     @NotBlank(message = "El rol es obligatorio")

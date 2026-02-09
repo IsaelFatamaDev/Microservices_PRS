@@ -22,8 +22,9 @@ public class UserAuthorizationService {
         }
 
         if (isSuperAdmin) {
-            if (targetRole != Role.ADMIN) {
-                throw new BusinessRuleException("SUPER_ADMIN can only create ADMIN users");
+            // SUPER_ADMIN puede crear SUPER_ADMIN o ADMIN
+            if (targetRole != Role.SUPER_ADMIN && targetRole != Role.ADMIN) {
+                throw new BusinessRuleException("SUPER_ADMIN can only create SUPER_ADMIN or ADMIN users");
             }
             return;
         }

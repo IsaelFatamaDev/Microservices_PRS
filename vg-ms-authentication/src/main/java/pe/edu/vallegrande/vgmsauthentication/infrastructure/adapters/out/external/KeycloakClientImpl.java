@@ -83,7 +83,7 @@ public class KeycloakClientImpl implements IKeycloakClient {
                 .doOnError(error -> log.warn("Token request failed: {}", error.getMessage()));
     }
 
-    @SuppressWarnings("unused") // Used by Resilience4j circuit breaker via reflection
+    @SuppressWarnings("unused")
     private Mono<Map<String, Object>> loginFallback(
             String username, String password, String clientId, Throwable t) {
         log.error("Keycloak circuit breaker opened for login. Error: {}", t.getMessage());
@@ -170,13 +170,23 @@ public class KeycloakClientImpl implements IKeycloakClient {
         log.info("Creating user in Keycloak: {}", email);
 
         Map<String, Object> userRepresentation = new HashMap<>();
-        // NO establecer "id" - Keycloak lo genera automáticamente
         userRepresentation.put("email", email);
         userRepresentation.put("username", username);
         userRepresentation.put("firstName", firstName);
         userRepresentation.put("lastName", lastName);
         userRepresentation.put("enabled", true);
         userRepresentation.put("emailVerified", true);
+
+        Map<String, java.util.List<String>> attributes = new HashMap<>();
+        if (userId != null) {
+            attributes.put("userId", java.util.List.of(userId));
+        }
+        if (organizationId != null) {
+            attributes.put("organizationId", java.util.List.of(organizationId));
+        }
+        if (!attributes.isEmpty()) {
+            userRepresentation.put("attributes", attributes);
+        }
 
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("type", "password");
@@ -198,36 +208,10 @@ public class KeycloakClientImpl implements IKeycloakClient {
                             return extractUserId(location);
                         }))
                 .flatMap(keycloakUserId -> {
-                    log.info("User created in Keycloak with ID: {}, now updating attributes", keycloakUserId);
-                    // Actualizar atributos en llamada separada después de la creación
-                    return updateUserAttributes(keycloakUserId, userId, organizationId)
-                            .then(assignRole(keycloakUserId, role))
+                    log.info("User created in Keycloak with ID: {}, now assigning role", keycloakUserId);
+                    return assignRole(keycloakUserId, role)
                             .thenReturn(keycloakUserId);
                 });
-    }
-
-    /**
-     * Actualiza los atributos personalizados del usuario en Keycloak
-     */
-    private Mono<Void> updateUserAttributes(String keycloakUserId, String userId, String organizationId) {
-        log.info("Updating custom attributes for Keycloak user: {}", keycloakUserId);
-
-        Map<String, Object> updates = new HashMap<>();
-        Map<String, java.util.List<String>> attributes = new HashMap<>();
-        attributes.put("userId", java.util.List.of(userId));
-        attributes.put("organizationId", java.util.List.of(organizationId));
-        updates.put("attributes", attributes);
-
-        return getAdminToken()
-                .flatMap(adminToken -> adminWebClient.put()
-                        .uri("/users/{userId}", keycloakUserId)
-                        .header("Authorization", "Bearer " + adminToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(updates)
-                        .retrieve()
-                        .bodyToMono(Void.class))
-                .doOnSuccess(v -> log.info("Attributes updated successfully for user: {}", keycloakUserId))
-                .doOnError(error -> log.error("Failed to update attributes for user: {}", keycloakUserId, error));
     }
 
     @Override

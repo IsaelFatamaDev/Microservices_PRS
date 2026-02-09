@@ -3,7 +3,7 @@ package pe.edu.vallegrande.vgmsorganizations.application.usescases.organization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.base.BussinessRuleException;
+import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.base.BusinessRuleException;
 import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.specific.OrganizationNotFoundException;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.Organization;
 import pe.edu.vallegrande.vgmsorganizations.domain.ports.in.organization.IDeleteOrganizationUseCase;
@@ -25,7 +25,7 @@ public class DeleteOrganizationUseCaseImpl implements IDeleteOrganizationUseCase
             .switchIfEmpty(Mono.error(new OrganizationNotFoundException(id)))
             .flatMap(org -> {
                 if (org.isInactive()) {
-                    return Mono.error(new BussinessRuleException("Organization is already inactive"));
+                    return Mono.error(new BusinessRuleException("Organization is already inactive"));
                 }
 
                 Organization deleted = org.markAsDeleted(deletedBy);

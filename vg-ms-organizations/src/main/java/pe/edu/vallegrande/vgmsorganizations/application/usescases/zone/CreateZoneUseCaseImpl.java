@@ -3,7 +3,7 @@ package pe.edu.vallegrande.vgmsorganizations.application.usescases.zone;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.base.BussinessRuleException;
+import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.base.BusinessRuleException;
 import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.specific.OrganizationNotFoundException;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.Zone;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.valueobjects.RecordStatus;
@@ -33,13 +33,13 @@ public class CreateZoneUseCaseImpl implements ICreateZoneUseCase {
             .switchIfEmpty(Mono.error(new OrganizationNotFoundException(zone.getOrganizationId())))
             .flatMap(org -> {
                 if (org.isInactive()) {
-                    return Mono.error(new BussinessRuleException("Cannot create a zone in an inactive organization"));
+                    return Mono.error(new BusinessRuleException("Cannot create a zone in an inactive organization"));
                 }
                 return zoneRepository.existsByZoneNameAndOrganizationId(zone.getZoneName(), zone.getOrganizationId());
             })
             .flatMap(exits -> {
                 if (exits) {
-                    return Mono.error(new BussinessRuleException(
+                    return Mono.error(new BusinessRuleException(
                         String.format("Zone '%s' already exists for organization '%s'", zone.getZoneName(), zone.getOrganizationId())
                     ));
                 }

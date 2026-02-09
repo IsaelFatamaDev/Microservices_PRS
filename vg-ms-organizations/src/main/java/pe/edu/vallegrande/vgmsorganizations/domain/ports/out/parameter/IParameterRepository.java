@@ -1,12 +1,10 @@
 package pe.edu.vallegrande.vgmsorganizations.domain.ports.out.parameter;
 
-import org.springframework.stereotype.Repository;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.Parameter;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.valueobjects.RecordStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Repository
 public interface IParameterRepository {
     Mono<Parameter> save(Parameter parameter);
 

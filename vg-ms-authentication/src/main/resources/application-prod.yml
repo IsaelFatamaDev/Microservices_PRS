@@ -1,7 +1,7 @@
 keycloak:
   auth-server-url: https://lab.vallegrande.edu.pe/jass/keycloak
   realm: sistema-jass
-  client-id: jass-backend
+  client-id: jass-users-service
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
   admin:
     username: ${KEYCLOAK_ADMIN_USERNAME:admin}

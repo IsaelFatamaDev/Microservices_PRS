@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.vgmsorganizations.application.dto.street;
+package pe.edu.vallegrande.vgmsorganizations.application.dto.request;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateStreetRequest {
 
-    @Pattern(regexp = "^(JR|AV|CALLE|PASAJE)$", message = "Street type must be JR, AV, CALLE, or PASAJE")
+    @Pattern(regexp = "^(JR|AV|CALLE|PASAJE)$", message = "El tipo de calle debe ser JR, AV, CALLE o PASAJE")
     private String streetType;
 
-    @Size(min = 2, max = 150, message = "Name must be between 2 and 150 characters")
+    @Size(min = 2, max = 150, message = "El nombre debe tener entre 2 y 150 caracteres")
     private String streetName;
 }

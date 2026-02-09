@@ -1,0 +1,23 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: vg-ms-notifications
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/notification_db
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+app:
+  evolution-api:
+    base-url: http://localhost:8084
+    api-key: JASS_EVOLUTION_KEY_2026
+    instance-name: jass-whatsapp
+

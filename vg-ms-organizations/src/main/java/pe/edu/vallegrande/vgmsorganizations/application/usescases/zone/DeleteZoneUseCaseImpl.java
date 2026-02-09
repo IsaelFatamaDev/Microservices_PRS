@@ -3,7 +3,7 @@ package pe.edu.vallegrande.vgmsorganizations.application.usescases.zone;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.base.BussinessRuleException;
+import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.base.BusinessRuleException;
 import pe.edu.vallegrande.vgmsorganizations.domain.exceptions.specific.ZoneNotFoundException;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.Zone;
 import pe.edu.vallegrande.vgmsorganizations.domain.ports.in.zone.IDeleteZoneUseCase;
@@ -27,7 +27,7 @@ public class DeleteZoneUseCaseImpl implements IDeleteZoneUseCase {
             .switchIfEmpty(Mono.error(new ZoneNotFoundException(id)))
             .flatMap(zone -> {
                 if (zone.isInactive()) {
-                    return Mono.error(new BussinessRuleException("Zone is already inactive"));
+                    return Mono.error(new BusinessRuleException("Zone is already inactive"));
                 }
 
                 Zone deleted = zone.markAsDeleted(deletedBy);

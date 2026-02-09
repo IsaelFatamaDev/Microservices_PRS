@@ -85,7 +85,7 @@ public class AuthRest {
     @PostMapping("/introspect")
     public Mono<ResponseEntity<IntrospectResponse>> introspect(
             @RequestParam String token,
-            @RequestParam(defaultValue = "jass-backend") String clientId,
+            @RequestParam(defaultValue = "jass-users-service") String clientId,
             @RequestParam(required = false) String clientSecret) {
         log.debug("Introspecting token");
         return validateTokenUseCase.introspect(token, clientId, clientSecret)

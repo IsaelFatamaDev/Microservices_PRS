@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.vgmsorganizations.application.dto.street;
+package pe.edu.vallegrande.vgmsorganizations.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

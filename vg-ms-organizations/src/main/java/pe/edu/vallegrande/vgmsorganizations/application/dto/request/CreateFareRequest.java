@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.vgmsorganizations.application.dto.fare;
+package pe.edu.vallegrande.vgmsorganizations.application.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -14,18 +14,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CreateFareRequest {
 
-    @NotBlank(message = "Organization ID is required")
+    @NotBlank(message = "El ID de la organización es obligatorio")
     private String organizationId;
 
-    @NotBlank(message = "Fare type is required")
-    @Pattern(regexp = "^[A-Z0-9_]{2,50}$", message = "Invalid fare type format")
+    @NotBlank(message = "El tipo de tarifa es obligatorio")
+    @Pattern(regexp = "^[A-Z0-9_]{2,50}$", message = "Formato de tipo de tarifa inválido")
     private String fareType;
 
-    @NotNull(message = "Amount is required")
-    @Positive(message = "Amount must be greater than 0")
+    @NotNull(message = "El monto es obligatorio")
+    @Positive(message = "El monto debe ser mayor a 0")
     private Double amount;
 
-    @Size(max = 250)
+    @Size(max = 250, message = "La descripción no puede exceder 250 caracteres")
     private String description;
 
     private LocalDateTime validFrom;

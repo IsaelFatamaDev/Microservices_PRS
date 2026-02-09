@@ -16,5 +16,5 @@ public class RefreshTokenRequest {
     private String refreshToken;
 
     @Builder.Default
-    private String clientId = "jass-backend";
+    private String clientId = "jass-users-service";
 }

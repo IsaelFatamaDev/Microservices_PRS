@@ -54,19 +54,44 @@ public class UserRest {
             .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), PROFILE_FOUND)));
     }
 
-    @Operation(summary = "Create user", description = "Creates a new user. SUPER_ADMIN can create ADMIN. ADMIN can create CLIENT/OPERATOR.")
+    @Operation(summary = "Create user", description = "Creates a new user. SUPER_ADMIN can create SUPER_ADMIN or ADMIN. ADMIN can create CLIENT/OPERATOR.")
     @PostMapping
     public Mono<ResponseEntity<ApiResponse<UserResponse>>> createUser(
         @Valid @RequestBody CreateUserRequest request
     ) {
         log.info("POST /users - Creating user with document: {}", request.getDocumentNumber());
 
-        return securityContext.getCurrentUserId()
+        return validateCreateUserRequest(request)
+            .then(securityContext.getCurrentUserId())
             .flatMap(userId -> createUserUseCase.execute(userMapper.toModel(request), userId))
             .map(user -> ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(userMapper.toResponse(user), USER_CREATED))
             );
+    }
+
+    private Mono<Void> validateCreateUserRequest(CreateUserRequest request) {
+        if (!"SUPER_ADMIN".equals(request.getRole())) {
+            // Otros roles requieren datos de organizaci\u00f3n
+            if (request.getOrganizationId() == null || request.getOrganizationId().isBlank()) {
+                return Mono.error(new IllegalArgumentException("Organization ID is required for non-SUPER_ADMIN roles"));
+            }
+            if (request.getZoneId() == null || request.getZoneId().isBlank()) {
+                return Mono.error(new IllegalArgumentException("Zone ID is required for non-SUPER_ADMIN roles"));
+            }
+            if (request.getStreetId() == null || request.getStreetId().isBlank()) {
+                return Mono.error(new IllegalArgumentException("Street ID is required for non-SUPER_ADMIN roles"));
+            }
+            if (request.getAddress() == null || request.getAddress().isBlank()) {
+                return Mono.error(new IllegalArgumentException("Address is required for non-SUPER_ADMIN roles"));
+            }
+        } else {
+            // SUPER_ADMIN requiere email obligatoriamente
+            if (request.getEmail() == null || request.getEmail().isBlank()) {
+                return Mono.error(new IllegalArgumentException("Email is required for SUPER_ADMIN"));
+            }
+        }
+        return Mono.empty();
     }
 
     @GetMapping("/{id}")

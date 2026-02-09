@@ -1,0 +1,17 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/db_jass_organizations
+      auto-index-creation: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+logging:
+  level:
+    root: INFO
+    pe.edu.vallegrande.vgmsorganizations: DEBUG
+    org.springframework.data.mongodb: DEBUG

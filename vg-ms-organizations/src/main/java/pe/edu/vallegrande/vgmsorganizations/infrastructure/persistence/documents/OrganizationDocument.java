@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.vgmsorganizations.infrastructure.persistence.document;
+package pe.edu.vallegrande.vgmsorganizations.infrastructure.persistence.documents;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

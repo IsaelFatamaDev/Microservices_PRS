@@ -1,12 +1,10 @@
 package pe.edu.vallegrande.vgmsorganizations.domain.ports.out.fare;
 
-import org.springframework.stereotype.Repository;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.Fare;
 import pe.edu.vallegrande.vgmsorganizations.domain.models.valueobjects.RecordStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Repository
 public interface IFareRepository {
     Mono<Fare> save(Fare fare);
 

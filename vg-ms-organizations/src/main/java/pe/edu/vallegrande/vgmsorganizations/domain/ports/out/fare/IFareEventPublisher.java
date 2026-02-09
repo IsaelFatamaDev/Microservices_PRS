@@ -12,5 +12,5 @@ public interface IFareEventPublisher {
 
     Mono<Void> publishFareDeleted(String fareId, String organizationId, String deletedBy, String reason);
 
-    Mono<Void> publishFareRestore(String fareId, String organizationId, String restoredBy);
+    Mono<Void> publishFareRestored(String fareId, String organizationId, String restoredBy);
 }

@@ -1,11 +1,11 @@
 keycloak:
-     auth-server-url: http://localhost:9090
+     auth-server-url: https://lab.vallegrande.edu.pe/jass/keycloak
      realm: sistema-jass
-     client-id: jass-backend
-     client-secret: ${KEYCLOAK_CLIENT_SECRET:t4kyYflBZjLcYJBqEG4qf3JesF8dEsMB}
+     client-id: jass-users-service
+     client-secret: zJgI1QiNFXWiinFgAVfxsbqcF8nlGYLy
      admin:
-          client-id: jass-backend
-          client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:t4kyYflBZjLcYJBqEG4qf3JesF8dEsMB}
+          client-id: jass-users-service
+          client-secret: zJgI1QiNFXWiinFgAVfxsbqcF8nlGYLy
           username: admin
           password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
      token-endpoint: ${keycloak.auth-server-url}/realms/${keycloak.realm}/protocol/openid-connect/token

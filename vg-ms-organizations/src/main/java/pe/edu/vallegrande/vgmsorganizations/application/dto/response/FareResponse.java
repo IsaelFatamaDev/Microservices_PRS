@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.vgmsorganizations.application.dto.fare;
+package pe.edu.vallegrande.vgmsorganizations.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

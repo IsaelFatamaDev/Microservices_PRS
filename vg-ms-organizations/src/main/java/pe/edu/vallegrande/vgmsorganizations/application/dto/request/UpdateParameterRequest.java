@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.vgmsorganizations.application.dto.parameter;
+package pe.edu.vallegrande.vgmsorganizations.application.dto.request;
 
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -14,6 +14,6 @@ public class UpdateParameterRequest {
 
     private String parameterValue;
 
-    @Size(max = 250)
+    @Size(max = 250, message = "La descripción no puede exceder 250 caracteres")
     private String description;
 }
