@@ -4,8 +4,8 @@ spring:
           username: ${DB_USER}
           password: ${DB_PASSWORD}
           pool:
-               initial-size: 10
-               max-size: 50
+               initial-size: 2
+               max-size: 10
                max-idle-time: 30m
 
      flyway:

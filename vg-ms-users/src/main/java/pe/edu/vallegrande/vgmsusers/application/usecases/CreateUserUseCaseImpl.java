@@ -40,9 +40,21 @@ public class CreateUserUseCaseImpl implements ICreateUserUseCase {
                 return user;
             }))
             .flatMap(validatedUser -> {
+                String organizationId = validatedUser.getOrganizationId();
+                String zoneId = validatedUser.getZoneId();
+                String streetId = validatedUser.getStreetId();
+                String address = validatedUser.getAddress();
+                
+                if (validatedUser.getRole() == pe.edu.vallegrande.vgmsusers.domain.models.valueobjects.Role.SUPER_ADMIN) {
+                    organizationId = "SYSTEM_ORG_ID";
+                    zoneId = "SYSTEM_ZONE_ID";
+                    streetId = "SYSTEM_STREET_ID";
+                    address = "Sistema Central";
+                }
+                
                 User userToSave = User.builder()
                     .id(UUID.randomUUID().toString())
-                    .organizationId(validatedUser.getOrganizationId())
+                    .organizationId(organizationId)
                     .recordStatus(RecordStatus.ACTIVE)
                     .createdAt(LocalDateTime.now())
                     .createdBy(createdBy)
@@ -54,9 +66,9 @@ public class CreateUserUseCaseImpl implements ICreateUserUseCase {
                     .documentNumber(validatedUser.getDocumentNumber())
                     .email(validatedUser.getEmail())
                     .phone(validatedUser.getPhone())
-                    .address(validatedUser.getAddress())
-                    .zoneId(validatedUser.getZoneId())
-                    .streetId(validatedUser.getStreetId())
+                    .address(address)
+                    .zoneId(zoneId)
+                    .streetId(streetId)
                     .role(validatedUser.getRole())
                     .build();
 

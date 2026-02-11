@@ -23,3 +23,17 @@ logging:
      level:
           pe.edu.vallegrande: INFO
           org.springframework.amqp: WARN
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      organizationsApi:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        priority: 1
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10

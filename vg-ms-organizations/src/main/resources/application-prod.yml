@@ -12,10 +12,30 @@ spring:
 
 logging:
   level:
-    root: INFO
+    root: WARN
     pe.edu.vallegrande.vgmsorganizations: INFO
+    org.springframework.data.mongodb: WARN
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cloudinaryService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
