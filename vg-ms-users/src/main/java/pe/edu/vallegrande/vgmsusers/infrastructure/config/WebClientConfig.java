@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
+@SuppressWarnings("null")
 public class WebClientConfig {
 
     @Value("${webclient.connect-timeout:5000}")
@@ -29,19 +30,18 @@ public class WebClientConfig {
     @Bean
     public WebClient.Builder webClientBuilder() {
         HttpClient httpClient = HttpClient.create()
-            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout)
-            .responseTimeout(Duration.ofMillis(readTimeout))
-            .doOnConnected(conn -> conn
-                .addHandlerLast(new ReadTimeoutHandler(readTimeout, TimeUnit.MILLISECONDS))
-                .addHandlerLast(new WriteTimeoutHandler(writeTimeout, TimeUnit.MILLISECONDS))
-            );
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout)
+                .responseTimeout(Duration.ofMillis(readTimeout))
+                .doOnConnected(conn -> conn
+                        .addHandlerLast(new ReadTimeoutHandler(readTimeout, TimeUnit.MILLISECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(writeTimeout, TimeUnit.MILLISECONDS)));
 
         ExchangeStrategies strategies = ExchangeStrategies.builder()
-            .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
-            .build();
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024))
+                .build();
 
         return WebClient.builder()
-            .clientConnector(new ReactorClientHttpConnector(httpClient))
-            .exchangeStrategies(strategies);
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .exchangeStrategies(strategies);
     }
 }

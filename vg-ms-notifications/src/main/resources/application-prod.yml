@@ -1,3 +1,25 @@
 spring:
-  application:
-    name: vg-ms-notifications
+     data:
+          mongodb:
+               uri: ${MONGODB_URI:mongodb://mongo_jass:27017/notifications_db}
+
+     rabbitmq:
+          host: ${RABBITMQ_HOST:rabbit_jass}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USER:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
+          publisher-confirm-type: correlated
+          publisher-returns: true
+
+app:
+     evolution-api:
+          base-url: ${EVOLUTION_API_BASE_URL:http://evolution_api:8084}
+          api-key: ${EVOLUTION_API_KEY:JASS_EVOLUTION_KEY_2024}
+          instance-name: ${EVOLUTION_API_INSTANCE:jass-whatsapp}
+     organizations-api:
+          base-url: ${ORGANIZATIONS_API_BASE_URL:http://vg-ms-organizations:8083}
+
+logging:
+     level:
+          pe.edu.vallegrande: INFO
+          org.springframework.amqp: WARN

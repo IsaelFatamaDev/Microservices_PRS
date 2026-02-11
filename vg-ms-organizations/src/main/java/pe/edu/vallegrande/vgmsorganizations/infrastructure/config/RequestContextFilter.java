@@ -11,6 +11,7 @@ import reactor.util.context.Context;
 import java.util.UUID;
 
 @Component
+@SuppressWarnings("null")
 public class RequestContextFilter implements WebFilter {
 
     private static final String CORRELATION_ID = "correlationId";
@@ -35,13 +36,13 @@ public class RequestContextFilter implements WebFilter {
         final String finalUserId = userId;
 
         return chain.filter(exchange)
-            .contextWrite(ctx -> {
-                Context context = ctx.put(CORRELATION_ID, finalCorrelationId);
-                if (finalUserId != null) {
-                    context = context.put(USER_ID, finalUserId);
-                }
-                return context;
-            })
-            .doFinally(signalType -> MDC.clear());
+                .contextWrite(ctx -> {
+                    Context context = ctx.put(CORRELATION_ID, finalCorrelationId);
+                    if (finalUserId != null) {
+                        context = context.put(USER_ID, finalUserId);
+                    }
+                    return context;
+                })
+                .doFinally(signalType -> MDC.clear());
     }
 }

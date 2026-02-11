@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@SuppressWarnings("null")
 public class RabbitMQConfig {
     public static final String EXCHANGE_NAME = "jass.events";
 
@@ -21,21 +22,20 @@ public class RabbitMQConfig {
     @Bean
     public TopicExchange jassEventsExchange() {
         return ExchangeBuilder
-            .topicExchange(EXCHANGE_NAME)
-            .durable(true)
-            .build();
+                .topicExchange(EXCHANGE_NAME)
+                .durable(true)
+                .build();
     }
 
     @Bean
-    public MessageConverter jsonMessageConverter(){
+    public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
     public RabbitTemplate rabbitTemplate(
-        ConnectionFactory connectionFactory,
-        MessageConverter jsonMessageConverter
-    ) {
+            ConnectionFactory connectionFactory,
+            MessageConverter jsonMessageConverter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(jsonMessageConverter);
         template.setExchange(EXCHANGE_NAME);

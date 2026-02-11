@@ -17,6 +17,7 @@ import java.util.UUID;
 @Component
 @Slf4j
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@SuppressWarnings("null")
 public class RequestContextFilter implements WebFilter {
 
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
@@ -42,22 +43,21 @@ public class RequestContextFilter implements WebFilter {
         final String finalUserId = userId;
 
         log.debug("Request: {} {} - correlationId: {}, userId: {}",
-            request.getMethod(), request.getPath(), finalCorrelationId, finalUserId);
+                request.getMethod(), request.getPath(), finalCorrelationId, finalUserId);
 
         exchange.getResponse().getHeaders().add(CORRELATION_ID_HEADER, finalCorrelationId);
         return chain.filter(exchange)
-            .contextWrite(ctx -> {
-                MDC.put(CORRELATION_ID_KEY, finalCorrelationId);
-                MDC.put(USER_ID_KEY, finalUserId);
-                return Context.empty();
-            })
-            .contextWrite(Context.of(
-                CORRELATION_ID_KEY, finalCorrelationId,
-                USER_ID_KEY, finalUserId
-            ))
-            .doFinally(signalType -> {
-                MDC.remove(CORRELATION_ID_KEY);
-                MDC.remove(USER_ID_KEY);
-            });
+                .contextWrite(ctx -> {
+                    MDC.put(CORRELATION_ID_KEY, finalCorrelationId);
+                    MDC.put(USER_ID_KEY, finalUserId);
+                    return Context.empty();
+                })
+                .contextWrite(Context.of(
+                        CORRELATION_ID_KEY, finalCorrelationId,
+                        USER_ID_KEY, finalUserId))
+                .doFinally(signalType -> {
+                    MDC.remove(CORRELATION_ID_KEY);
+                    MDC.remove(USER_ID_KEY);
+                });
     }
 }

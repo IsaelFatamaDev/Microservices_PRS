@@ -43,6 +43,9 @@ public class OrganizationDocument {
     @Field("email")
     private String email;
 
+    @Field("logo_url")
+    private String logoUrl;
+
     @Indexed
     @Field("record_status")
     private String recordStatus;

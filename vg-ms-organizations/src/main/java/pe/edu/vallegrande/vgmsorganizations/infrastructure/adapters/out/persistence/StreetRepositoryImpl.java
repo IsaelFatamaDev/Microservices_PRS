@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Repository
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class StreetRepositoryImpl implements IStreetRepository {
 
     private final StreetMongoRepository mongoRepository;

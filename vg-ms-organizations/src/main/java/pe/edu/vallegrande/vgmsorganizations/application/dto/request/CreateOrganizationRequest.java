@@ -39,4 +39,6 @@ public class CreateOrganizationRequest {
 
     @Email(message = "El email debe ser válido")
     private String email;
+
+    private String logoUrl;
 }

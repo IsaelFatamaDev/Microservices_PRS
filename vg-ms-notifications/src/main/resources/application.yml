@@ -4,20 +4,23 @@ server:
 spring:
   application:
     name: vg-ms-notifications
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/notification_db
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    try-it-out-enabled: true
+    operations-sorter: method
 
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+management:
+  health:
+    rabbit:
+      enabled: false
 
-app:
-  evolution-api:
-    base-url: http://localhost:8084
-    api-key: JASS_EVOLUTION_KEY_2026
-    instance-name: jass-whatsapp
-
+frontend:
+  url: ${FRONTEND_URL:https://lab.vallegrande.edu.pe/jass/SistemaJass}

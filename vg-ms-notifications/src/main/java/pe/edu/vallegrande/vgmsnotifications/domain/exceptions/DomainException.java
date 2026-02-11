@@ -1,20 +1,27 @@
 package pe.edu.vallegrande.vgmsnotifications.domain.exceptions;
 
-public abstract class DomainException extends RuntimeException{
+public abstract class DomainException extends RuntimeException {
 
-    private final String code;
+    private final String errorCode;
+    private final int httpStatus;
 
-    protected DomainException(String code, String message) {
+    protected DomainException(String errorCode, int httpStatus, String message) {
         super(message);
-        this.code = code;
+        this.errorCode = errorCode;
+        this.httpStatus = httpStatus;
     }
 
-    protected DomainException(String code, String message, Throwable cause){
+    protected DomainException(String errorCode, int httpStatus, String message, Throwable cause) {
         super(message, cause);
-        this.code = code;
+        this.errorCode = errorCode;
+        this.httpStatus = httpStatus;
     }
 
-    public String getCode() {
-        return code;
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public int getHttpStatus() {
+        return httpStatus;
     }
 }

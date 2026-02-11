@@ -9,20 +9,20 @@ public class NotificationMapper {
 
     public NotificationResponse toResponse(Notification notification) {
         return NotificationResponse.builder()
-            .id(notification.getId())
-            .userId(notification.getUserId())
-            .phoneNumber(notification.getPhoneNumber())
-            .recipientName(notification.getRecipientName())
-            .type(notification.getType().name())
-            .channel(notification.getChannel().name())
-            .status(notification.getStatus().name())
-            .message(notification.getMessage())
-            .imageUrl(notification.getImageUrl())
-            .eventSource(notification.getEventSource())
-            .retryCount(notification.getRetryCount())
-            .failureReason(notification.getFailureReason())
-            .createdAt(notification.getCreatedAt())
-            .sentAt(notification.getSentAt())
-            .build();
+                .id(notification.getId())
+                .userId(notification.getUserId())
+                .phoneNumber(notification.getPhoneNumber())
+                .recipientName(notification.getRecipientName())
+                .type(notification.getType().name())
+                .channel(notification.getChannel().name())
+                .status(notification.getStatus().name())
+                .message(notification.getMessage())
+                .imageUrl(notification.getImageUrl())
+                .eventSource(notification.getEventSource())
+                .retryCount(notification.getRetryCount())
+                .failureReason(notification.getFailureReason())
+                .createdAt(notification.getCreatedAt())
+                .sentAt(notification.getSentAt())
+                .build();
     }
 }

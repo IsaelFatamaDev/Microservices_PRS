@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Repository
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class ZoneRepositoryImpl implements IZoneRepository {
 
     private final ZoneMongoRepository mongoRepository;

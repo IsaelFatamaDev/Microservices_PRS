@@ -34,6 +34,7 @@ public class UserEventPublisherImpl implements IUserEventPublisher {
                     .userId(user.getId())
                     .organizationId(user.getOrganizationId())
                     .email(user.getEmail())
+                    .phone(user.getPhone())
                     .firstName(user.getFirstName())
                     .lastName(user.getLastName())
                     .documentNumber(user.getDocumentNumber())

@@ -1,6 +1,7 @@
 package pe.edu.vallegrande.vgmsnotifications.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,14 +17,14 @@ import java.util.Map;
 @AllArgsConstructor
 public class SendNotificationRequest {
 
-    @NotBlank(message = "El número de teléfono es requerido")
-    @Pattern(regexp = "^\\+?\\d{10,15}$", message = "El número de teléfono debe ser válido")
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^\\+?\\d{10,15}$", message = "Phone number must be valid")
     private String phoneNumber;
 
-    @NotBlank(message = "El nombre del destinatario es requerido")
+    @NotBlank(message = "Recipient name is required")
     private String recipientName;
 
-    @NotBlank(message = "el tipo de notificacion es requerido")
+    @NotNull(message = "Notification type is required")
     private NotificationType type;
 
     private Map<String, String> variables;

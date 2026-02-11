@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Repository
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class FareRepositoryImpl implements IFareRepository {
 
     private final FareMongoRepository mongoRepository;
@@ -55,8 +56,7 @@ public class FareRepositoryImpl implements IFareRepository {
     @Override
     public Flux<Fare> findActiveByOrganizationAndType(String organizationId, String fareType) {
         return mongoRepository.findByOrganizationIdAndFareTypeAndRecordStatus(
-            organizationId, fareType, RecordStatus.ACTIVE.name()
-        ).map(mapper::toModel);
+                organizationId, fareType, RecordStatus.ACTIVE.name()).map(mapper::toModel);
     }
 
     @Override

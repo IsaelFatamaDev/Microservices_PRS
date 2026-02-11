@@ -1,6 +1,7 @@
 package pe.edu.vallegrande.vgmsnotifications.application.usecases;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pe.edu.vallegrande.vgmsnotifications.domain.exceptions.NotFoundException;
 import pe.edu.vallegrande.vgmsnotifications.domain.models.Notification;
@@ -10,10 +11,10 @@ import pe.edu.vallegrande.vgmsnotifications.domain.ports.out.INotificationReposi
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GetNotificationHistoryUseCaseImpl implements IGetNotificationHistoryUseCase {
-
 
     private final INotificationRepository notificationRepository;
 
@@ -35,6 +36,6 @@ public class GetNotificationHistoryUseCaseImpl implements IGetNotificationHistor
     @Override
     public Mono<Notification> findById(String id) {
         return notificationRepository.findById(id)
-            .switchIfEmpty(Mono.error(new NotFoundException("Notificacion no encontrada con ID" + id)));
+                .switchIfEmpty(Mono.error(new NotFoundException("Notification not found with ID: " + id)));
     }
 }

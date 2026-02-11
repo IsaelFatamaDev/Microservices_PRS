@@ -18,6 +18,7 @@ public class Organization {
     private String address;
     private String phone;
     private String email;
+    private String logoUrl;
 
     private RecordStatus recordStatus;
     private LocalDateTime createdAt;
@@ -39,32 +40,41 @@ public class Organization {
 
     public Organization markAsDeleted(String deletedBy) {
         return this.toBuilder()
-            .recordStatus(RecordStatus.INACTIVE)
-            .updatedAt(LocalDateTime.now())
-            .updatedBy(deletedBy)
-            .build();
+                .recordStatus(RecordStatus.INACTIVE)
+                .updatedAt(LocalDateTime.now())
+                .updatedBy(deletedBy)
+                .build();
     }
 
     public Organization restore(String restoredBy) {
         return this.toBuilder()
-            .recordStatus(RecordStatus.ACTIVE)
-            .updatedAt(LocalDateTime.now())
-            .updatedBy(restoredBy)
-            .build();
+                .recordStatus(RecordStatus.ACTIVE)
+                .updatedAt(LocalDateTime.now())
+                .updatedBy(restoredBy)
+                .build();
     }
 
     public Organization updateWith(Organization changes, String updatedBy) {
         var builder = this.toBuilder()
-            .updatedAt(LocalDateTime.now())
-            .updatedBy(updatedBy);
+                .updatedAt(LocalDateTime.now())
+                .updatedBy(updatedBy);
 
-        if (changes.getOrganizationName() != null) builder.organizationName(changes.getOrganizationName());
-        if (changes.getDistrict() != null) builder.district(changes.getDistrict());
-        if (changes.getProvince() != null) builder.province(changes.getProvince());
-        if (changes.getDepartment() != null) builder.department(changes.getDepartment());
-        if (changes.getAddress() != null) builder.address(changes.getAddress());
-        if (changes.getPhone() != null) builder.phone(changes.getPhone());
-        if (changes.getEmail() != null) builder.email(changes.getEmail());
+        if (changes.getOrganizationName() != null)
+            builder.organizationName(changes.getOrganizationName());
+        if (changes.getDistrict() != null)
+            builder.district(changes.getDistrict());
+        if (changes.getProvince() != null)
+            builder.province(changes.getProvince());
+        if (changes.getDepartment() != null)
+            builder.department(changes.getDepartment());
+        if (changes.getAddress() != null)
+            builder.address(changes.getAddress());
+        if (changes.getPhone() != null)
+            builder.phone(changes.getPhone());
+        if (changes.getEmail() != null)
+            builder.email(changes.getEmail());
+        if (changes.getLogoUrl() != null)
+            builder.logoUrl(changes.getLogoUrl());
 
         return builder.build();
     }

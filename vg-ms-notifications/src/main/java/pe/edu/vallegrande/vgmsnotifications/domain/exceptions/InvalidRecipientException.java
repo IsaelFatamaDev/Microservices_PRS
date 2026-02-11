@@ -1,8 +1,8 @@
 package pe.edu.vallegrande.vgmsnotifications.domain.exceptions;
 
-public class InvalidRecipientException extends DomainException{
+public class InvalidRecipientException extends DomainException {
 
-    public InvalidRecipientException(String message){
-        super("INVALID_RECIPIENT", message);
+    public InvalidRecipientException(String message) {
+        super("INVALID_RECIPIENT", 400, message);
     }
 }

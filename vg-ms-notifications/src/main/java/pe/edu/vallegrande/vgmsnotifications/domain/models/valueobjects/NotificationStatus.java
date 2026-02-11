@@ -4,18 +4,19 @@ import lombok.Getter;
 
 @Getter
 public enum NotificationStatus {
-    PENDING("Pendiente de envío"),
-    SENT("Enviado exitósamente"),
-    FAILED("Fallo en el envío"),
-    RETRYING("Reintando envío");
+
+    PENDING("Pending delivery"),
+    SENT("Successfully sent"),
+    FAILED("Delivery failed"),
+    RETRYING("Retrying delivery");
 
     private final String description;
 
-    NotificationStatus(String description){
+    NotificationStatus(String description) {
         this.description = description;
     }
 
-    public boolean hasIssue(){
+    public boolean hasIssue() {
         return this == FAILED || this == RETRYING;
     }
 }

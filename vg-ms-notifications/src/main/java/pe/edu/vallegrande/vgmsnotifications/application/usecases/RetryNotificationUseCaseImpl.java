@@ -21,34 +21,33 @@ public class RetryNotificationUseCaseImpl implements IRetryNotificationUseCase {
 
     @Override
     public Mono<Notification> retryOne(String notificationId) {
-        log.info("Reintentando notificación: {}", notificationId);
+        log.info("Retrying notification: {}", notificationId);
         return notificationRepository.findById(notificationId)
-            .switchIfEmpty(Mono.error(
-                new NotFoundException("Notificación no encontrada: " + notificationId)
-            ))
-            .flatMap(notification -> {
-                if (!notification.canRetry()) {
-                    return Mono.error(new BusinessRuleException(
-                        "No se puede reintentar. Estado: " + notification.getStatus() + ", Reintentos: " + notification.getRetryCount() + "/3"
-                    ));
-                }
-                notification.prepareForRetry();
-                return dispatcherService.dispatch(notification);
-            })
-            .flatMap(notificationRepository::save)
-            .doOnSuccess(n ->log.info("Reintento #{} - {} ({})", n.getRetryCount(), n.getStatus(), n.getId()));
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException("Notification not found: " + notificationId)))
+                .flatMap(notification -> {
+                    if (!notification.canRetry()) {
+                        return Mono.error(new BusinessRuleException(
+                                "Cannot retry. Status: " + notification.getStatus() + ", Retries: "
+                                        + notification.getRetryCount() + "/3"));
+                    }
+                    notification.prepareForRetry();
+                    return dispatcherService.dispatch(notification);
+                })
+                .flatMap(notificationRepository::save)
+                .doOnSuccess(n -> log.info("Retry #{} - {} ({})", n.getRetryCount(), n.getStatus(), n.getId()));
     }
 
     @Override
     public Flux<Notification> retryAllFailed() {
-        log.info("Reintentando todas las notificaciones fallidas...");
+        log.info("Retrying all failed notifications...");
 
         return notificationRepository.findFailedWithRetryAvailable()
-            .flatMap(notification -> {
-                notification.prepareForRetry();
-                return dispatcherService.dispatch(notification)
-                    .flatMap(notificationRepository::save);
-            })
-            .doOnCancel(()-> log.info("Reintento masivo competado"));
+                .flatMap(notification -> {
+                    notification.prepareForRetry();
+                    return dispatcherService.dispatch(notification)
+                            .flatMap(notificationRepository::save);
+                })
+                .doOnComplete(() -> log.info("Massive retry completed"));
     }
 }

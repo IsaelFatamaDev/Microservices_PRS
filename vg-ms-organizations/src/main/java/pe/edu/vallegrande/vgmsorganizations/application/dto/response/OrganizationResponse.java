@@ -23,6 +23,7 @@ public class OrganizationResponse {
     private String address;
     private String phone;
     private String email;
+    private String logoUrl;
     private String recordStatus;
     private LocalDateTime createdAt;
     private String createdBy;

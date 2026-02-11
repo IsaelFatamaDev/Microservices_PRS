@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class AuthenticationClientImpl implements IAuthenticationClient {
 
     private final WebClient.Builder webClientBuilder;
@@ -31,14 +32,14 @@ public class AuthenticationClientImpl implements IAuthenticationClient {
     public Mono<String> createUser(String userId, String email, String firstName, String lastName, String role) {
         log.info("Creating user with id: {}", userId);
         return webClientBuilder.build()
-            .post()
-            .uri(authServiceUrl + "/api/v1/auth/register")
-            .bodyValue(new RegisterRequest(userId, email, firstName, lastName, role))
-            .retrieve()
-            .bodyToMono(RegisterResponse.class)
-            .map(RegisterResponse::keycloakId)
-            .doOnSuccess(id -> log.info("User created in keycloak: {}", id))
-            .doOnError(e -> log.error("Error creating user in keycloak: {}", e.getMessage()));
+                .post()
+                .uri(authServiceUrl + "/api/v1/auth/register")
+                .bodyValue(new RegisterRequest(userId, email, firstName, lastName, role))
+                .retrieve()
+                .bodyToMono(RegisterResponse.class)
+                .map(RegisterResponse::keycloakId)
+                .doOnSuccess(id -> log.info("User created in keycloak: {}", id))
+                .doOnError(e -> log.error("Error creating user in keycloak: {}", e.getMessage()));
     }
 
     @Override
@@ -47,12 +48,12 @@ public class AuthenticationClientImpl implements IAuthenticationClient {
     public Mono<Void> disableUser(String userId) {
         log.info("Disabling user with id: {}", userId);
         return webClientBuilder.build()
-            .patch()
-            .uri(authServiceUrl + "/api/v1/auth/users/{userId}/disable", userId)
-            .retrieve()
-            .bodyToMono(Void.class)
-            .doOnSuccess(v -> log.info("User disabled in keycloak: {}", userId))
-            .doOnError(e -> log.error("Error disabling user in keycloak: {}", e.getMessage()));
+                .patch()
+                .uri(authServiceUrl + "/api/v1/auth/users/{userId}/disable", userId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .doOnSuccess(v -> log.info("User disabled in keycloak: {}", userId))
+                .doOnError(e -> log.error("Error disabling user in keycloak: {}", e.getMessage()));
     }
 
     @Override
@@ -61,12 +62,12 @@ public class AuthenticationClientImpl implements IAuthenticationClient {
     public Mono<Void> enableUser(String userId) {
         log.info("Enabling user with id: {}", userId);
         return webClientBuilder.build()
-            .patch()
-            .uri(authServiceUrl + "/api/v1/auth/users/{userId}/enable", userId)
-            .retrieve()
-            .bodyToMono(Void.class)
-            .doOnSuccess(v -> log.info("User enabled in keycloak: {}", userId))
-            .doOnError(e -> log.error("Error enabling user in keycloak: {}", e.getMessage()));
+                .patch()
+                .uri(authServiceUrl + "/api/v1/auth/users/{userId}/enable", userId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .doOnSuccess(v -> log.info("User enabled in keycloak: {}", userId))
+                .doOnError(e -> log.error("Error enabling user in keycloak: {}", e.getMessage()));
     }
 
     @Override
@@ -75,17 +76,16 @@ public class AuthenticationClientImpl implements IAuthenticationClient {
     public Mono<Void> deleteUser(String userId) {
         log.info("Deleting user with id: {}", userId);
         return webClientBuilder.build()
-            .delete()
-            .uri(authServiceUrl + "/api/v1/auth/users/{userId}", userId)
-            .retrieve()
-            .bodyToMono(Void.class)
-            .doOnSuccess(v -> log.info("User deleted in keycloak: {}", userId))
-            .doOnError(e -> log.error("Error deleting user in keycloak: {}", e.getMessage()));
+                .delete()
+                .uri(authServiceUrl + "/api/v1/auth/users/{userId}", userId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .doOnSuccess(v -> log.info("User deleted in keycloak: {}", userId))
+                .doOnError(e -> log.error("Error deleting user in keycloak: {}", e.getMessage()));
     }
 
     private Mono<String> createUserFallback(
-        String userId, String email, String firstName, String lastName, String role, Throwable t
-    ) {
+            String userId, String email, String firstName, String lastName, String role, Throwable t) {
         log.error("Circuit breaker: createUser fallback for {}: {}", userId, t.getMessage());
         return Mono.error(new ExternalServiceException("Authentication", t));
     }
@@ -106,8 +106,7 @@ public class AuthenticationClientImpl implements IAuthenticationClient {
     }
 
     private record RegisterRequest(
-        String userId, String email, String firstName, String lastName, String role
-    ) {
+            String userId, String email, String firstName, String lastName, String role) {
     }
 
     private record RegisterResponse(String keycloakId) {

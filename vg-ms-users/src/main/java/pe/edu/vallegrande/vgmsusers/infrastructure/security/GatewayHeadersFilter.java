@@ -15,6 +15,7 @@ import reactor.util.context.Context;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null")
 public class GatewayHeadersFilter implements WebFilter {
 
     public static final String AUTHENTICATED_USER_KEY = "AUTHENTICATED_USER";
@@ -26,9 +27,9 @@ public class GatewayHeadersFilter implements WebFilter {
         AuthenticatedUser user = headersExtractor.extractFromRequest(exchange.getRequest());
 
         log.debug("GatewayHeadersFilter - User: {}, Authenticated: {}",
-            user.getUserId(), user.isAuthenticated());
+                user.getUserId(), user.isAuthenticated());
 
         return chain.filter(exchange)
-            .contextWrite(Context.of(AUTHENTICATED_USER_KEY, user));
+                .contextWrite(Context.of(AUTHENTICATED_USER_KEY, user));
     }
 }

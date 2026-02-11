@@ -12,6 +12,7 @@ import reactor.util.context.Context;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class GatewayHeadersFilter implements WebFilter {
 
     public static final String AUTHENTICATED_USER_KEY = "authenticatedUser";
@@ -23,6 +24,6 @@ public class GatewayHeadersFilter implements WebFilter {
         AuthenticatedUser user = extractor.extract(exchange.getRequest().getHeaders());
 
         return chain.filter(exchange)
-            .contextWrite(Context.of(AUTHENTICATED_USER_KEY, user));
+                .contextWrite(Context.of(AUTHENTICATED_USER_KEY, user));
     }
 }

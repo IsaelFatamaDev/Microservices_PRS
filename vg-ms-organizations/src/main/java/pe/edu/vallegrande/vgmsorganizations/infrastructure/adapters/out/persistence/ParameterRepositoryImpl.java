@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Repository
 @RequiredArgsConstructor
+@SuppressWarnings("null")
 public class ParameterRepositoryImpl implements IParameterRepository {
 
     private final ParameterMongoRepository mongoRepository;

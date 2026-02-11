@@ -25,7 +25,6 @@ public class CreateUserUseCaseImpl implements ICreateUserUseCase {
     private final IUserRepository userRepository;
     private final IOrganizationClient organizationClient;
     private final IUserEventPublisher eventPublisher;
-    private final INotificationClient notificationClient;
     private final ISecurityContext securityContext;
 
     @Override
@@ -122,27 +121,10 @@ public class CreateUserUseCaseImpl implements ICreateUserUseCase {
 
     private Mono<User> publishEventAndNotify(User user, String createdBy) {
         return eventPublisher.publishUserCreated(user, createdBy)
-            .then(sendWelcomeNotification(user))
             .thenReturn(user)
             .onErrorResume(e -> {
-                log.warn("Failed to publish event or send notification: {}", e.getMessage());
+                log.warn("Failed to publish event: {}", e.getMessage());
                 return Mono.just(user);
-            });
-    }
-
-    private Mono<Void> sendWelcomeNotification(User user) {
-        if (user.getPhone() == null || user.getPhone().isBlank()) {
-            return Mono.empty();
-        }
-
-        return notificationClient.sendWelcomeMessage(
-                user.getPhone(),
-                user.getFirstName(),
-                "JASS Digital"
-            )
-            .onErrorResume(e -> {
-                log.warn("Failed to send welcome notification: {}", e.getMessage());
-                return Mono.empty();
             });
     }
 }

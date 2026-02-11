@@ -20,6 +20,7 @@ public class UserCreatedEvent {
     private String userId;
     private String organizationId;
     private String email;
+    private String phone;
     private String firstName;
     private String lastName;
     private String documentNumber;

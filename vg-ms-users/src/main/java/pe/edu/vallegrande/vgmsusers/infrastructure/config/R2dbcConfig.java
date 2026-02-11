@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableR2dbcAuditing
 @EnableR2dbcRepositories(basePackages = "pe.edu.vallegrande.vgmsusers.infrastructure.persistence.repositories")
 @EnableTransactionManagement
+@SuppressWarnings("null")
 public class R2dbcConfig {
     @Bean
     public ReactiveTransactionManager transactionManager(ConnectionFactory connectionFactory) {

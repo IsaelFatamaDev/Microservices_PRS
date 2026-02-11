@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("unused")
 public class NotificationClientImpl implements INotificationClient {
 
     private final WebClient.Builder webClientBuilder;
@@ -22,22 +23,20 @@ public class NotificationClientImpl implements INotificationClient {
 
     private static final String SERVICE_NAME = "notificationService";
 
-
     @Override
     @CircuitBreaker(name = SERVICE_NAME, fallbackMethod = "sendWelcomeMessageFallback")
     @Retry(name = SERVICE_NAME)
     public Mono<Void> sendWelcomeMessage(String phone, String firstName, String organizationName) {
         log.info("Enviando mensaje de bienvenida a usuario: {}", phone);
         return webClientBuilder.build()
-            .post()
-            .uri(notificationServiceUrl + "/api/v1/notifications/whatsapp")
-            .bodyValue(new WhatsAppMessage(
-                phone, "welcome", new WelcomeParams(firstName, organizationName)
-            ))
-            .retrieve()
-            .bodyToMono(void.class)
-            .doOnSuccess(v -> log.info("Mensaje de bienvenida enviado a: {}", phone))
-            .doOnError(e -> log.warn("Error al enviar el mensaje a {}: error - {}", phone, e.getMessage()));
+                .post()
+                .uri(notificationServiceUrl + "/api/v1/notifications/whatsapp")
+                .bodyValue(new WhatsAppMessage(
+                        phone, "welcome", new WelcomeParams(firstName, organizationName)))
+                .retrieve()
+                .bodyToMono(void.class)
+                .doOnSuccess(v -> log.info("Mensaje de bienvenida enviado a: {}", phone))
+                .doOnError(e -> log.warn("Error al enviar el mensaje a {}: error - {}", phone, e.getMessage()));
     }
 
     @Override
@@ -46,17 +45,16 @@ public class NotificationClientImpl implements INotificationClient {
     public Mono<Void> sendProfileUpdatedNotification(String phone, String firstName) {
         log.info("Enviando actualizacion del perfil a usuario: {}", phone);
         return webClientBuilder.build()
-            .post()
-            .uri(notificationServiceUrl + "/api/v1/notifications/whatsapp")
-            .bodyValue(new WhatsAppMessage(
-                phone,
-                "profile-updated",
-                new ProfileUpdatedParams(firstName)
-            ))
-            .retrieve()
-            .bodyToMono(void.class)
-            .doOnSuccess(v -> log.info("Notificacion de actualizacion de perfil enviada a: {}", phone))
-            .doOnError(e -> log.warn("Error al enviar la notificacion a {}: error - {}", phone, e.getMessage()));
+                .post()
+                .uri(notificationServiceUrl + "/api/v1/notifications/whatsapp")
+                .bodyValue(new WhatsAppMessage(
+                        phone,
+                        "profile-updated",
+                        new ProfileUpdatedParams(firstName)))
+                .retrieve()
+                .bodyToMono(void.class)
+                .doOnSuccess(v -> log.info("Notificacion de actualizacion de perfil enviada a: {}", phone))
+                .doOnError(e -> log.warn("Error al enviar la notificacion a {}: error - {}", phone, e.getMessage()));
     }
 
     private Mono<Void> sendWelcomeMessageFallback(String phone, String firstName, String org, Throwable t) {

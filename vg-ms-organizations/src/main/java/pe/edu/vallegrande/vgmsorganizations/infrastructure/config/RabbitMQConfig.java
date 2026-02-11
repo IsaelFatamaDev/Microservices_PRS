@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@SuppressWarnings("null")
 public class RabbitMQConfig {
 
     public static final String EXCHANGE_NAME = "jass.events";
@@ -16,9 +17,9 @@ public class RabbitMQConfig {
     @Bean
     public TopicExchange jassEventsExchange() {
         return ExchangeBuilder
-            .topicExchange(EXCHANGE_NAME)
-            .durable(true)
-            .build();
+                .topicExchange(EXCHANGE_NAME)
+                .durable(true)
+                .build();
     }
 
     @Bean
@@ -83,4 +84,3 @@ public class RabbitMQConfig {
         return template;
     }
 }
-

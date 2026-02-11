@@ -4,12 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum NotificationChannel {
-    WHATSAPP("WhatsApp vía Evolution API");
+
+    WHATSAPP("WhatsApp via Evolution API");
 
     private final String description;
 
     NotificationChannel(String description) {
         this.description = description;
     }
-
 }

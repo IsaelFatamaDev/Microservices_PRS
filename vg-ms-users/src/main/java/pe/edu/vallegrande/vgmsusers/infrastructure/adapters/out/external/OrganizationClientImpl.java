@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class OrganizationClientImpl implements IOrganizationClient {
 
     private final WebClient.Builder webClientBuilder;
@@ -34,11 +35,11 @@ public class OrganizationClientImpl implements IOrganizationClient {
         log.debug("Checking if organization exists: {}", organizationId);
 
         return webClientBuilder.build()
-            .get()
-            .uri(organizationServiceUrl + "/api/v1/organizations/{id}/exists", organizationId)
-            .retrieve()
-            .bodyToMono(Boolean.class)
-            .defaultIfEmpty(false);
+                .get()
+                .uri(organizationServiceUrl + "/api/v1/organizations/{id}/exists", organizationId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .defaultIfEmpty(false);
     }
 
     @Override
@@ -49,12 +50,12 @@ public class OrganizationClientImpl implements IOrganizationClient {
         log.debug("Checking if zone {} exists in organization {}", zoneId, organizationId);
 
         return webClientBuilder.build()
-            .get()
-            .uri(organizationServiceUrl + "/api/v1/organizations/{orgId}/zones/{zoneId}/exists",
-                organizationId, zoneId)
-            .retrieve()
-            .bodyToMono(Boolean.class)
-            .defaultIfEmpty(false);
+                .get()
+                .uri(organizationServiceUrl + "/api/v1/organizations/{orgId}/zones/{zoneId}/exists",
+                        organizationId, zoneId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .defaultIfEmpty(false);
     }
 
     @Override
@@ -65,12 +66,12 @@ public class OrganizationClientImpl implements IOrganizationClient {
         log.debug("Checking if street {} exists in zone {}", streetId, zoneId);
 
         return webClientBuilder.build()
-            .get()
-            .uri(organizationServiceUrl + "/api/v1/zones/{zoneId}/streets/{streetId}/exists",
-                zoneId, streetId)
-            .retrieve()
-            .bodyToMono(Boolean.class)
-            .defaultIfEmpty(false);
+                .get()
+                .uri(organizationServiceUrl + "/api/v1/zones/{zoneId}/streets/{streetId}/exists",
+                        zoneId, streetId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .defaultIfEmpty(false);
     }
 
     @Override
@@ -86,12 +87,13 @@ public class OrganizationClientImpl implements IOrganizationClient {
         }
 
         return webClientBuilder.build()
-            .get()
-            .uri(organizationServiceUrl + "/api/v1/organizations/{orgId}/zones/{zoneId}/streets/{streetId}/validate",
-                organizationId, zoneId, streetId)
-            .retrieve()
-            .bodyToMono(Boolean.class)
-            .defaultIfEmpty(false);
+                .get()
+                .uri(organizationServiceUrl
+                        + "/api/v1/organizations/{orgId}/zones/{zoneId}/streets/{streetId}/validate",
+                        organizationId, zoneId, streetId)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .defaultIfEmpty(false);
     }
 
     private Mono<Boolean> existsOrganizationFallback(String organizationId, Throwable t) {

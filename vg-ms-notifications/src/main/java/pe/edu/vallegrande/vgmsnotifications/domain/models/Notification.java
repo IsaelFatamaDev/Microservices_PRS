@@ -1,7 +1,9 @@
 package pe.edu.vallegrande.vgmsnotifications.domain.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import pe.edu.vallegrande.vgmsnotifications.domain.models.valueobjects.NotificationChannel;
 import pe.edu.vallegrande.vgmsnotifications.domain.models.valueobjects.NotificationStatus;
 import pe.edu.vallegrande.vgmsnotifications.domain.models.valueobjects.NotificationType;
@@ -10,7 +12,9 @@ import pe.edu.vallegrande.vgmsnotifications.domain.models.valueobjects.RecordSta
 import java.time.LocalDateTime;
 
 @Getter
-@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Notification {
 
     private String id;
@@ -18,27 +22,33 @@ public class Notification {
     private String phoneNumber;
     private String recipientName;
     private NotificationType type;
-    private NotificationChannel channel;
-    private NotificationStatus status;
+
+    @Builder.Default
+    private NotificationChannel channel = NotificationChannel.WHATSAPP;
+
+    @Builder.Default
+    private NotificationStatus status = NotificationStatus.PENDING;
+
     private String message;
     private String imageUrl;
     private String eventSource;
     private String eventId;
-    private int retryCount;
-    private String failureReason;
-    private RecordStatus recordStatus;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private LocalDateTime sentAt;
 
-    public Notification() {
-        this.status = NotificationStatus.PENDING;
-        this.channel = NotificationChannel.WHATSAPP;
-        this.recordStatus = RecordStatus.ACTIVE;
-        this.retryCount = 0;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+    @Builder.Default
+    private int retryCount = 0;
+
+    private String failureReason;
+
+    @Builder.Default
+    private RecordStatus recordStatus = RecordStatus.ACTIVE;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+
+    private LocalDateTime sentAt;
 
     public void markAsSent() {
         this.status = NotificationStatus.SENT;
@@ -56,8 +66,7 @@ public class Notification {
     public void prepareForRetry() {
         if (this.retryCount >= 3) {
             throw new IllegalStateException(
-                "Máximo de reintentos alcanzados para la notificación: " + this.id
-            );
+                    "Maximum retries reached for notification: " + this.id);
         }
         this.status = NotificationStatus.RETRYING;
         this.retryCount++;
@@ -89,5 +98,4 @@ public class Notification {
     public boolean isActive() {
         return this.recordStatus == RecordStatus.ACTIVE;
     }
-
 }

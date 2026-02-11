@@ -5,26 +5,29 @@ import lombok.Getter;
 @Getter
 public enum NotificationType {
 
-    WELCOME("Biendvenido/a al sistema"),
-    ACCOUNT_DEACTIVATED("Cuenta desactivada"),
-    ACCOUNT_RESTORED("Cuenta restaurada"),
-    PAYMENT_CONFIRMATION("Confirmación de pago"),
-    RECEIPT_NOTIFICATION("Notificacion de recibo"),
-    OVERDUE_REMINDER("Recordatorio de pago vencido"),
-    SERVICE_CUT_WARNING("Advertencia de corte"),
-    SERVICE_CUT_EXECUTE("Corte Ejecutado"),
-    SERVICE_RESTORED("Servicio Restaurado");
+    WELCOME("Welcome to the system"),
+    PROFILE_UPDATED("Profile updated"),
+    ACCOUNT_DEACTIVATED("Account deactivated"),
+    ACCOUNT_RESTORED("Account restored"),
+    PAYMENT_CONFIRMATION("Payment confirmation"),
+    RECEIPT_NOTIFICATION("Receipt notification"),
+    OVERDUE_REMINDER("Overdue payment reminder"),
+    SERVICE_CUT_WARNING("Service cut warning"),
+    SERVICE_CUT_EXECUTED("Service cut executed"),
+    SERVICE_RESTORED("Service restored"),
+    CUSTOM("Custom notification");
+
     private final String description;
 
-    NotificationType(String description){
+    NotificationType(String description) {
         this.description = description;
     }
 
-    public boolean requiresImage(){
+    public boolean requiresImage() {
         return this == WELCOME;
     }
 
-    public boolean isUrgent(){
-        return this == SERVICE_CUT_WARNING || this == SERVICE_CUT_EXECUTE || this == OVERDUE_REMINDER;
+    public boolean isUrgent() {
+        return this == SERVICE_CUT_WARNING || this == SERVICE_CUT_EXECUTED || this == OVERDUE_REMINDER;
     }
 }
