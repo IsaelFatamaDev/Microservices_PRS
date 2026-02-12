@@ -1,0 +1,21 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VHOST:/}
+
+logging:
+  level:
+    root: INFO
+    pe.edu.vallegrande.msdistribution: INFO
+
+springdoc:
+     api-docs:
+          enabled: false
+     swagger-ui:
+          enabled: false
