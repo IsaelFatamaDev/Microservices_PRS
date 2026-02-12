@@ -33,6 +33,11 @@ public class FallbackController {
         return buildFallbackResponse("notifications", "Servicio de notificaciones no disponible");
     }
 
+    @RequestMapping("/distribution")
+    public Mono<ResponseEntity<Map<String, Object>>> distributionFallback() {
+        return buildFallbackResponse("distribution", "Servicio de distribución no disponible");
+    }
+
     private Mono<ResponseEntity<Map<String, Object>>> buildFallbackResponse(String service, String message) {
         Map<String, Object> response = Map.of(
                 "success", false,

@@ -9,6 +9,4 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 9095
-
-ENV SPRING_PROFILES_ACTIVE=prod
 ENTRYPOINT ["sh", "-c", "java -jar app.jar"]
