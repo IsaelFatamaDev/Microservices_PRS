@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.gateway.config;
+package pe.edu.vallegrande.vgmsgateway.config;
 
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +10,12 @@ public class RateLimiterConfig {
 
     @Bean
     public KeyResolver ipKeyResolver() {
-        return exchange -> Mono.just(
-            exchange.getRequest().getRemoteAddress() != null
-                ? exchange.getRequest().getRemoteAddress().getAddress().getHostAddress()
-                : "anonymous"
-        );
+        return exchange -> {
+            var remoteAddress = exchange.getRequest().getRemoteAddress();
+            return Mono.just(
+                    remoteAddress != null
+                            ? remoteAddress.getAddress().getHostAddress()
+                            : "anonymous");
+        };
     }
 }

@@ -5,9 +5,9 @@ spring:
         - id: auth-service
           uri: http://vg-ms-authentication:8082
           predicates:
-            - Path=/api/v1/auth/**
+            - Path=/api/auth/**
           filters:
-            - RewritePath=/api/v1/(?<segment>.*), /api/${segment}
+            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
             - name: CircuitBreaker
               args:
                 name: authCircuitBreaker
@@ -15,9 +15,9 @@ spring:
         - id: users-service
           uri: http://vg-ms-users:8081
           predicates:
-            - Path=/api/v1/users/**
+            - Path=/api/users/**
           filters:
-            - RewritePath=/api/v1/(?<segment>.*), /api/${segment}
+            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
             - name: CircuitBreaker
               args:
                 name: usersCircuitBreaker
@@ -25,9 +25,9 @@ spring:
         - id: organizations-service
           uri: http://vg-ms-organizations:8083
           predicates:
-            - Path=/api/v1/organizations/**
+            - Path=/api/organizations/**
           filters:
-            - RewritePath=/api/v1/(?<segment>.*), /api/${segment}
+            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
             - name: CircuitBreaker
               args:
                 name: organizationsCircuitBreaker
@@ -35,9 +35,9 @@ spring:
         - id: notifications-service
           uri: http://vg-ms-notifications:8085
           predicates:
-            - Path=/api/v1/notifications/**
+            - Path=/api/notifications/**
           filters:
-            - RewritePath=/api/v1/(?<segment>.*), /api/${segment}
+            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
             - name: CircuitBreaker
               args:
                 name: notificationsCircuitBreaker

@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 9095
 
 spring:
   application:
@@ -36,6 +36,31 @@ resilience4j:
         failureRateThreshold: 50
         waitDurationInOpenState: 30000
         permittedNumberOfCallsInHalfOpenState: 5
+    instances:
+      authCircuitBreaker:
+        baseConfig: default
+      usersCircuitBreaker:
+        baseConfig: default
+      organizationsCircuitBreaker:
+        baseConfig: default
+      notificationsCircuitBreaker:
+        baseConfig: default
+      claimsCircuitBreaker:
+        baseConfig: default
+      paymentsCircuitBreaker:
+        baseConfig: default
+      inventoryCircuitBreaker:
+        baseConfig: default
+      infrastructureCircuitBreaker:
+        baseConfig: default
+      waterQualityCircuitBreaker:
+        baseConfig: default
+      distributionCircuitBreaker:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 10s
     instances:
       authCircuitBreaker:
         baseConfig: default

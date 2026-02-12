@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.gateway.config;
+package pe.edu.vallegrande.vgmsgateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,22 +11,21 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
-        "/api/auth/**",
-        "/api/organizations/public/**",
-        "/actuator/**"
+            "/api/auth/**",
+            "/api/organizations/public/**",
+            "/actuator/**"
     };
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(exchanges -> exchanges
-                .pathMatchers(PUBLIC_PATHS).permitAll()
-                .anyExchange().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> {})
-            )
-            .build();
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers(PUBLIC_PATHS).permitAll()
+                        .anyExchange().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> {
+                        }))
+                .build();
     }
 }

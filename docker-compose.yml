@@ -4,7 +4,7 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: jass-rabbitmq
-    mem_limit: 200m
+    mem_limit: 250m
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -13,14 +13,19 @@ services:
       RABBITMQ_DEFAULT_PASS: admin
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    networks: [jass-net]
+    networks: [ jass-net ]
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   vg-ms-organizations:
     image: isaelfatamadev/prs_microservices-vg-ms-organizations:latest
     container_name: vg-ms-organizations
-    mem_limit: 200m
-    ports: ["8083:8083"]
+    mem_limit: 250m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MONGODB_URI: mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000
@@ -31,16 +36,16 @@ services:
       CLOUDINARY_CLOUD_NAME: drqpwb5rq
       CLOUDINARY_API_KEY: "376462778114431"
       CLOUDINARY_API_SECRET: 47C9YZgGsnXTCEu-yrifnY8NC5E
-    networks: [jass-net]
+    networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
 
   vg-ms-users:
     image: isaelfatamadev/prs_microservices-vg-ms-users:latest
     container_name: vg-ms-users
-    mem_limit: 512m
-    ports: ["8081:8081"]
+    mem_limit: 250m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_HOST: 144.126.140.79
@@ -53,17 +58,16 @@ services:
       RABBITMQ_USER: admin
       RABBITMQ_PASSWORD: admin
 
-    networks: [jass-net]
+    networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
 
   vg-ms-notifications:
     image: isaelfatamadev/prs_microservices-vg-ms-notifications:latest
     container_name: vg-ms-notifications
-    mem_limit: 350m
-    ports: ["8090:8090"]
+    mem_limit: 250m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MONGODB_URI: mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000
@@ -77,19 +81,18 @@ services:
       ORGANIZATIONS_API_BASE_URL: http://vg-ms-organizations:8083
 
       FRONTEND_URL: https://lab.vallegrande.edu.pe/jass/SistemaJass
-    networks: [jass-net]
+    networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
       evolution-apis:
         condition: service_started
 
   vg-ms-authentication:
     image: isaelfatamadev/prs_microservices-vg-ms-authentication:latest
     container_name: vg-ms-authentication
-    mem_limit: 200m
-    ports: ["8082:8082"]
+    mem_limit: 250m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       RABBITMQ_HOST: rabbitmq
@@ -99,18 +102,18 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
       KEYCLOAK_ADMIN_USERNAME: admin
       KEYCLOAK_CLIENT_SECRET: zJgI1QiNFXWiinFgAVfxsbqcF8nlGYLy
-    networks: [jass-net]
+    networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
 
   evolution-apis:
     image: atendai/evolution-api:v1.8.4
     container_name: evolution-apis
-    mem_limit: 200m
+    mem_limit: 250m
     ports:
-      - "8080:8080"
+      - "9099:8080"
     environment:
       AUTHENTICATION_API_KEY: "JASS_EVOLUTION_KEY_2024"
       AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
@@ -132,7 +135,7 @@ services:
     volumes:
       - evolution_data:/evolution/instances
       - evolution_store:/evolution/store
-    networks: [jass-net]
+    networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
       redis:
@@ -143,14 +146,14 @@ services:
     container_name: jass-redis
     mem_limit: 50m
     restart: unless-stopped
-    networks: [jass-net]
+    networks: [ jass-net ]
 
   vg-ms-gateway:
     image: isaelfatamadev/prs_microservices-vg-ms-gateway:latest
     container_name: vg-ms-gateway
-    mem_limit: 300m
+    mem_limit: 250m
     ports:
-      - "8084:8084"
+      - "9095:9095"
     environment:
       SPRING_PROFILES_ACTIVE: prod
       KEYCLOAK_ISSUER_URI: https://lab.vallegrande.edu.pe/auth/realms/sistema-jass
@@ -158,7 +161,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       CORS_ALLOWED_ORIGINS: https://lab.vallegrande.edu.pe
-    networks: [jass-net]
+    networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
       - redis
@@ -166,8 +169,6 @@ services:
       - vg-ms-organizations
       - vg-ms-users
       - vg-ms-notifications
-
-
 
 networks:
   jass-net:

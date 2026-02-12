@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.gateway.config;
+package pe.edu.vallegrande.vgmsgateway.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

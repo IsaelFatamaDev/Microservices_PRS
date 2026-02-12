@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.gateway.filter;
+package pe.edu.vallegrande.vgmsgateway.filter;
 
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;

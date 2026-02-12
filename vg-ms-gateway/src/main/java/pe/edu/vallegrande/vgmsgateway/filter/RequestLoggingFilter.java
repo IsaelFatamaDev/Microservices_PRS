@@ -1,4 +1,4 @@
-package pe.edu.vallegrande.gateway.filter;
+package pe.edu.vallegrande.vgmsgateway.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
