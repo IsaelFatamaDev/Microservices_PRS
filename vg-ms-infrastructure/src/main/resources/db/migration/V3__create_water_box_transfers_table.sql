@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS water_box_transfers (
     created_by VARCHAR(36)
 );
 
-CREATE INDEX idx_transfers_water_box ON water_box_transfers(water_box_id);
-CREATE INDEX idx_transfers_from_user ON water_box_transfers(from_user_id);
-CREATE INDEX idx_transfers_to_user ON water_box_transfers(to_user_id);
+CREATE INDEX IF NOT EXISTS idx_transfers_water_box ON water_box_transfers(water_box_id);
+CREATE INDEX IF NOT EXISTS idx_transfers_from_user ON water_box_transfers(from_user_id);
+CREATE INDEX IF NOT EXISTS idx_transfers_to_user ON water_box_transfers(to_user_id);

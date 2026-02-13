@@ -16,6 +16,6 @@ CREATE TABLE IF NOT EXISTS water_boxes (
     updated_by VARCHAR(36)
 );
 
-CREATE INDEX idx_water_boxes_organization ON water_boxes(organization_id);
-CREATE INDEX idx_water_boxes_zone ON water_boxes(zone_id);
-CREATE INDEX idx_water_boxes_status ON water_boxes(record_status);
+CREATE INDEX IF NOT EXISTS idx_water_boxes_organization ON water_boxes(organization_id);
+CREATE INDEX IF NOT EXISTS idx_water_boxes_zone ON water_boxes(zone_id);
+CREATE INDEX IF NOT EXISTS idx_water_boxes_status ON water_boxes(record_status);

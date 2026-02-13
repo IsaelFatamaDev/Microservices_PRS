@@ -28,11 +28,11 @@ CREATE TABLE IF NOT EXISTS users
     CONSTRAINT chk_users_contact CHECK (email IS NOT NULL OR phone IS NOT NULL)
 );
 
-CREATE INDEX idx_users_organization_id ON users (organization_id);
-CREATE INDEX idx_users_zone_id ON users (zone_id);
-CREATE INDEX idx_users_record_status ON users (record_status);
-CREATE INDEX idx_users_document_number ON users (document_number);
-CREATE INDEX idx_users_role ON users (role);
+CREATE INDEX IF NOT EXISTS idx_users_organization_id ON users (organization_id);
+CREATE INDEX IF NOT EXISTS idx_users_zone_id ON users (zone_id);
+CREATE INDEX IF NOT EXISTS idx_users_record_status ON users (record_status);
+CREATE INDEX IF NOT EXISTS idx_users_document_number ON users (document_number);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users (role);
 
 -- Comentarios
 COMMENT ON TABLE users IS 'Tabla de usuarios del sistema JASS Digital';

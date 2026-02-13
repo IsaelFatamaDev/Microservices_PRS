@@ -1,3 +1,97 @@
 spring:
-  application:
-    name: vg-ms-commercial
+     r2dbc:
+          url: r2dbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:sistemajass}
+          username: ${DB_USER}
+          password: ${DB_PASSWORD}
+          pool:
+               initial-size: 2
+               max-size: 10
+               max-idle-time: 30m
+
+     flyway:
+          enabled: true
+          url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:sistemajass}
+          user: ${DB_USER}
+          password: ${DB_PASSWORD}
+          locations: classpath:db/migration
+          table: flyway_schema_history_commercial
+          baseline-on-migrate: true
+
+     rabbitmq:
+          host: ${RABBITMQ_HOST:rabbitmq}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USER}
+          password: ${RABBITMQ_PASSWORD}
+          publisher-confirm-type: correlated
+          publisher-returns: true
+
+webclient:
+     connect-timeout: 3000
+     read-timeout: 5000
+     write-timeout: 5000
+     services:
+          user:
+               base-url: http://vg-ms-users:8081
+          infrastructure:
+               base-url: http://vg-ms-infrastructure:8089
+          notification:
+               base-url: http://vg-ms-notifications:8090
+
+resilience4j:
+     circuitbreaker:
+          configs:
+               default:
+                    register-health-indicator: true
+                    sliding-window-size: 20
+                    minimum-number-of-calls: 10
+                    wait-duration-in-open-state: 30s
+                    failure-rate-threshold: 50
+                    slow-call-duration-threshold: 2s
+                    slow-call-rate-threshold: 80
+          instances:
+               userService:
+                    base-config: default
+               infrastructureService:
+                    base-config: default
+               notificationService:
+                    base-config: default
+                    slow-call-duration-threshold: 5s
+
+     retry:
+          configs:
+               default:
+                    max-attempts: 3
+                    wait-duration: 1s
+                    enable-exponential-backoff: true
+                    exponential-backoff-multiplier: 2
+          instances:
+               userService:
+                    base-config: default
+               infrastructureService:
+                    base-config: default
+               notificationService:
+                    base-config: default
+
+     timelimiter:
+          configs:
+               default:
+                    timeout-duration: 3s
+          instances:
+               userService:
+                    base-config: default
+               infrastructureService:
+                    base-config: default
+               notificationService:
+                    timeout-duration: 10s
+
+logging:
+     level:
+          root: WARN
+          pe.edu.vallegrande: INFO
+          org.springframework.r2dbc: WARN
+
+springdoc:
+     api-docs:
+          enabled: false
+     swagger-ui:
+          enabled: false

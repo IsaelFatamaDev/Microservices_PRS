@@ -1,3 +1,92 @@
 spring:
-  application:
-    name: vg-ms-commercial
+     r2dbc:
+          url: r2dbc:postgresql://localhost:5432/sistemajass
+          username: sistemajass_user
+          password: SISTEMAJASS
+          pool:
+               initial-size: 5
+               max-size: 20
+
+     flyway:
+          enabled: true
+          url: jdbc:postgresql://localhost:5432/sistemajass
+          user: sistemajass_user
+          password: SISTEMAJASS
+          locations: classpath:db/migration
+          table: flyway_schema_history_commercial
+          baseline-on-migrate: true
+
+     rabbitmq:
+          host: localhost
+          port: 5672
+          username: guest
+          password: guest
+          publisher-confirm-type: correlated
+
+webclient:
+     connect-timeout: 5000
+     read-timeout: 10000
+     write-timeout: 10000
+     services:
+          user:
+               base-url: http://localhost:8081
+          infrastructure:
+               base-url: http://localhost:8089
+          notification:
+               base-url: http://localhost:8090
+
+resilience4j:
+     circuitbreaker:
+          configs:
+               default:
+                    register-health-indicator: true
+                    sliding-window-size: 10
+                    minimum-number-of-calls: 5
+                    wait-duration-in-open-state: 10s
+                    failure-rate-threshold: 50
+          instances:
+               userService:
+                    base-config: default
+               infrastructureService:
+                    base-config: default
+                    minimum-number-of-calls: 1
+                    sliding-window-size: 1
+                    failure-rate-threshold: 100
+               notificationService:
+                    base-config: default
+                    minimum-number-of-calls: 1
+                    sliding-window-size: 1
+                    failure-rate-threshold: 100
+
+     retry:
+          configs:
+               default:
+                    max-attempts: 3
+                    wait-duration: 500ms
+                    enable-exponential-backoff: true
+          instances:
+               userService:
+                    base-config: default
+               infrastructureService:
+                    max-attempts: 1
+                    wait-duration: 100ms
+               notificationService:
+                    max-attempts: 1
+                    wait-duration: 100ms
+
+     timelimiter:
+          configs:
+               default:
+                    timeout-duration: 5s
+          instances:
+               userService:
+                    base-config: default
+               infrastructureService:
+                    base-config: default
+               notificationService:
+                    timeout-duration: 10s
+
+logging:
+     level:
+          pe.edu.vallegrande: DEBUG
+          org.springframework.r2dbc: DEBUG

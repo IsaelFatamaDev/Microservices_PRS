@@ -1,3 +1,43 @@
 spring:
-  application:
-    name: vg-ms-commercial
+     application:
+          name: vg-ms-commercial-operations
+     profiles:
+          active: ${SPRING_PROFILES_ACTIVE:dev}
+
+server:
+     port: 8094
+     shutdown: graceful
+
+spring.lifecycle:
+     timeout-per-shutdown-phase: 30s
+
+springdoc:
+     api-docs:
+          path: /v3/api-docs
+          enabled: true
+     swagger-ui:
+          path: /swagger-ui.html
+          enabled: true
+          try-it-out-enabled: true
+          operations-sorter: method
+
+management:
+     endpoints:
+          web:
+               exposure:
+                    include: health,info,metrics,circuitbreakers
+     endpoint:
+          health:
+               show-details: always
+     health:
+          circuitbreakers:
+               enabled: true
+          db:
+               enabled: true
+          rabbit:
+               enabled: true
+
+logging:
+     level:
+          root: INFO
+          pe.edu.vallegrande: INFO

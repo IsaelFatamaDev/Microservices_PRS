@@ -13,6 +13,6 @@ CREATE TABLE IF NOT EXISTS water_box_assignments (
     updated_by VARCHAR(36)
 );
 
-CREATE INDEX idx_assignments_water_box ON water_box_assignments(water_box_id);
-CREATE INDEX idx_assignments_user ON water_box_assignments(user_id);
-CREATE INDEX idx_assignments_status ON water_box_assignments(assignment_status);
+CREATE INDEX IF NOT EXISTS idx_assignments_water_box ON water_box_assignments(water_box_id);
+CREATE INDEX IF NOT EXISTS idx_assignments_user ON water_box_assignments(user_id);
+CREATE INDEX IF NOT EXISTS idx_assignments_status ON water_box_assignments(assignment_status);
