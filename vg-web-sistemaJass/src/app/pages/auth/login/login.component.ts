@@ -8,11 +8,11 @@ import { AlertService } from '../../../core/services/alert.service';
 import { EvolutionApiService } from '../../../core/services/evolution-api.service';
 
 @Component({
-     selector: 'app-login',
-     standalone: true,
-     imports: [CommonModule, FormsModule, LucideAngularModule],
-     template: `
-    <div class="h-screen w-screen flex overflow-hidden">
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, FormsModule, LucideAngularModule],
+  template: `
+    <div class="h-screen w-screen flex overflow-hidden animate-fade-in">
       <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 relative">
         <div class="absolute inset-0 overflow-hidden">
           <div class="absolute top-20 left-20 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl"></div>
@@ -33,14 +33,14 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
         <div class="relative z-10 flex flex-col justify-center px-12 w-full">
           <div class="flex items-center justify-center mb-6">
             <div class="relative">
-              <div class="absolute -inset-3 bg-cyan-500/20 rounded-full blur-xl"></div>
-              <lucide-icon [img]="mapPinIcon" [size]="56" class="text-cyan-400 relative"></lucide-icon>
+              <div class="absolute -inset-6 bg-cyan-500/20 rounded-full blur-xl animate-pulse"></div>
+              <img src="assets/Gotita.png" alt="JASS Logo" class="w-40 h-40 object-contain relative drop-shadow-2xl animate-float">
             </div>
           </div>
 
-          <h1 class="text-4xl font-bold text-white text-center mb-3 tracking-tight">JASS</h1>
-          <p class="text-lg text-cyan-300 text-center mb-1">Junta Administradora de Servicios de Saneamiento</p>
-          <p class="text-base text-slate-400 text-center mb-8">Sistema Digital Corporativo</p>
+          <h1 class="text-4xl font-bold text-white text-center mb-3 tracking-tight animate-fade-in-up delay-100">JASS</h1>
+          <p class="text-lg text-cyan-300 text-center mb-1 animate-fade-in-up delay-200">Junta Administradora de Servicios de Saneamiento</p>
+          <p class="text-base text-slate-400 text-center mb-8 animate-fade-in-up delay-300">Sistema Digital Corporativo</p>
 
           <p class="text-slate-300 text-center mb-8 max-w-sm mx-auto leading-relaxed text-sm">
             Gestión Integral de Servicios de Agua y Saneamiento para comunidades
@@ -71,7 +71,7 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
 
       <div class="w-full lg:w-1/2 flex items-center justify-center p-6 bg-gray-50 overflow-auto">
         <div class="w-full max-w-md">
-          <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 animate-fade-in-up">
             <div class="flex flex-col items-center mb-6">
               <div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-full flex items-center justify-center mb-4 shadow-lg">
                 <lucide-icon [img]="userIcon" [size]="28" class="text-white"></lucide-icon>
@@ -156,7 +156,7 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
 
           <div class="lg:hidden mt-6 text-center">
             <div class="flex items-center justify-center gap-2 mb-1">
-              <lucide-icon [img]="mapPinIcon" [size]="20" class="text-slate-700"></lucide-icon>
+              <img src="assets/Gotita.png" alt="Logo" class="w-10 h-10 object-contain">
               <span class="text-lg font-bold text-slate-800">JASS Digital</span>
             </div>
             <p class="text-xs text-gray-500">Sistema de Gestión de Agua y Saneamiento</p>
@@ -221,168 +221,174 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
   `
 })
 export class LoginComponent implements OnInit, OnDestroy {
-     private authService = inject(AuthService);
-     private alertService = inject(AlertService);
-     evolutionApi = inject(EvolutionApiService);
-     private router = inject(Router);
-     private platformId = inject(PLATFORM_ID);
+  private authService = inject(AuthService);
+  private alertService = inject(AlertService);
+  evolutionApi = inject(EvolutionApiService);
+  private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
-     email = '';
-     password = '';
-     rememberMe = false;
+  email = '';
+  password = '';
+  rememberMe = false;
 
-     showPassword = signal(false);
-     isLoading = signal(false);
-     isAnimating = signal(false);
-     isSuccess = signal(false);
-     showQrModal = signal(false);
+  showPassword = signal(false);
+  isLoading = signal(false);
+  isAnimating = signal(false);
+  isSuccess = signal(false);
+  showQrModal = signal(false);
 
-     mailIcon = Mail;
-     lockIcon = Lock;
-     eyeIcon = Eye;
-     eyeOffIcon = EyeOff;
-     loaderIcon = Loader2;
-     userIcon = User;
-     mapPinIcon = MapPin;
-     shieldIcon = Shield;
-     zapIcon = Zap;
-     checkIcon = CheckCircle;
-     arrowRightIcon = ArrowRight;
+  mailIcon = Mail;
+  lockIcon = Lock;
+  eyeIcon = Eye;
+  eyeOffIcon = EyeOff;
+  loaderIcon = Loader2;
+  userIcon = User;
+  mapPinIcon = MapPin;
+  shieldIcon = Shield;
+  zapIcon = Zap;
+  checkIcon = CheckCircle;
+  arrowRightIcon = ArrowRight;
 
-     private pollingSubscription: any;
-     private animationInterval: any;
+  private pollingSubscription: any;
+  private animationInterval: any;
 
-     ngOnInit(): void {
-          if (isPlatformBrowser(this.platformId)) {
-               this.startIdleAnimation();
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.startIdleAnimation();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.animationInterval) {
+      clearInterval(this.animationInterval);
+    }
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+    }
+  }
+
+  private startIdleAnimation(): void {
+    this.animationInterval = setInterval(() => {
+      if (!this.isLoading()) {
+        this.isAnimating.set(true);
+        setTimeout(() => this.isAnimating.set(false), 1000);
+      }
+    }, 5000);
+  }
+
+  togglePassword(): void {
+    this.showPassword.update(v => !v);
+  }
+
+  async onSubmit(): Promise<void> {
+    if (!this.email || !this.password) {
+      this.alertService.warning('Campos requeridos', 'Por favor complete todos los campos');
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    this.authService.login({ email: this.email, password: this.password }).subscribe({
+      next: () => {
+        this.authService.loadUserProfile().subscribe({
+          next: () => {
+            const role = this.authService.userRole();
+            console.log('Login successful. Role:', role);
+
+            if (role === 'ADMIN') {
+              this.handleAdminLogin();
+            } else {
+              console.log('Redirecting for role:', role);
+              this.completeLogin();
+            }
+          },
+          error: (err) => {
+            console.error('Error loading user profile:', err);
+            this.alertService.error('Error de perfil', 'No se pudo cargar el perfil del usuario. ' + (err.status || ''));
+            this.isLoading.set(false);
           }
-     }
+        });
+      },
+      error: (err) => {
+        console.error('Login error:', err);
+        this.alertService.error('Error de inicio de sesión', 'Credenciales incorrectas o error del servidor.');
+        this.isLoading.set(false);
+      }
+    });
+  }
 
-     ngOnDestroy(): void {
-          if (this.animationInterval) {
-               clearInterval(this.animationInterval);
+  private handleAdminLogin(): void {
+    this.showQrModal.set(true);
+    this.isLoading.set(false);
+
+    this.evolutionApi.checkConnection().subscribe(status => {
+      if (status.state === 'open') {
+        this.completeLogin();
+      } else {
+        this.evolutionApi.getQrCode().subscribe({
+          next: () => {
+            this.startPolling();
+          },
+          error: () => {
+            this.alertService.error('Error', 'No se pudo generar el código QR');
           }
-          if (this.pollingSubscription) {
-               this.pollingSubscription.unsubscribe();
-          }
-     }
+        });
+      }
+    });
+  }
 
-     private startIdleAnimation(): void {
-          this.animationInterval = setInterval(() => {
-               if (!this.isLoading()) {
-                    this.isAnimating.set(true);
-                    setTimeout(() => this.isAnimating.set(false), 1000);
-               }
-          }, 5000);
-     }
+  private startPolling(): void {
+    this.pollingSubscription = this.evolutionApi.startPolling().subscribe({
+      next: status => {
+        if (status.state === 'open') {
+          setTimeout(() => this.completeLogin(), 1500);
+        }
+      },
+      error: () => { }
+    });
+  }
 
-     togglePassword(): void {
-          this.showPassword.update(v => !v);
-     }
+  retryQr(): void {
+    this.evolutionApi.getQrCode().subscribe({
+      next: () => this.startPolling(),
+      error: () => this.alertService.error('Error', 'No se pudo generar el código QR')
+    });
+  }
 
-     async onSubmit(): Promise<void> {
-          if (!this.email || !this.password) {
-               this.alertService.warning('Campos requeridos', 'Por favor complete todos los campos');
-               return;
-          }
+  private completeLogin(): void {
+    this.showQrModal.set(false);
+    this.isSuccess.set(true);
+    this.alertService.success('¡Bienvenido!', `Hola ${this.authService.userFullName()}`);
 
-          this.isLoading.set(true);
+    const role = this.authService.userRole();
+    const orgId = this.authService.organizationId();
 
-          this.authService.login({ email: this.email, password: this.password }).subscribe({
-               next: () => {
-                    this.authService.loadUserProfile().subscribe({
-                         next: () => {
-                              const role = this.authService.userRole();
+    if (orgId && role !== 'SUPER_ADMIN') {
+      this.authService.loadOrganization(orgId).subscribe({
+        next: () => this.redirectByRole(role!),
+        error: () => this.redirectByRole(role!)
+      });
+    } else {
+      this.redirectByRole(role!);
+    }
+  }
 
-                              if (role === 'ADMIN') {
-                                   this.handleAdminLogin();
-                              } else {
-                                   this.completeLogin();
-                              }
-                         },
-                         error: () => {
-                              this.isLoading.set(false);
-                         }
-                    });
-               },
-               error: () => {
-                    this.isLoading.set(false);
-               }
-          });
-     }
-
-     private handleAdminLogin(): void {
-          this.showQrModal.set(true);
-          this.isLoading.set(false);
-
-          this.evolutionApi.checkConnection().subscribe(status => {
-               if (status.state === 'open') {
-                    this.completeLogin();
-               } else {
-                    this.evolutionApi.getQrCode().subscribe({
-                         next: () => {
-                              this.startPolling();
-                         },
-                         error: () => {
-                              this.alertService.error('Error', 'No se pudo generar el código QR');
-                         }
-                    });
-               }
-          });
-     }
-
-     private startPolling(): void {
-          this.pollingSubscription = this.evolutionApi.startPolling().subscribe({
-               next: status => {
-                    if (status.state === 'open') {
-                         setTimeout(() => this.completeLogin(), 1500);
-                    }
-               },
-               error: () => { }
-          });
-     }
-
-     retryQr(): void {
-          this.evolutionApi.getQrCode().subscribe({
-               next: () => this.startPolling(),
-               error: () => this.alertService.error('Error', 'No se pudo generar el código QR')
-          });
-     }
-
-     private completeLogin(): void {
-          this.showQrModal.set(false);
-          this.isSuccess.set(true);
-          this.alertService.success('¡Bienvenido!', `Hola ${this.authService.userFullName()}`);
-
-          const role = this.authService.userRole();
-          const orgId = this.authService.organizationId();
-
-          if (orgId && role !== 'SUPER_ADMIN') {
-               this.authService.loadOrganization(orgId).subscribe({
-                    next: () => this.redirectByRole(role!),
-                    error: () => this.redirectByRole(role!)
-               });
-          } else {
-               this.redirectByRole(role!);
-          }
-     }
-
-     private redirectByRole(role: string): void {
-          switch (role) {
-               case 'SUPER_ADMIN':
-                    this.router.navigate(['/super-admin/organizations']);
-                    break;
-               case 'ADMIN':
-                    this.router.navigate(['/admin/dashboard']);
-                    break;
-               case 'OPERATOR':
-                    this.router.navigate(['/operator/dashboard']);
-                    break;
-               case 'CLIENT':
-                    this.router.navigate(['/client/dashboard']);
-                    break;
-               default:
-                    this.router.navigate(['/']);
-          }
-     }
+  private redirectByRole(role: string): void {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        this.router.navigate(['/super-admin/organizations']);
+        break;
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'OPERATOR':
+        this.router.navigate(['/operator/dashboard']);
+        break;
+      case 'CLIENT':
+        this.router.navigate(['/client/dashboard']);
+        break;
+      default:
+        this.router.navigate(['/']);
+    }
+  }
 }

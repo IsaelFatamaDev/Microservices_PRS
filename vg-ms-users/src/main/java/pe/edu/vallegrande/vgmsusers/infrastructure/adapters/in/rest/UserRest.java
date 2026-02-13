@@ -53,7 +53,9 @@ public class UserRest {
                         .flatMap(getUserUseCase::findByEmail)
                 )
             )
-            .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), PROFILE_FOUND)));
+            .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), PROFILE_FOUND)))
+            .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error("User not found", HttpStatus.NOT_FOUND.value())));
     }
 
     @PostMapping

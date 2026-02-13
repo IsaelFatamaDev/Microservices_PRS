@@ -12,6 +12,7 @@ import pe.edu.vallegrande.vgmsauthentication.application.dto.response.Introspect
 import pe.edu.vallegrande.vgmsauthentication.application.dto.response.LoginResponse;
 import pe.edu.vallegrande.vgmsauthentication.application.dto.response.TokenResponse;
 import pe.edu.vallegrande.vgmsauthentication.application.dto.response.UserInfoResponse;
+import pe.edu.vallegrande.vgmsauthentication.application.dto.common.ApiResponse;
 import pe.edu.vallegrande.vgmsauthentication.application.mappers.AuthMapper;
 import pe.edu.vallegrande.vgmsauthentication.domain.ports.in.ILoginUseCase;
 import pe.edu.vallegrande.vgmsauthentication.domain.ports.in.ILogoutUseCase;
@@ -31,11 +32,11 @@ public class AuthRest {
     private final IValidateTokenUseCase validateTokenUseCase;
 
     @PostMapping("/login")
-    public Mono<ResponseEntity<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+    public Mono<ResponseEntity<ApiResponse<LoginResponse>> > login(@Valid @RequestBody LoginRequest request) {
         log.info("Login request for user: {}", request.getUsername());
         return loginUseCase.execute(AuthMapper.toCredentials(request))
                 .map(AuthMapper::toLoginResponse)
-                .map(ResponseEntity::ok);
+                .map(response -> ResponseEntity.ok(ApiResponse.success(response, "Login successful")));
     }
 
     @PostMapping("/refresh")
