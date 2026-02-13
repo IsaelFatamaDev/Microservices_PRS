@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  vg-ms-gateway:
+    build: .
+    container_name: vg-ms-gateway-local
+    mem_limit: 250m
+    ports:
+      - "9095:9095"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      CORS_ALLOWED_ORIGINS: http://localhost:4200,https://lab.vallegrande.edu.pe/jass/SistemaJass
+      KEYCLOAK_ISSUER_URI: https://lab.vallegrande.edu.pe/auth/realms/sistema-jass
+      KEYCLOAK_JWK_URI: https://lab.vallegrande.edu.pe/auth/realms/sistema-jass/protocol/openid-connect/certs
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    networks:
+      - jass-local-net
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: jass-redis-local
+    mem_limit: 50m
+    restart: unless-stopped
+    networks:
+      - jass-local-net
+
+networks:
+  jass-local-net:
+    driver: bridge

@@ -23,7 +23,7 @@ public class SecurityConfig {
                 return http
                                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                                 .cors(cors -> {
-                                }) // Habilitar CORS y delegar al CorsWebFilter
+                                })
                                 .authorizeExchange(exchanges -> exchanges
                                                 .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .pathMatchers(PUBLIC_PATHS).permitAll()
