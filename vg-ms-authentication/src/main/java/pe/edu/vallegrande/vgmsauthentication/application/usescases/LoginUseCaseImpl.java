@@ -34,19 +34,44 @@ public class LoginUseCaseImpl implements ILoginUseCase {
     }
 
     private Mono<Map<String, Object>> enrichWithUserInfo(Map<String, Object> tokens, String username) {
-    return userServiceClient.getUserByEmail(username)
-        .map(userInfo -> {
-            Map<String, Object> enriched = new HashMap<>(tokens);
-            enriched.put("user_id", userInfo.id());
-            enriched.put("organization_id", userInfo.organizationId());
-            enriched.put("role", userInfo.role());
-            enriched.put("full_name", userInfo.firstName() + " " + userInfo.lastName());
-            return enriched;
-        })
-        .onErrorResume(error ->{
-            log.warn("Could not enrich user info: {}", error.getMessage());
-            return Mono.just(tokens);
-        });
+        String accessToken = (String) tokens.get("access_token");
+        String userId = extractUserIdFromToken(accessToken);
+
+        return userServiceClient.getUserById(userId)
+            .map(userInfo -> {
+                Map<String, Object> enriched = new HashMap<>(tokens);
+                enriched.put("user_id", userInfo.id());
+                enriched.put("organization_id", userInfo.organizationId());
+                enriched.put("role", userInfo.role());
+                enriched.put("full_name", userInfo.firstName() + " " + userInfo.lastName());
+                return enriched;
+            })
+            .onErrorResume(error -> {
+                log.warn("Could not enrich user info for user {}: {}", username, error.getMessage());
+                return Mono.just(tokens);
+            });
+    }
+
+    private String extractUserIdFromToken(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) {
+                return null;
+            }
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(payload);
+            
+            if (node.has("userId")) {
+                return node.get("userId").asText();
+            }
+            if (node.has("sub")) {
+                return node.get("sub").asText();
+            }
+        } catch (Exception e) {
+            log.warn("Error parsing token to extract userId: {}", e.getMessage());
+        }
+        return null;
     }
 
     private Throwable mapKeycloakError(Throwable error) {
