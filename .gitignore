@@ -28,7 +28,7 @@
 **/src/test/
 **/*Test.java
 **/*Tests.java
-**/*IT.java
+**/*IntegrationTest.java
 
 ############################
 # IDEs
