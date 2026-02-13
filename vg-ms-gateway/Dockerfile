@@ -1,11 +1,9 @@
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:21-alpine-jdk AS build
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:21-al2023-jdk AS build
 WORKDIR /app
-COPY pom.xml mvnw ./
-COPY .mvn .mvn
-COPY src ./src
-RUN chmod +x mvnw && ./mvnw package -DskipTests -q
+COPY . .
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests
 
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:21-alpine-jdk
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:21-al2023-headless
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 9095
