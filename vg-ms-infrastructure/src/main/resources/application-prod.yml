@@ -1,0 +1,45 @@
+spring:
+     r2dbc:
+          url: ${DATABASE_URL}
+          username: ${DATABASE_USER}
+          password: ${DATABASE_PASSWORD}
+          pool:
+               initial-size: 3
+               max-size: 10
+
+     flyway:
+          enabled: true
+          url: ${DATABASE_JDBC_URL}
+          user: ${DATABASE_USER}
+          password: ${DATABASE_PASSWORD}
+          table: flyway_schema_history_infrastructure
+
+     rabbitmq:
+          host: ${RABBITMQ_HOST}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USER}
+          password: ${RABBITMQ_PASSWORD}
+          ssl:
+               enabled: ${RABBITMQ_SSL_ENABLED:false}
+          listener:
+               simple:
+                    acknowledge-mode: manual
+                    prefetch: 10
+
+webclient:
+     services:
+          user:
+               base-url: ${USER_SERVICE_URL}
+          organization:
+               base-url: ${ORGANIZATION_SERVICE_URL}
+
+springdoc:
+     api-docs:
+          enabled: false
+     swagger-ui:
+          enabled: false
+
+logging:
+     level:
+          root: WARN
+          pe.edu.vallegrande: INFO

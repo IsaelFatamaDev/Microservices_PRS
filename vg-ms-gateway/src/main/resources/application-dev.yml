@@ -53,6 +53,42 @@ spring:
                                   name: distributionCircuitBreaker
                                   fallbackUri: forward:/fallback/distribution
 
+                    # ── Infrastructure Service (port 8089) ──
+                    - id: infrastructure-service
+                      uri: http://vg-ms-infrastructure:8089
+                      predicates:
+                           - Path=/api/water-boxes/**,/api/water-box-assignments/**,/api/water-box-transfers/**
+                      filters:
+                           - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
+                           - name: CircuitBreaker
+                             args:
+                                  name: infrastructureCircuitBreaker
+                                  fallbackUri: forward:/fallback/infrastructure
+
+                    # ── Commercial Service (port 8094) ──
+                    - id: commercial-service
+                      uri: http://vg-ms-commercial:8094
+                      predicates:
+                           - Path=/api/receipts/**,/api/debts/**,/api/payments/**,/api/petty-cash/**,/api/service-cuts/**
+                      filters:
+                           - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
+                           - name: CircuitBreaker
+                             args:
+                                  name: commercialCircuitBreaker
+                                  fallbackUri: forward:/fallback/commercial
+
+                    # ── Claims & Incidents Service (port 8085) ──
+                    - id: claims-service
+                      uri: http://vg-ms-claims:8085
+                      predicates:
+                           - Path=/api/incidents/**,/api/incident-resolutions/**,/api/incident-types/**,/api/complaints/**,/api/complaint-categories/**
+                      filters:
+                           - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
+                           - name: CircuitBreaker
+                             args:
+                                  name: claimsCircuitBreaker
+                                  fallbackUri: forward:/fallback/claims
+
 cors:
      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200, https://lab.vallegrande.edu.pe/jass/SistemaJass}
 logging:

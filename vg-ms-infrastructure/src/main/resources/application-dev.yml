@@ -1,0 +1,75 @@
+spring:
+     r2dbc:
+          url: r2dbc:postgresql://localhost:5432/sistemajass
+          username: sistemajass_user
+          password: SISTEMAJASS
+          pool:
+               initial-size: 5
+               max-size: 20
+               max-idle-time: 30m
+
+     flyway:
+          enabled: true
+          url: jdbc:postgresql://localhost:5432/sistemajass
+          user: sistemajass_user
+          password: SISTEMAJASS
+          locations: classpath:db/migration
+          table: flyway_schema_history_infrastructure
+          baseline-on-migrate: true
+
+     rabbitmq:
+          host: localhost
+          port: 5672
+          username: guest
+          password: guest
+          publisher-confirm-type: correlated
+          publisher-returns: true
+          listener:
+               simple:
+                    acknowledge-mode: manual
+                    prefetch: 10
+
+webclient:
+     connect-timeout: 5000
+     read-timeout: 10000
+     write-timeout: 10000
+     services:
+          user:
+               base-url: http://localhost:8081
+          organization:
+               base-url: http://localhost:8083
+
+resilience4j:
+     circuitbreaker:
+          configs:
+               default:
+                    register-health-indicator: true
+                    sliding-window-size: 10
+                    minimum-number-of-calls: 5
+                    wait-duration-in-open-state: 10s
+                    failure-rate-threshold: 50
+          instances:
+               userService:
+                    base-config: default
+               organizationService:
+                    base-config: default
+     retry:
+          configs:
+               default:
+                    max-attempts: 3
+                    wait-duration: 500ms
+                    enable-exponential-backoff: true
+          instances:
+               userService:
+                    base-config: default
+               organizationService:
+                    base-config: default
+     timelimiter:
+          configs:
+               default:
+                    timeout-duration: 5s
+
+logging:
+     level:
+          pe.edu.vallegrande: DEBUG
+          org.springframework.r2dbc: DEBUG

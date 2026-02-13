@@ -1,0 +1,54 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/db_jass_claims
+      database: db_jass_claims
+      auto-index-creation: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+services:
+  users:
+    url: http://localhost:8081
+  organizations:
+    url: http://localhost:8083
+
+webclient:
+  timeout:
+    connect: 5000
+    read: 10000
+    write: 10000
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      usersService:
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+      organizationsService:
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      usersService:
+        maxAttempts: 3
+        waitDuration: 500ms
+      organizationsService:
+        maxAttempts: 3
+        waitDuration: 500ms
+
+logging:
+  level:
+    root: INFO
+    pe.edu.vallegrande: DEBUG
+    org.springframework.data.mongodb: DEBUG

@@ -14,6 +14,8 @@ spring:
           user: ${DB_USER}
           password: ${DB_PASSWORD}
           locations: classpath:db/migration
+          table: flyway_schema_history_users
+          baseline-on-migrate: true
 
      rabbitmq:
           host: ${RABBITMQ_HOST:rabbitmq}

@@ -29,6 +29,12 @@ jobs:
                            image: prs_microservices-vg-ms-gateway
                          - service: vg-ms-distribution
                            image: prs_microservices-vg-ms-distribution
+                         - service: vg-ms-claims
+                           image: prs_microservices-vg-ms-claims
+                         - service: vg-ms-infrastructure
+                           image: prs_microservices-vg-ms-infrastructure
+                         - service: vg-ms-commercial
+                           image: prs_microservices-vg-ms-commercial
 
           steps:
                - name: Checkout repository

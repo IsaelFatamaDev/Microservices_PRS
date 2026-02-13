@@ -13,6 +13,8 @@ spring:
           user: sistemajass_user
           password: SISTEMAJASS
           locations: classpath:db/migration
+          table: flyway_schema_history_users
+          baseline-on-migrate: true
 
      rabbitmq:
           host: localhost
