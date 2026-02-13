@@ -1,0 +1,31 @@
+spring:
+     r2dbc:
+          url: r2dbc:postgresql://localhost:5432/sistemajass
+          username: sistemajass_user
+          password: SISTEMAJASS
+          pool:
+               initial-size: 5
+               max-size: 20
+               max-idle-time: 30m
+
+     flyway:
+          enabled: true
+          url: jdbc:postgresql://localhost:5432/sistemajass
+          user: sistemajass_user
+          password: SISTEMAJASS
+          locations: classpath:db/migration
+          table: flyway_schema_history_inventory
+          baseline-on-migrate: true
+
+     rabbitmq:
+          host: localhost
+          port: 5672
+          username: guest
+          password: guest
+          publisher-confirm-type: correlated
+          publisher-returns: true
+
+logging:
+     level:
+          pe.edu.vallegrande: DEBUG
+          org.springframework.r2dbc: DEBUG

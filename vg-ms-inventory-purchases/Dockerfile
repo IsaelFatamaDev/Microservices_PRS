@@ -1,0 +1,12 @@
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /app
+COPY pom.xml mvnw ./
+COPY .mvn .mvn
+COPY src ./src
+RUN chmod +x mvnw && ./mvnw package -DskipTests -q
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8087
+ENTRYPOINT ["sh", "-c", "java -jar app.jar"]

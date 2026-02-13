@@ -89,6 +89,18 @@ spring:
                                   name: claimsCircuitBreaker
                                   fallbackUri: forward:/fallback/claims
 
+                    # ── Inventory & Purchases Service (port 8087) ──
+                    - id: inventory-service
+                      uri: http://vg-ms-inventory-purchases:8087
+                      predicates:
+                           - Path=/api/suppliers/**,/api/product-categories/**,/api/materials/**,/api/purchases/**,/api/purchase-details/**,/api/inventory-movements/**
+                      filters:
+                           - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
+                           - name: CircuitBreaker
+                             args:
+                                  name: inventoryCircuitBreaker
+                                  fallbackUri: forward:/fallback/inventory
+
 cors:
      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200, https://lab.vallegrande.edu.pe/jass/SistemaJass}
 logging:

@@ -226,6 +226,26 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  vg-ms-inventory-purchases:
+    image: isaelfatamadev/prs_microservices-vg-ms-inventory-purchases:latest
+    container_name: vg-ms-inventory-purchases
+    mem_limit: 250m
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATABASE_URL: r2dbc:postgresql://144.126.140.79:5410/sistemajass
+      DATABASE_JDBC_URL: jdbc:postgresql://144.126.140.79:5410/sistemajass
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: SistemaJass12
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin
+    networks: [ jass-net ]
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   vg-ms-gateway:
     image: isaelfatamadev/prs_microservices-vg-ms-gateway:latest
     container_name: vg-ms-gateway
@@ -251,6 +271,7 @@ services:
       - vg-ms-claims
       - vg-ms-infrastructure
       - vg-ms-commercial
+      - vg-ms-inventory-purchases
 
 networks:
   jass-net:

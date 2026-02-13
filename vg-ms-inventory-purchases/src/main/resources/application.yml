@@ -1,0 +1,42 @@
+spring:
+     application:
+          name: vg-ms-inventory-purchases
+     profiles:
+          active: ${SPRING_PROFILES_ACTIVE:dev}
+     webflux:
+          base-path: /api/v1
+     lifecycle:
+          timeout-per-shutdown-phase: 30s
+
+server:
+     port: 8087
+     shutdown: graceful
+
+springdoc:
+     api-docs:
+          path: /v3/api-docs
+          enabled: true
+     swagger-ui:
+          path: /swagger-ui.html
+          enabled: true
+          try-it-out-enabled: true
+          operations-sorter: method
+
+management:
+     endpoints:
+          web:
+               exposure:
+                    include: health,info,metrics
+     endpoint:
+          health:
+               show-details: always
+     health:
+          db:
+               enabled: true
+          rabbit:
+               enabled: true
+
+logging:
+     level:
+          root: INFO
+          pe.edu.vallegrande: INFO

@@ -35,6 +35,8 @@ jobs:
                            image: prs_microservices-vg-ms-infrastructure
                          - service: vg-ms-commercial
                            image: prs_microservices-vg-ms-commercial
+                         - service: vg-ms-inventory-purchases
+                           image: prs_microservices-vg-ms-inventory-purchases
 
           steps:
                - name: Checkout repository
