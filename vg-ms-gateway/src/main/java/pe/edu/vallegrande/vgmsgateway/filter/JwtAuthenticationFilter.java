@@ -20,8 +20,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             .filter(auth -> auth != null && auth.getPrincipal() instanceof Jwt)
             .map(auth -> (Jwt) auth.getPrincipal())
             .map(jwt -> {
+                String userId = jwt.hasClaim("userId") ? jwt.getClaimAsString("userId") : jwt.getSubject();
                 ServerHttpRequest request = exchange.getRequest().mutate()
-                    .header("X-User-Id", jwt.getSubject())
+                    .header("X-User-Id", userId)
                     .header("X-User-Email", jwt.getClaimAsString("email"))
                     .header("X-User-Roles", String.join(",", jwt.getClaimAsStringList("roles")))
                     .build();

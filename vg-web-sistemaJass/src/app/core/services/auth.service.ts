@@ -92,7 +92,11 @@ export class AuthService {
 
      login(credentials: LoginRequest): Observable<ApiResponse<LoginResponse>> {
           this._isLoading.set(true);
-          return this.http.post<ApiResponse<LoginResponse>>(`${environment.apiUrl}/auth/login`, credentials).pipe(
+          const payload = {
+               username: credentials.email,
+               password: credentials.password
+          };
+          return this.http.post<ApiResponse<LoginResponse>>(`${environment.apiUrl}/auth/login`, payload).pipe(
                tap(response => {
                     this.storage.set(TOKEN_KEY, response.data.accessToken);
                     this.storage.set(REFRESH_TOKEN_KEY, response.data.refreshToken);

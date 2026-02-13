@@ -1,8 +1,5 @@
 package pe.edu.vallegrande.vgmsusers.infrastructure.adapters.in.rest;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +21,6 @@ import java.util.List;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Users", description = "User Management API")
 public class UserRest {
 
     private final ICreateUserUseCase createUserUseCase;
@@ -45,16 +41,20 @@ public class UserRest {
     private static final String USER_PURGED = "User permanently deleted";
     private static final String PROFILE_FOUND = "Profile retrieved successfully";
 
-    @Operation(summary = "Get my profile", description = "Returns the authenticated user's profile")
     @GetMapping("/me")
     public Mono<ResponseEntity<ApiResponse<UserResponse>>> getMyProfile() {
         log.info("GET /users/me - Getting authenticated user profile");
+        
         return securityContext.getCurrentUserId()
-            .flatMap(getUserUseCase::findById)
+            .flatMap(userId -> getUserUseCase.findById(userId)
+                .switchIfEmpty(
+                    securityContext.getCurrentUserEmail()
+                        .flatMap(getUserUseCase::findByEmail)
+                )
+            )
             .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), PROFILE_FOUND)));
     }
 
-    @Operation(summary = "Create user", description = "Creates a new user. SUPER_ADMIN can create SUPER_ADMIN or ADMIN. ADMIN can create CLIENT/OPERATOR.")
     @PostMapping
     public Mono<ResponseEntity<ApiResponse<UserResponse>>> createUser(
         @Valid @RequestBody CreateUserRequest request
@@ -72,7 +72,6 @@ public class UserRest {
 
     private Mono<Void> validateCreateUserRequest(CreateUserRequest request) {
         if (!"SUPER_ADMIN".equals(request.getRole())) {
-            // Otros roles requieren datos de organizaci\u00f3n
             if (request.getOrganizationId() == null || request.getOrganizationId().isBlank()) {
                 return Mono.error(new IllegalArgumentException("Organization ID is required for non-SUPER_ADMIN roles"));
             }
@@ -86,7 +85,6 @@ public class UserRest {
                 return Mono.error(new IllegalArgumentException("Address is required for non-SUPER_ADMIN roles"));
             }
         } else {
-            // SUPER_ADMIN requiere email obligatoriamente
             if (request.getEmail() == null || request.getEmail().isBlank()) {
                 return Mono.error(new IllegalArgumentException("Email is required for SUPER_ADMIN"));
             }
@@ -135,7 +133,6 @@ public class UserRest {
             ));
     }
 
-    @Operation(summary = "Get users by organization", description = "Returns users from a specific organization. If organizationId is omitted, uses the authenticated user's organization.")
     @GetMapping("/organization")
     public Mono<ResponseEntity<ApiResponse<List<UserResponse>>>> getUsersByMyOrganization(
         @Parameter(description = "Include inactive users")
@@ -153,7 +150,6 @@ public class UserRest {
             .map(users -> ResponseEntity.ok(ApiResponse.success(users, USERS_FOUND)));
     }
 
-    @Operation(summary = "Get users by organization ID", description = "Returns users from a specific organization (SUPER_ADMIN only)")
     @GetMapping("/organization/{organizationId}")
     public Mono<ResponseEntity<ApiResponse<List<UserResponse>>>> getUsersByOrganization(
         @Parameter(description = "Organization ID")
@@ -172,7 +168,6 @@ public class UserRest {
             .map(users -> ResponseEntity.ok(ApiResponse.success(users, USERS_FOUND)));
     }
 
-    @Operation(summary = "Update user")
     @PutMapping("/{id}")
     public Mono<ResponseEntity<ApiResponse<UserResponse>>> updateUser(
         @Parameter(description = "User ID") @PathVariable String id,
@@ -184,7 +179,6 @@ public class UserRest {
             .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), USER_UPDATED)));
     }
 
-    @Operation(summary = "Soft delete user")
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<ApiResponse<UserResponse>>> deleteUser(
         @Parameter(description = "User ID") @PathVariable String id,
@@ -196,7 +190,6 @@ public class UserRest {
             .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), USER_DELETED)));
     }
 
-    @Operation(summary = "Restore user")
     @PatchMapping("/{id}/restore")
     public Mono<ResponseEntity<ApiResponse<UserResponse>>> restoreUser(
         @Parameter(description = "User ID") @PathVariable String id
@@ -207,7 +200,6 @@ public class UserRest {
             .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user), USER_RESTORED)));
     }
 
-    @Operation(summary = "Hard delete user (permanent)")
     @DeleteMapping("/{id}/purge")
     public Mono<ResponseEntity<ApiResponse<Void>>> purgeUser(
         @Parameter(description = "User ID") @PathVariable String id,

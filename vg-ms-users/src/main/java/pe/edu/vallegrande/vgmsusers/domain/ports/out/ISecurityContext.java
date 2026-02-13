@@ -13,5 +13,7 @@ public interface ISecurityContext {
 
     Mono<Set<Role>> getCurrentUserRoles();
 
+    Mono<String> getCurrentUserEmail();
+
     Mono<Boolean> isAuthenticated();
 }

@@ -22,6 +22,11 @@ public class SecurityContextAdapter implements ISecurityContext {
     }
 
     @Override
+    public Mono<String> getCurrentUserEmail() {
+        return getAuthenticatedUser().map(AuthenticatedUser::getEmail);
+    }
+
+    @Override
     public Mono<Set<Role>> getCurrentUserRoles() {
         return getAuthenticatedUser()
             .map(AuthenticatedUser::getRoles)
