@@ -10,6 +10,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
@@ -21,15 +25,34 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             .map(auth -> (Jwt) auth.getPrincipal())
             .map(jwt -> {
                 String userId = jwt.hasClaim("userId") ? jwt.getClaimAsString("userId") : jwt.getSubject();
+                String email = jwt.getClaimAsString("email");
+
+                List<String> roles = extractRoles(jwt);
+
                 ServerHttpRequest request = exchange.getRequest().mutate()
                     .header("X-User-Id", userId)
-                    .header("X-User-Email", jwt.getClaimAsString("email"))
-                    .header("X-User-Roles", String.join(",", jwt.getClaimAsStringList("roles")))
+                    .header("X-User-Email", email != null ? email : "")
+                    .header("X-User-Roles", String.join(",", roles))
                     .build();
                 return exchange.mutate().request(request).build();
             })
             .defaultIfEmpty(exchange)
             .flatMap(chain::filter);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> extractRoles(Jwt jwt) {
+        // Intentar obtener roles de realm_access.roles (Keycloak)
+        Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+        if (realmAccess != null && realmAccess.containsKey("roles")) {
+            Object rolesObj = realmAccess.get("roles");
+            if (rolesObj instanceof List) {
+                return (List<String>) rolesObj;
+            }
+        }
+        // Fallback: intentar obtener roles directamente
+        List<String> directRoles = jwt.getClaimAsStringList("roles");
+        return directRoles != null ? directRoles : Collections.emptyList();
     }
 
     @Override

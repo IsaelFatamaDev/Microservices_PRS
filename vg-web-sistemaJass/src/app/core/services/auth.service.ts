@@ -79,7 +79,11 @@ export class AuthService {
      }
 
      private decodeToken(token: string): TokenPayload {
-          const base64Url = token.split('.')[1];
+          const parts = token.split('.');
+          if (parts.length < 2 || !parts[1]) {
+               throw new Error('Invalid JWT token format');
+          }
+          const base64Url = parts[1];
           const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
           const jsonPayload = decodeURIComponent(
                atob(base64)
@@ -98,9 +102,9 @@ export class AuthService {
           };
           return this.http.post<ApiResponse<LoginResponse>>(`${environment.apiUrl}/auth/login`, payload).pipe(
                tap(response => {
-                    this.storage.set(TOKEN_KEY, response.data.accessToken);
-                    this.storage.set(REFRESH_TOKEN_KEY, response.data.refreshToken);
-                    this._accessToken.set(response.data.accessToken);
+                    this.storage.set(TOKEN_KEY, response.data.access_token);
+                    this.storage.set(REFRESH_TOKEN_KEY, response.data.refresh_token);
+                    this._accessToken.set(response.data.access_token);
                     this._isLoading.set(false);
                }),
                catchError(error => {
@@ -111,13 +115,29 @@ export class AuthService {
      }
 
      loadUserProfile(): Observable<ApiResponse<User>> {
-          return this.http.get<ApiResponse<User>>(`${environment.apiUrl}/users/me`).pipe(
+     const token = this._accessToken() || this.storage.get(TOKEN_KEY);
+     if (!token) {
+          return throwError(() => new Error('No access token available'));
+     }
+     try {
+          const payload = this.decodeToken(token);
+          const userId = payload.userId; 
+
+          if (!userId) {
+               return throwError(() => new Error('userId not found in token'));
+          }
+
+          return this.http.get<ApiResponse<User>>(`${environment.apiUrl}/users/${userId}`).pipe(
                tap(response => {
                     this._user.set(response.data);
                     this.storage.setObject(USER_KEY, response.data);
                })
           );
+     } catch (e) {
+          console.error('Error decoding token:', e, 'Token value:', token);
+          return throwError(() => new Error('Invalid token format'));
      }
+}
 
      loadOrganization(orgId: string): Observable<ApiResponse<Organization>> {
           return this.http.get<ApiResponse<Organization>>(`${environment.apiUrl}/organizations/${orgId}`).pipe(
@@ -143,9 +163,9 @@ export class AuthService {
           const body: RefreshTokenRequest = { refreshToken };
           return this.http.post<ApiResponse<LoginResponse>>(`${environment.apiUrl}/auth/refresh`, body).pipe(
                tap(response => {
-                    this.storage.set(TOKEN_KEY, response.data.accessToken);
-                    this.storage.set(REFRESH_TOKEN_KEY, response.data.refreshToken);
-                    this._accessToken.set(response.data.accessToken);
+                    this.storage.set(TOKEN_KEY, response.data.access_token);
+                    this.storage.set(REFRESH_TOKEN_KEY, response.data.refresh_token);
+                    this._accessToken.set(response.data.access_token);
                }),
                catchError(error => {
                     this.logout();

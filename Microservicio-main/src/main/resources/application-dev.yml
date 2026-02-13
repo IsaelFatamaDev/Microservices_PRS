@@ -1,0 +1,18 @@
+spring:
+     data:
+          mongodb:
+               uri: mongodb+srv://Programador:zCZtYDpyvSL7b8Wz@sistemajass.tobosre.mongodb.net/SistemaJASS?retryWrites=true&w=majority&appName=SistemaJASS
+               auto-index-creation: true
+
+     rabbitmq:
+          host: localhost
+          port: 5672
+          username: guest
+          password: guest
+          publisher-confirm-type: correlated
+          publisher-returns: true
+
+logging:
+     level:
+          pe.edu.vallegrande: DEBUG
+          org.springframework.data.mongodb: DEBUG

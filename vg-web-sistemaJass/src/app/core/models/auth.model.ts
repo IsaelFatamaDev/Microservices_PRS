@@ -4,10 +4,17 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-     accessToken: string;
-     refreshToken: string;
-     expiresIn: number;
-     tokenType: string;
+     access_token: string;
+     refresh_token: string;
+     expires_in: number;
+     token_type: string;
+     refresh_expires_in: number;
+     user_id: string;
+     organization_id: string;
+     email: string;
+     full_name: string;
+     role: string;
+     scope: string;
 }
 
 export interface TokenPayload {
@@ -19,6 +26,7 @@ export interface TokenPayload {
      lastName: string;
      exp: number;
      iat: number;
+     userId: string;
 }
 
 export interface RefreshTokenRequest {

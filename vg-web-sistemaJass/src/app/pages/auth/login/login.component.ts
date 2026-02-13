@@ -12,7 +12,7 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   template: `
-    <div class="h-screen w-screen flex overflow-hidden animate-fade-in">
+    <div class="h-screen w-screen flex overflow-hidden">
       <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 relative">
         <div class="absolute inset-0 overflow-hidden">
           <div class="absolute top-20 left-20 w-32 h-32 bg-cyan-500/10 rounded-full blur-3xl"></div>
@@ -33,14 +33,14 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
         <div class="relative z-10 flex flex-col justify-center px-12 w-full">
           <div class="flex items-center justify-center mb-6">
             <div class="relative">
-              <div class="absolute -inset-6 bg-cyan-500/20 rounded-full blur-xl animate-pulse"></div>
-              <img src="assets/Gotita.png" alt="JASS Logo" class="w-40 h-40 object-contain relative drop-shadow-2xl animate-float">
+              <div class="absolute -inset-3 bg-cyan-500/20 rounded-full blur-xl"></div>
+              <lucide-icon [img]="mapPinIcon" [size]="56" class="text-cyan-400 relative"></lucide-icon>
             </div>
           </div>
 
-          <h1 class="text-4xl font-bold text-white text-center mb-3 tracking-tight animate-fade-in-up delay-100">JASS</h1>
-          <p class="text-lg text-cyan-300 text-center mb-1 animate-fade-in-up delay-200">Junta Administradora de Servicios de Saneamiento</p>
-          <p class="text-base text-slate-400 text-center mb-8 animate-fade-in-up delay-300">Sistema Digital Corporativo</p>
+          <h1 class="text-4xl font-bold text-white text-center mb-3 tracking-tight">JASS</h1>
+          <p class="text-lg text-cyan-300 text-center mb-1">Junta Administradora de Servicios de Saneamiento</p>
+          <p class="text-base text-slate-400 text-center mb-8">Sistema Digital Corporativo</p>
 
           <p class="text-slate-300 text-center mb-8 max-w-sm mx-auto leading-relaxed text-sm">
             Gestión Integral de Servicios de Agua y Saneamiento para comunidades
@@ -71,7 +71,7 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
 
       <div class="w-full lg:w-1/2 flex items-center justify-center p-6 bg-gray-50 overflow-auto">
         <div class="w-full max-w-md">
-          <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 animate-fade-in-up">
+          <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <div class="flex flex-col items-center mb-6">
               <div class="w-16 h-16 bg-gradient-to-br from-slate-700 to-slate-900 rounded-full flex items-center justify-center mb-4 shadow-lg">
                 <lucide-icon [img]="userIcon" [size]="28" class="text-white"></lucide-icon>
@@ -156,7 +156,7 @@ import { EvolutionApiService } from '../../../core/services/evolution-api.servic
 
           <div class="lg:hidden mt-6 text-center">
             <div class="flex items-center justify-center gap-2 mb-1">
-              <img src="assets/Gotita.png" alt="Logo" class="w-10 h-10 object-contain">
+              <lucide-icon [img]="mapPinIcon" [size]="20" class="text-slate-700"></lucide-icon>
               <span class="text-lg font-bold text-slate-800">JASS Digital</span>
             </div>
             <p class="text-xs text-gray-500">Sistema de Gestión de Agua y Saneamiento</p>
@@ -293,25 +293,19 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.authService.loadUserProfile().subscribe({
           next: () => {
             const role = this.authService.userRole();
-            console.log('Login successful. Role:', role);
 
             if (role === 'ADMIN') {
               this.handleAdminLogin();
             } else {
-              console.log('Redirecting for role:', role);
               this.completeLogin();
             }
           },
-          error: (err) => {
-            console.error('Error loading user profile:', err);
-            this.alertService.error('Error de perfil', 'No se pudo cargar el perfil del usuario. ' + (err.status || ''));
+          error: () => {
             this.isLoading.set(false);
           }
         });
       },
-      error: (err) => {
-        console.error('Login error:', err);
-        this.alertService.error('Error de inicio de sesión', 'Credenciales incorrectas o error del servidor.');
+      error: () => {
         this.isLoading.set(false);
       }
     });

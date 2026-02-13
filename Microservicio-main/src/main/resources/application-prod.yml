@@ -1,0 +1,24 @@
+spring:
+     data:
+          mongodb:
+               uri: ${MONGODB_URI}
+               auto-index-creation: false
+
+     rabbitmq:
+          host: ${RABBITMQ_HOST}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USER}
+          password: ${RABBITMQ_PASSWORD}
+          ssl:
+               enabled: ${RABBITMQ_SSL_ENABLED:false}
+
+springdoc:
+     api-docs:
+          enabled: false
+     swagger-ui:
+          enabled: false
+
+logging:
+     level:
+          root: WARN
+          pe.edu.vallegrande: INFO
