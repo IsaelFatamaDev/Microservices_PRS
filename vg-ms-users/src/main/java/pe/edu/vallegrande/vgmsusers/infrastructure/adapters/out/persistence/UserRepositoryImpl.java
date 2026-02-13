@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import pe.edu.vallegrande.vgmsusers.application.mappers.UserMapper;
 import pe.edu.vallegrande.vgmsusers.domain.models.User;
+import pe.edu.vallegrande.vgmsusers.domain.models.valueobjects.Role;
 import pe.edu.vallegrande.vgmsusers.domain.ports.out.IUserRepository;
 import pe.edu.vallegrande.vgmsusers.infrastructure.persistence.repositories.UserR2dbcRepository;
 import reactor.core.publisher.Flux;
@@ -101,5 +102,13 @@ public class UserRepositoryImpl implements IUserRepository {
     public Mono<Void> deleteById(String id) {
         log.warn("Physically deleting user: {}", id);
         return r2dbcRepository.deleteById(id);
+    }
+
+    @Override
+    public Flux<User> findByRole(Role role) {
+        log.debug("Finding users by role: {}", role);
+        return r2dbcRepository.findByRole(role.name())
+                .doOnNext(entity -> entity.setNotNew())
+                .map(userMapper::toModel);
     }
 }

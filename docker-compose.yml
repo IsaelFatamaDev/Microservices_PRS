@@ -194,6 +194,10 @@ services:
       DATABASE_JDBC_URL: jdbc:postgresql://144.126.140.79:5410/sistemajass
       DATABASE_USER: postgres
       DATABASE_PASSWORD: SistemaJass12
+      SPRING_FLYWAY_URL: jdbc:postgresql://144.126.140.79:5410/sistemajass
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: SistemaJass12
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: admin
@@ -216,6 +220,10 @@ services:
       DATABASE_JDBC_URL: jdbc:postgresql://144.126.140.79:5410/sistemajass
       DATABASE_USER: postgres
       DATABASE_PASSWORD: SistemaJass12
+      SPRING_FLYWAY_URL: jdbc:postgresql://144.126.140.79:5410/sistemajass
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: SistemaJass12
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: admin
@@ -236,6 +244,10 @@ services:
       DATABASE_JDBC_URL: jdbc:postgresql://144.126.140.79:5410/sistemajass
       DATABASE_USER: postgres
       DATABASE_PASSWORD: SistemaJass12
+      SPRING_FLYWAY_URL: jdbc:postgresql://144.126.140.79:5410/sistemajass
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: SistemaJass12
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: admin

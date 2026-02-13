@@ -2,6 +2,7 @@ package pe.edu.vallegrande.vgmsusers.domain.ports.out;
 
 import org.springframework.stereotype.Repository;
 import pe.edu.vallegrande.vgmsusers.domain.models.User;
+import pe.edu.vallegrande.vgmsusers.domain.models.valueobjects.Role;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,5 +30,7 @@ public interface IUserRepository {
     Mono<Boolean> existsByDocumentNumber(String documentNumber);
 
     Mono<Void> deleteById(String id);
+
+    Flux<User> findByRole(Role role);
 
 }
