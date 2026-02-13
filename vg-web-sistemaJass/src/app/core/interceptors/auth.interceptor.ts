@@ -16,6 +16,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
      const clonedReq = req.clone({
           setHeaders: { Authorization: `Bearer ${token}` }
      });
+     console.log(`[AuthInterceptor] Attaching token to ${req.url}:`, token ? 'Found' : 'Missing');
 
      return next(clonedReq).pipe(
           catchError((error: HttpErrorResponse) => {

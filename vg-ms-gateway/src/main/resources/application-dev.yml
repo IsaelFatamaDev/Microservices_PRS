@@ -96,7 +96,6 @@ spring:
                              args:
                                   name: inventoryCircuitBreaker
                                   fallbackUri: forward:/fallback/inventory
-
 cors:
      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,https://lab.vallegrande.edu.pe/jass/SistemaJass}
 logging:

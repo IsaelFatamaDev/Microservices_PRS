@@ -266,8 +266,8 @@ services:
       - "9095:9095"
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      KEYCLOAK_ISSUER_URI: https://lab.vallegrande.edu.pe/auth/realms/sistema-jass
-      KEYCLOAK_JWK_URI: https://lab.vallegrande.edu.pe/auth/realms/sistema-jass/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER_URI: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass
+      KEYCLOAK_JWK_URI: https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/certs
       REDIS_HOST: redis
       REDIS_PORT: 6379
       CORS_ALLOWED_ORIGINS: https://lab.vallegrande.edu.pe,http://localhost:4200

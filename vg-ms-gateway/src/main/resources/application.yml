@@ -18,8 +18,8 @@ spring:
           oauth2:
                resourceserver:
                     jwt:
-                         issuer-uri: ${KEYCLOAK_ISSUER_URI:https://lab.vallegrande.edu.pe/auth/realms/sistema-jass}
-                         jwk-set-uri: ${KEYCLOAK_JWK_URI:https://lab.vallegrande.edu.pe/auth/realms/sistema-jass/protocol/openid-connect/certs}
+                         issuer-uri: ${KEYCLOAK_ISSUER_URI:https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass}
+                         jwk-set-uri: ${KEYCLOAK_JWK_URI:https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/certs}
      data:
           redis:
                host: ${REDIS_HOST:redis}
