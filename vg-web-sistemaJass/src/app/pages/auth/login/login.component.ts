@@ -370,7 +370,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private redirectByRole(role: string): void {
     switch (role) {
       case 'SUPER_ADMIN':
-        this.router.navigate(['/super-admin/organizations']);
+        this.router.navigate(['/super-admin/dashboard']);
         break;
       case 'ADMIN':
         this.router.navigate(['/admin/dashboard']);

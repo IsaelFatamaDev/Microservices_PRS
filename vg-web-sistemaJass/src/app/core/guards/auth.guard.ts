@@ -25,7 +25,7 @@ export const guestGuard: CanActivateFn = () => {
      const role = authService.userRole();
      switch (role) {
           case 'SUPER_ADMIN':
-               router.navigate(['/super-admin/organizations']);
+               router.navigate(['/super-admin/dashboard']);
                break;
           case 'ADMIN':
                router.navigate(['/admin/dashboard']);

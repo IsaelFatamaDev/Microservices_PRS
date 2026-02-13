@@ -10,10 +10,10 @@ import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-     selector: 'app-users-list',
-     standalone: true,
-     imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule],
-     template: `
+  selector: 'app-users-list',
+  standalone: true,
+  imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule],
+  template: `
     <div>
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
@@ -177,101 +177,101 @@ import { AuthService } from '../../../core/services/auth.service';
   `
 })
 export class UsersListComponent implements OnInit {
-     private http = inject(HttpClient);
-     private alertService = inject(AlertService);
-     private authService = inject(AuthService);
+  private http = inject(HttpClient);
+  private alertService = inject(AlertService);
+  private authService = inject(AuthService);
 
-     users = signal<User[]>([]);
-     isLoading = signal(false);
-     searchTerm = '';
-     statusFilter: RecordStatus | '' = 'A' as RecordStatus;
-     roleFilter: Role | '' = '';
+  users = signal<User[]>([]);
+  isLoading = signal(false);
+  searchTerm = '';
+  statusFilter: RecordStatus | '' = 'A' as RecordStatus;
+  roleFilter: Role | '' = '';
 
-     currentPage = signal(1);
-     pageSize = signal(10);
-     totalElements = signal(0);
-     totalPages = signal(0);
+  currentPage = signal(1);
+  pageSize = signal(10);
+  totalElements = signal(0);
+  totalPages = signal(0);
 
-     Math = Math;
+  Math = Math;
 
-     plusIcon = Plus;
-     searchIcon = Search;
-     editIcon = Edit;
-     trashIcon = Trash2;
-     restoreIcon = RotateCcw;
-     usersIcon = Users;
-     filterIcon = Filter;
+  plusIcon = Plus;
+  searchIcon = Search;
+  editIcon = Edit;
+  trashIcon = Trash2;
+  restoreIcon = RotateCcw;
+  usersIcon = Users;
+  filterIcon = Filter;
 
-     ngOnInit(): void {
+  ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.isLoading.set(true);
+    const orgId = this.authService.organizationId();
+
+    const params: any = {
+      page: this.currentPage() - 1,
+      size: this.pageSize(),
+      organizationId: orgId
+    };
+
+    if (this.statusFilter) {
+      params.recordStatus = this.statusFilter;
+    }
+
+    if (this.roleFilter) {
+      params.role = this.roleFilter;
+    }
+
+    if (this.searchTerm) {
+      params.search = this.searchTerm;
+    }
+
+    this.http.get<ApiResponse<PageResponse<User>>>(`${environment.apiUrl}/users`, { params }).subscribe({
+      next: res => {
+        this.users.set(res.data?.content || []);
+        this.totalElements.set(res.data?.totalElements || 0);
+        this.totalPages.set(res.data?.totalPages || 0);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onSearch(): void {
+    this.currentPage.set(1);
+    this.loadUsers();
+  }
+
+  goToPage(page: number): void {
+    this.currentPage.set(page);
+    this.loadUsers();
+  }
+
+  async deleteUser(user: User): Promise<void> {
+    const result = await this.alertService.confirmDelete(`${user.firstName} ${user.lastName}`);
+    if (result.isConfirmed) {
+      this.http.delete(`${environment.apiUrl}/users/${user.id}`).subscribe({
+        next: () => {
+          this.alertService.success('Eliminado', 'Usuario eliminado correctamente');
           this.loadUsers();
-     }
+        }
+      });
+    }
+  }
 
-     loadUsers(): void {
-          this.isLoading.set(true);
-          const orgId = this.authService.organizationId();
-
-          const params: any = {
-               page: this.currentPage() - 1,
-               size: this.pageSize(),
-               organizationId: orgId
-          };
-
-          if (this.statusFilter) {
-               params.recordStatus = this.statusFilter;
-          }
-
-          if (this.roleFilter) {
-               params.role = this.roleFilter;
-          }
-
-          if (this.searchTerm) {
-               params.search = this.searchTerm;
-          }
-
-          this.http.get<ApiResponse<PageResponse<User>>>(`${environment.apiUrl}/users`, { params }).subscribe({
-               next: res => {
-                    this.users.set(res.data.content);
-                    this.totalElements.set(res.data.totalElements);
-                    this.totalPages.set(res.data.totalPages);
-                    this.isLoading.set(false);
-               },
-               error: () => {
-                    this.isLoading.set(false);
-               }
-          });
-     }
-
-     onSearch(): void {
-          this.currentPage.set(1);
+  async restoreUser(user: User): Promise<void> {
+    const result = await this.alertService.confirmRestore(`${user.firstName} ${user.lastName}`);
+    if (result.isConfirmed) {
+      this.http.patch(`${environment.apiUrl}/users/${user.id}/restore`, {}).subscribe({
+        next: () => {
+          this.alertService.success('Restaurado', 'Usuario restaurado correctamente');
           this.loadUsers();
-     }
-
-     goToPage(page: number): void {
-          this.currentPage.set(page);
-          this.loadUsers();
-     }
-
-     async deleteUser(user: User): Promise<void> {
-          const result = await this.alertService.confirmDelete(`${user.firstName} ${user.lastName}`);
-          if (result.isConfirmed) {
-               this.http.delete(`${environment.apiUrl}/users/${user.id}`).subscribe({
-                    next: () => {
-                         this.alertService.success('Eliminado', 'Usuario eliminado correctamente');
-                         this.loadUsers();
-                    }
-               });
-          }
-     }
-
-     async restoreUser(user: User): Promise<void> {
-          const result = await this.alertService.confirmRestore(`${user.firstName} ${user.lastName}`);
-          if (result.isConfirmed) {
-               this.http.patch(`${environment.apiUrl}/users/${user.id}/restore`, {}).subscribe({
-                    next: () => {
-                         this.alertService.success('Restaurado', 'Usuario restaurado correctamente');
-                         this.loadUsers();
-                    }
-               });
-          }
-     }
+        }
+      });
+    }
+  }
 }
