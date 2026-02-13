@@ -74,22 +74,25 @@ public class UserRest {
     }
 
     private Mono<Void> validateCreateUserRequest(CreateUserRequest request) {
-        if (!"SUPER_ADMIN".equals(request.getRole())) {
+        if ("SUPER_ADMIN".equals(request.getRole())) {
+            if (request.getEmail() == null || request.getEmail().isBlank()) {
+                return Mono.error(new IllegalArgumentException("Email is required for SUPER_ADMIN"));
+            }
+        } else {
             if (request.getOrganizationId() == null || request.getOrganizationId().isBlank()) {
                 return Mono.error(new IllegalArgumentException("Organization ID is required for non-SUPER_ADMIN roles"));
-            }
-            if (request.getZoneId() == null || request.getZoneId().isBlank()) {
-                return Mono.error(new IllegalArgumentException("Zone ID is required for non-SUPER_ADMIN roles"));
-            }
-            if (request.getStreetId() == null || request.getStreetId().isBlank()) {
-                return Mono.error(new IllegalArgumentException("Street ID is required for non-SUPER_ADMIN roles"));
             }
             if (request.getAddress() == null || request.getAddress().isBlank()) {
                 return Mono.error(new IllegalArgumentException("Address is required for non-SUPER_ADMIN roles"));
             }
-        } else {
-            if (request.getEmail() == null || request.getEmail().isBlank()) {
-                return Mono.error(new IllegalArgumentException("Email is required for SUPER_ADMIN"));
+
+            if (!"ADMIN".equals(request.getRole())) {
+                if (request.getZoneId() == null || request.getZoneId().isBlank()) {
+                    return Mono.error(new IllegalArgumentException("Zone ID is required for non-ADMIN roles"));
+                }
+                if (request.getStreetId() == null || request.getStreetId().isBlank()) {
+                    return Mono.error(new IllegalArgumentException("Street ID is required for non-ADMIN roles"));
+                }
             }
         }
         return Mono.empty();

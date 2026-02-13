@@ -102,9 +102,9 @@ public class CreateUserUseCaseImpl implements ICreateUserUseCase {
     }
 
     private Mono<Void> validateOrganizationHierarchyIfNeeded(User user) {
-        // SUPER_ADMIN no requiere validación de organización
-        if (user.getRole() == pe.edu.vallegrande.vgmsusers.domain.models.valueobjects.Role.SUPER_ADMIN) {
-            log.info("Skipping organization validation for SUPER_ADMIN");
+        if (user.getRole() == pe.edu.vallegrande.vgmsusers.domain.models.valueobjects.Role.SUPER_ADMIN ||
+            user.getRole() == pe.edu.vallegrande.vgmsusers.domain.models.valueobjects.Role.ADMIN) {
+            log.info("Skipping organization validation for SUPER_ADMIN/ADMIN");
             return Mono.empty();
         }
 

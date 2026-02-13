@@ -3,8 +3,8 @@ CREATE TABLE IF NOT EXISTS users
     id              VARCHAR(36) PRIMARY KEY,
 
     organization_id VARCHAR(36)  NOT NULL,
-    zone_id         VARCHAR(36)  NOT NULL,
-    street_id       VARCHAR(36)  NOT NULL,
+    zone_id         VARCHAR(36),
+    street_id       VARCHAR(36),
 
     record_status   VARCHAR(20)  NOT NULL DEFAULT 'ACTIVE',
     created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,

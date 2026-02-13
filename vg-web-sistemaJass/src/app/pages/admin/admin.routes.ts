@@ -18,20 +18,8 @@ export const ADMIN_ROUTES: Routes = [
           loadComponent: () => import('./users/user-form.component').then(m => m.UserFormComponent)
      },
      {
-          path: 'config/zones',
-          loadComponent: () => import('./config/zones/zones.component').then(m => m.ZonesComponent)
-     },
-     {
-          path: 'config/streets',
-          loadComponent: () => import('./config/streets/streets.component').then(m => m.StreetsComponent)
-     },
-     {
-          path: 'config/fares',
-          loadComponent: () => import('./config/fares/fares.component').then(m => m.FaresComponent)
-     },
-     {
-          path: 'config/parameters',
-          loadComponent: () => import('./config/parameters/parameters.component').then(m => m.ParametersComponent)
+          path: 'config',
+          loadComponent: () => import('./config/config.component').then(m => m.ConfigComponent)
      },
      {
           path: 'infrastructure/water-boxes',

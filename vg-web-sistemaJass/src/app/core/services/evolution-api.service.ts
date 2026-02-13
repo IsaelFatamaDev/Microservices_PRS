@@ -30,28 +30,40 @@ export class EvolutionApiService {
      readonly isChecking = this._isChecking.asReadonly();
 
      private get instanceName(): string {
-          return `jass_${this.authService.organizationId()}`;
+          return `jass-whatsapp`;
+     }
+
+     private get headers() {
+          return {
+               headers: {
+                    'apikey': (environment as any).evolutionApiKey || 'JASS_EVOLUTION_KEY_2024'
+               }
+          };
      }
 
      private get baseUrl(): string {
           return environment.evolutionApiUrl;
      }
 
-     checkConnection(): Observable<InstanceStatus> {
+     checkConnection(): Observable<any> {
           this._isChecking.set(true);
           this._connectionStatus.set('connecting');
 
-          return this.http.get<InstanceStatus>(`${this.baseUrl}/instance/connectionState/${this.instanceName}`).pipe(
-               tap(status => {
+          return this.http.get<any>(`${this.baseUrl}/instance/connectionState/${this.instanceName}`, this.headers).pipe(
+               tap(res => {
                     this._isChecking.set(false);
-                    if (status.state === 'open') {
+                    const state = res?.state || res?.instance?.state || res?.instance?.status || res?.status;
+                    const phoneNumber = res?.phoneNumber || res?.instance?.phoneNumber;
+
+                    if (state === 'open') {
                          this._connectionStatus.set('connected');
-                         this._phoneNumber.set(status.phoneNumber || '');
+                         this._phoneNumber.set(phoneNumber || '');
                     } else {
                          this._connectionStatus.set('disconnected');
                     }
                }),
-               catchError(() => {
+               catchError(err => {
+                    console.error('[EvolutionAPI] Check connection error:', err);
                     this._isChecking.set(false);
                     this._connectionStatus.set('disconnected');
                     return of({ state: 'close' as const });
@@ -62,7 +74,7 @@ export class EvolutionApiService {
      getQrCode(): Observable<QrCodeResponse> {
           this._connectionStatus.set('connecting');
 
-          return this.http.get<QrCodeResponse>(`${this.baseUrl}/instance/connect/${this.instanceName}`).pipe(
+          return this.http.get<QrCodeResponse>(`${this.baseUrl}/instance/connect/${this.instanceName}`, this.headers).pipe(
                tap(response => {
                     this._qrCode.set(response.base64 || response.qrcode);
                     this._connectionStatus.set('qr_ready');
@@ -74,21 +86,33 @@ export class EvolutionApiService {
           );
      }
 
-     startPolling(): Observable<InstanceStatus> {
+     startPolling(): Observable<any> {
           return interval(3000).pipe(
-               switchMap(() => this.http.get<InstanceStatus>(`${this.baseUrl}/instance/connectionState/${this.instanceName}`)),
-               tap(status => {
-                    if (status.state === 'open') {
+               switchMap(() => this.http.get<any>(`${this.baseUrl}/instance/connectionState/${this.instanceName}`, this.headers).pipe(
+                    catchError(err => {
+                         console.warn('[EvolutionAPI] Polling error (skipping):', err);
+                         return of(null);
+                    })
+               )),
+               tap(res => {
+                    if (!res) return;
+                    const state = res?.state || res?.instance?.state || res?.instance?.status || res?.status;
+                    const phoneNumber = res?.phoneNumber || res?.instance?.phoneNumber;
+
+                    if (state === 'open') {
                          this._connectionStatus.set('connected');
-                         this._phoneNumber.set(status.phoneNumber || '');
+                         this._phoneNumber.set(phoneNumber || '');
                     }
                }),
-               takeWhile(status => status.state !== 'open', true)
+               takeWhile(res => {
+                    const state = res?.state || res?.instance?.state || res?.instance?.status || res?.status;
+                    return state !== 'open';
+               }, true)
           );
      }
 
      logout(): Observable<void> {
-          return this.http.delete<void>(`${this.baseUrl}/instance/logout/${this.instanceName}`).pipe(
+          return this.http.delete<void>(`${this.baseUrl}/instance/logout/${this.instanceName}`, this.headers).pipe(
                tap(() => {
                     this._connectionStatus.set('disconnected');
                     this._qrCode.set('');
@@ -103,7 +127,7 @@ export class EvolutionApiService {
           return this.http.post<any>(`${this.baseUrl}/message/sendText/${this.instanceName}`, {
                number: formattedPhone,
                textMessage: { text: message }
-          }).pipe(
+          }, this.headers).pipe(
                tap(() => true),
                catchError(() => of(false))
           );

@@ -1,10 +1,11 @@
 export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'OPERATOR' | 'CLIENT';
-export type RecordStatus = 'A' | 'I' | 'ACTIVE' | 'INACTIVE';
+export type RecordStatus = 'ACTIVE' | 'INACTIVE';
 export type DocumentType = 'DNI' | 'CE' | 'PASSPORT';
 
 export interface User {
      id: string;
      organizationId: string;
+     organization_id?: string;
      firstName: string;
      lastName: string;
      documentType: DocumentType;

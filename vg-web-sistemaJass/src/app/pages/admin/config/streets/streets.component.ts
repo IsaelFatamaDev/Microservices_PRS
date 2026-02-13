@@ -52,8 +52,8 @@ import { AuthService } from '../../../../core/services/auth.service';
               [(ngModel)]="statusFilter"
               (change)="loadStreets()"
               class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="A">Activos</option>
-              <option value="I">Inactivos</option>
+              <option value="ACTIVE">Activos</option>
+              <option value="INACTIVE">Inactivos</option>
               <option value="">Todos</option>
             </select>
           </div>
@@ -101,11 +101,11 @@ import { AuthService } from '../../../../core/services/auth.service';
                     <td class="px-6 py-4">
                       <span
                         class="inline-flex px-2.5 py-1 text-xs font-medium rounded-full"
-                        [class.bg-green-100]="street.recordStatus === 'A'"
-                        [class.text-green-700]="street.recordStatus === 'A'"
-                        [class.bg-red-100]="street.recordStatus === 'I'"
-                        [class.text-red-700]="street.recordStatus === 'I'">
-                        {{ street.recordStatus === 'A' ? 'Activo' : 'Inactivo' }}
+                        [class.bg-green-100]="street.recordStatus === 'ACTIVE'"
+                        [class.text-green-700]="street.recordStatus === 'ACTIVE'"
+                        [class.bg-red-100]="street.recordStatus === 'INACTIVE'"
+                        [class.text-red-700]="street.recordStatus === 'INACTIVE'">
+                        {{ street.recordStatus === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
                       </span>
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -115,7 +115,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                           class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                           <lucide-icon [img]="editIcon" [size]="18"></lucide-icon>
                         </button>
-                        @if (street.recordStatus === 'A') {
+                        @if (street.recordStatus === 'ACTIVE') {
                           <button
                             (click)="deleteStreet(street)"
                             class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
@@ -211,7 +211,7 @@ export class StreetsComponent implements OnInit {
      editingStreet = signal<Street | null>(null);
 
      searchTerm = '';
-     statusFilter: RecordStatus | '' = 'A';
+     statusFilter: RecordStatus | '' = 'ACTIVE';
      zoneFilter = '';
 
      form = { name: '', zoneId: '' };
@@ -234,7 +234,7 @@ export class StreetsComponent implements OnInit {
      loadZones(): void {
           const orgId = this.authService.organizationId();
           this.http.get<ApiResponse<Zone[]>>(`${environment.apiUrl}/zones`, {
-               params: { organizationId: orgId || '', recordStatus: 'A' }
+               params: { organizationId: orgId || '', recordStatus: 'ACTIVE' }
           }).subscribe({
                next: res => this.zones.set(res.data)
           });

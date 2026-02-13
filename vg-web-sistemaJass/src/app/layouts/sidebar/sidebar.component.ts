@@ -4,42 +4,42 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { Role } from '../../core/models';
 import {
-    LucideAngularModule,
-    Home,
-    Users,
-    Building2,
-    MapPin,
-    Route,
-    DollarSign,
-    Package,
-    ClipboardList,
-    Bell,
-    Settings,
-    LogOut,
-    X,
-    ChevronDown,
-    Droplets,
-    FileText,
-    BarChart3,
-    Calendar,
-    Truck,
-    AlertCircle,
-    CreditCard
+  LucideAngularModule,
+  Home,
+  Users,
+  Building2,
+  MapPin,
+  Route,
+  DollarSign,
+  Package,
+  ClipboardList,
+  Bell,
+  Settings,
+  LogOut,
+  X,
+  ChevronDown,
+  Droplets,
+  FileText,
+  BarChart3,
+  Calendar,
+  Truck,
+  AlertCircle,
+  CreditCard
 } from 'lucide-angular';
 
 interface MenuItem {
-    label: string;
-    icon: any;
-    route: string;
-    roles: Role[];
-    children?: MenuItem[];
+  label: string;
+  icon: any;
+  route: string;
+  roles: Role[];
+  children?: MenuItem[];
 }
 
 @Component({
-    selector: 'app-sidebar',
-    standalone: true,
-    imports: [CommonModule, RouterLink, RouterLinkActive, LucideAngularModule],
-    template: `
+  selector: 'app-sidebar',
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterLinkActive, LucideAngularModule],
+  template: `
     <aside
       class="fixed inset-y-0 left-0 z-50 w-72 bg-white text-slate-700 transform transition-transform duration-300 ease-in-out shadow-xl flex flex-col border-r border-slate-200"
       [class.-translate-x-full]="!isOpen()"
@@ -47,12 +47,19 @@ interface MenuItem {
     >
       <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100 bg-white">
         <div class="flex items-center gap-3">
-          <div class="relative">
-            <img src="assets/Gotita.png" alt="JASS" class="w-10 h-10 object-contain relative z-10">
+          <div class="relative w-10 h-10 flex items-center justify-center">
+            @if (authService.organization()?.logoUrl || authService.organization()?.logo_url || authService.organization()?.logo) {
+                <img [src]="authService.organization()?.logoUrl || authService.organization()?.logo_url || authService.organization()?.logo"
+                     alt="Logo" class="w-full h-full object-contain relative z-10 rounded-full">
+            } @else {
+                <img src="assets/Gotita.png" alt="JASS" class="w-10 h-10 object-contain relative z-10">
+            }
           </div>
-          <div>
-            <h1 class="font-bold text-xl text-slate-800 tracking-tight">JASS Digital</h1>
-            <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Sistema de Gestión</p>
+          <div class="overflow-hidden">
+            <h1 class="font-bold text-lg text-slate-800 tracking-tight truncate max-w-[180px]" [title]="authService.organization()?.organizationName || authService.organization()?.organization_name || authService.organization()?.name || 'JASS Digital'">
+                {{ authService.organization()?.organizationName || authService.organization()?.organization_name || authService.organization()?.name || 'JASS Digital' }}
+            </h1>
+            <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wider truncate">Sistema de Gestión</p>
           </div>
         </div>
         <button (click)="closeSidebar.emit()" class="lg:hidden p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
@@ -139,7 +146,7 @@ interface MenuItem {
       ></div>
     }
   `,
-    styles: [`
+  styles: [`
     .custom-scrollbar::-webkit-scrollbar {
       width: 4px;
     }
@@ -156,130 +163,119 @@ interface MenuItem {
   `]
 })
 export class SidebarComponent {
-    authService = inject(AuthService);
-    isOpen = input.required<boolean>();
-    closeSidebar = output<void>();
+  authService = inject(AuthService);
+  isOpen = input.required<boolean>();
+  closeSidebar = output<void>();
 
-    openSubmenus = signal<string[]>([]);
+  openSubmenus = signal<string[]>([]);
 
-    closeIcon = X;
-    chevronIcon = ChevronDown;
-    logoutIcon = LogOut;
+  closeIcon = X;
+  chevronIcon = ChevronDown;
+  logoutIcon = LogOut;
 
-    private menuItems: MenuItem[] = [
-        { label: 'Inicio', icon: Home, route: '/super-admin/dashboard', roles: ['SUPER_ADMIN'] },
-        { label: 'Organizaciones', icon: Building2, route: '/super-admin/organizations', roles: ['SUPER_ADMIN'] },
+  private menuItems: MenuItem[] = [
+    { label: 'Inicio', icon: Home, route: '/super-admin/dashboard', roles: ['SUPER_ADMIN'] },
+    { label: 'Organizaciones', icon: Building2, route: '/super-admin/organizations', roles: ['SUPER_ADMIN'] },
 
-        { label: 'Dashboard', icon: Home, route: '/admin/dashboard', roles: ['ADMIN'] },
-        { label: 'Usuarios', icon: Users, route: '/admin/users', roles: ['ADMIN'] },
-        {
-            label: 'Configuración',
-            icon: Settings,
-            route: '/admin/config',
-            roles: ['ADMIN'],
-            children: [
-                { label: 'Zonas', icon: MapPin, route: '/admin/config/zones', roles: ['ADMIN'] },
-                { label: 'Calles', icon: Route, route: '/admin/config/streets', roles: ['ADMIN'] },
-                { label: 'Tarifas', icon: DollarSign, route: '/admin/config/fares', roles: ['ADMIN'] },
-                { label: 'Parámetros', icon: Settings, route: '/admin/config/parameters', roles: ['ADMIN'] }
-            ]
-        },
-        {
-            label: 'Infraestructura',
-            icon: Droplets,
-            route: '/admin/infrastructure',
-            roles: ['ADMIN'],
-            children: [
-                { label: 'Cajas de Agua', icon: Droplets, route: '/admin/infrastructure/water-boxes', roles: ['ADMIN'] },
-                { label: 'Transferencias', icon: Truck, route: '/admin/infrastructure/transfers', roles: ['ADMIN'] }
-            ]
-        },
-        {
-            label: 'Comercial',
-            icon: DollarSign,
-            route: '/admin/commercial',
-            roles: ['ADMIN'],
-            children: [
-                { label: 'Recibos', icon: FileText, route: '/admin/commercial/receipts', roles: ['ADMIN'] },
-                { label: 'Pagos', icon: CreditCard, route: '/admin/commercial/payments', roles: ['ADMIN'] },
-                { label: 'Deudas', icon: AlertCircle, route: '/admin/commercial/debts', roles: ['ADMIN'] },
-                { label: 'Cortes', icon: X, route: '/admin/commercial/cuts', roles: ['ADMIN'] },
-                { label: 'Caja Chica', icon: DollarSign, route: '/admin/commercial/petty-cash', roles: ['ADMIN'] }
-            ]
-        },
-        {
-            label: 'Inventario',
-            icon: Package,
-            route: '/admin/inventory',
-            roles: ['ADMIN'],
-            children: [
-                { label: 'Proveedores', icon: Building2, route: '/admin/inventory/suppliers', roles: ['ADMIN'] },
-                { label: 'Materiales', icon: Package, route: '/admin/inventory/materials', roles: ['ADMIN'] },
-                { label: 'Compras', icon: ClipboardList, route: '/admin/inventory/purchases', roles: ['ADMIN'] },
-                { label: 'Movimientos', icon: Truck, route: '/admin/inventory/movements', roles: ['ADMIN'] }
-            ]
-        },
-        {
-            label: 'Reclamos',
-            icon: AlertCircle,
-            route: '/admin/claims',
-            roles: ['ADMIN'],
-            children: [
-                { label: 'Quejas', icon: AlertCircle, route: '/admin/claims/complaints', roles: ['ADMIN'] },
-                { label: 'Incidencias', icon: AlertCircle, route: '/admin/claims/incidents', roles: ['ADMIN'] }
-            ]
-        },
-        {
-            label: 'Distribución',
-            icon: Truck,
-            route: '/admin/distribution',
-            roles: ['ADMIN'],
-            children: [
-                { label: 'Programas', icon: Calendar, route: '/admin/distribution/programs', roles: ['ADMIN'] },
-                { label: 'Rutas', icon: Route, route: '/admin/distribution/routes', roles: ['ADMIN'] },
-                { label: 'Horarios', icon: Calendar, route: '/admin/distribution/schedules', roles: ['ADMIN'] }
-            ]
-        },
-        { label: 'Notificaciones', icon: Bell, route: '/admin/notifications', roles: ['ADMIN'] },
-        { label: 'Reportes', icon: BarChart3, route: '/admin/reports', roles: ['ADMIN'] },
+    { label: 'Dashboard', icon: Home, route: '/admin/dashboard', roles: ['ADMIN'] },
+    { label: 'Usuarios', icon: Users, route: '/admin/users', roles: ['ADMIN'] },
+    { label: 'Configuración', icon: Settings, route: '/admin/config', roles: ['ADMIN'] },
+    {
+      label: 'Infraestructura',
+      icon: Droplets,
+      route: '/admin/infrastructure',
+      roles: ['ADMIN'],
+      children: [
+        { label: 'Cajas de Agua', icon: Droplets, route: '/admin/infrastructure/water-boxes', roles: ['ADMIN'] },
+        { label: 'Transferencias', icon: Truck, route: '/admin/infrastructure/transfers', roles: ['ADMIN'] }
+      ]
+    },
+    {
+      label: 'Comercial',
+      icon: DollarSign,
+      route: '/admin/commercial',
+      roles: ['ADMIN'],
+      children: [
+        { label: 'Recibos', icon: FileText, route: '/admin/commercial/receipts', roles: ['ADMIN'] },
+        { label: 'Pagos', icon: CreditCard, route: '/admin/commercial/payments', roles: ['ADMIN'] },
+        { label: 'Deudas', icon: AlertCircle, route: '/admin/commercial/debts', roles: ['ADMIN'] },
+        { label: 'Cortes', icon: X, route: '/admin/commercial/cuts', roles: ['ADMIN'] },
+        { label: 'Caja Chica', icon: DollarSign, route: '/admin/commercial/petty-cash', roles: ['ADMIN'] }
+      ]
+    },
+    {
+      label: 'Inventario',
+      icon: Package,
+      route: '/admin/inventory',
+      roles: ['ADMIN'],
+      children: [
+        { label: 'Proveedores', icon: Building2, route: '/admin/inventory/suppliers', roles: ['ADMIN'] },
+        { label: 'Materiales', icon: Package, route: '/admin/inventory/materials', roles: ['ADMIN'] },
+        { label: 'Compras', icon: ClipboardList, route: '/admin/inventory/purchases', roles: ['ADMIN'] },
+        { label: 'Movimientos', icon: Truck, route: '/admin/inventory/movements', roles: ['ADMIN'] }
+      ]
+    },
+    {
+      label: 'Reclamos',
+      icon: AlertCircle,
+      route: '/admin/claims',
+      roles: ['ADMIN'],
+      children: [
+        { label: 'Quejas', icon: AlertCircle, route: '/admin/claims/complaints', roles: ['ADMIN'] },
+        { label: 'Incidencias', icon: AlertCircle, route: '/admin/claims/incidents', roles: ['ADMIN'] }
+      ]
+    },
+    {
+      label: 'Distribución',
+      icon: Truck,
+      route: '/admin/distribution',
+      roles: ['ADMIN'],
+      children: [
+        { label: 'Programas', icon: Calendar, route: '/admin/distribution/programs', roles: ['ADMIN'] },
+        { label: 'Rutas', icon: Route, route: '/admin/distribution/routes', roles: ['ADMIN'] },
+        { label: 'Horarios', icon: Calendar, route: '/admin/distribution/schedules', roles: ['ADMIN'] }
+      ]
+    },
+    { label: 'Notificaciones', icon: Bell, route: '/admin/notifications', roles: ['ADMIN'] },
+    { label: 'Reportes', icon: BarChart3, route: '/admin/reports', roles: ['ADMIN'] },
 
-        { label: 'Dashboard', icon: Home, route: '/operator/dashboard', roles: ['OPERATOR'] },
-        { label: 'Usuarios', icon: Users, route: '/operator/users', roles: ['OPERATOR'] },
-        { label: 'Recibos', icon: FileText, route: '/operator/receipts', roles: ['OPERATOR'] },
-        { label: 'Pagos', icon: CreditCard, route: '/operator/payments', roles: ['OPERATOR'] },
-        { label: 'Quejas', icon: AlertCircle, route: '/operator/complaints', roles: ['OPERATOR'] },
+    { label: 'Dashboard', icon: Home, route: '/operator/dashboard', roles: ['OPERATOR'] },
+    { label: 'Usuarios', icon: Users, route: '/operator/users', roles: ['OPERATOR'] },
+    { label: 'Recibos', icon: FileText, route: '/operator/receipts', roles: ['OPERATOR'] },
+    { label: 'Pagos', icon: CreditCard, route: '/operator/payments', roles: ['OPERATOR'] },
+    { label: 'Quejas', icon: AlertCircle, route: '/operator/complaints', roles: ['OPERATOR'] },
 
-        { label: 'Inicio', icon: Home, route: '/client/dashboard', roles: ['CLIENT'] },
-        { label: 'Mis Recibos', icon: FileText, route: '/client/receipts', roles: ['CLIENT'] },
-        { label: 'Mis Pagos', icon: CreditCard, route: '/client/payments', roles: ['CLIENT'] },
-        { label: 'Nueva Queja', icon: AlertCircle, route: '/client/complaints', roles: ['CLIENT'] },
-    ];
+    { label: 'Inicio', icon: Home, route: '/client/dashboard', roles: ['CLIENT'] },
+    { label: 'Mis Recibos', icon: FileText, route: '/client/receipts', roles: ['CLIENT'] },
+    { label: 'Mis Pagos', icon: CreditCard, route: '/client/payments', roles: ['CLIENT'] },
+    { label: 'Nueva Queja', icon: AlertCircle, route: '/client/complaints', roles: ['CLIENT'] },
+  ];
 
-    filteredMenuItems = computed(() => {
-        const role = this.authService.userRole();
-        if (!role) return [];
+  filteredMenuItems = computed(() => {
+    const role = this.authService.userRole();
+    if (!role) return [];
 
-        return this.menuItems.filter(item => item.roles.includes(role)).map(item => {
-            if (item.children) {
-                return {
-                    ...item,
-                    children: item.children.filter(child => child.roles.includes(role))
-                };
-            }
-            return item;
-        });
+    return this.menuItems.filter(item => item.roles.includes(role)).map(item => {
+      if (item.children) {
+        return {
+          ...item,
+          children: item.children.filter(child => child.roles.includes(role))
+        };
+      }
+      return item;
     });
+  });
 
-    toggleSubmenu(route: string): void {
-        this.openSubmenus.update(menus => {
-            if (menus.includes(route)) {
-                return menus.filter(m => m !== route);
-            }
-            return [...menus, route];
-        });
-    }
+  toggleSubmenu(route: string): void {
+    this.openSubmenus.update(menus => {
+      if (menus.includes(route)) {
+        return menus.filter(m => m !== route);
+      }
+      return [...menus, route];
+    });
+  }
 
-    logout(): void {
-        this.authService.logout();
-    }
+  logout(): void {
+    this.authService.logout();
+  }
 }

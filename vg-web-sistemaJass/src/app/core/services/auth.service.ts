@@ -33,7 +33,7 @@ export class AuthService {
      readonly isAuthenticated = computed(() => !!this._accessToken() && !!this._user());
      readonly userRole = computed(() => this._user()?.role || null);
      readonly userId = computed(() => this._user()?.id || null);
-     readonly organizationId = computed(() => this._user()?.organizationId || null);
+     readonly organizationId = computed(() => this._user()?.organizationId || this._user()?.organization_id || null);
      readonly userFullName = computed(() => {
           const user = this._user();
           return user ? `${user.firstName} ${user.lastName}` : '';
@@ -115,29 +115,29 @@ export class AuthService {
      }
 
      loadUserProfile(): Observable<ApiResponse<User>> {
-     const token = this._accessToken() || this.storage.get(TOKEN_KEY);
-     if (!token) {
-          return throwError(() => new Error('No access token available'));
-     }
-     try {
-          const payload = this.decodeToken(token);
-          const userId = payload.userId; 
-
-          if (!userId) {
-               return throwError(() => new Error('userId not found in token'));
+          const token = this._accessToken() || this.storage.get(TOKEN_KEY);
+          if (!token) {
+               return throwError(() => new Error('No access token available'));
           }
+          try {
+               const payload = this.decodeToken(token);
+               const userId = payload.userId;
 
-          return this.http.get<ApiResponse<User>>(`${environment.apiUrl}/users/${userId}`).pipe(
-               tap(response => {
-                    this._user.set(response.data);
-                    this.storage.setObject(USER_KEY, response.data);
-               })
-          );
-     } catch (e) {
-          console.error('Error decoding token:', e, 'Token value:', token);
-          return throwError(() => new Error('Invalid token format'));
+               if (!userId) {
+                    return throwError(() => new Error('userId not found in token'));
+               }
+
+               return this.http.get<ApiResponse<User>>(`${environment.apiUrl}/users/${userId}`).pipe(
+                    tap(response => {
+                         this._user.set(response.data);
+                         this.storage.setObject(USER_KEY, response.data);
+                    })
+               );
+          } catch (e) {
+               console.error('Error decoding token:', e, 'Token value:', token);
+               return throwError(() => new Error('Invalid token format'));
+          }
      }
-}
 
      loadOrganization(orgId: string): Observable<ApiResponse<Organization>> {
           return this.http.get<ApiResponse<Organization>>(`${environment.apiUrl}/organizations/${orgId}`).pipe(

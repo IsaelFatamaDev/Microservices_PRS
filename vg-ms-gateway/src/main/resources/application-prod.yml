@@ -27,7 +27,7 @@ spring:
                     - id: organizations-service
                       uri: http://vg-ms-organizations:8083
                       predicates:
-                           - Path=/api/organizations/**
+                           - Path=/api/organizations/**,/api/zones/**,/api/streets/**,/api/fares/**,/api/parameters/**
                       filters:
                            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
                            - name: CircuitBreaker
@@ -49,7 +49,7 @@ spring:
                     - id: distribution-service
                       uri: http://vg-ms-distribution:8091
                       predicates:
-                           - Path=/api/distribution/**
+                           - Path=/api/programs/**,/api/routes/**,/api/schedules/**
                       filters:
                            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
                            - name: CircuitBreaker

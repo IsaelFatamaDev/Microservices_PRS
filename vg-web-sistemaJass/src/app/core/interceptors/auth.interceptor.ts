@@ -9,7 +9,10 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
      const authService = inject(AuthService);
      const token = authService.accessToken();
 
-     if (!token || req.url.includes('/auth/login') || req.url.includes('/auth/refresh')) {
+     if (!token ||
+          req.url.includes('/auth/login') ||
+          req.url.includes('/auth/refresh') ||
+          req.url.includes('9099')) { // Evolution API port
           return next(req);
      }
 

@@ -116,11 +116,11 @@ import { AuthService } from '../../../core/services/auth.service';
                     <td class="px-6 py-4">
                       <span
                         class="inline-flex px-2.5 py-1 text-xs font-medium rounded-full"
-                        [class.bg-green-100]="user.recordStatus === 'A' || user.recordStatus === 'ACTIVE'"
-                        [class.text-green-700]="user.recordStatus === 'A' || user.recordStatus === 'ACTIVE'"
-                        [class.bg-red-100]="user.recordStatus === 'I' || user.recordStatus === 'INACTIVE'"
-                        [class.text-red-700]="user.recordStatus === 'I' || user.recordStatus === 'INACTIVE'">
-                        {{ user.recordStatus === 'A' || user.recordStatus === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+                        [class.bg-green-100]="user.recordStatus === 'ACTIVE'"
+                        [class.text-green-700]="user.recordStatus === 'ACTIVE'"
+                        [class.bg-red-100]="user.recordStatus === 'INACTIVE'"
+                        [class.text-red-700]="user.recordStatus === 'INACTIVE'">
+                        {{ user.recordStatus === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
                       </span>
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -129,7 +129,7 @@ import { AuthService } from '../../../core/services/auth.service';
                            class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
                           <lucide-icon [img]="editIcon" [size]="18"></lucide-icon>
                         </a>
-                        @if (user.recordStatus === 'A' || user.recordStatus === 'ACTIVE') {
+                        @if (user.recordStatus === 'ACTIVE') {
                           <button
                             (click)="deleteUser(user)"
                             class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">

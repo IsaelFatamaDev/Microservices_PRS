@@ -25,7 +25,7 @@ spring:
                     - id: organizations-service
                       uri: http://vg-ms-organizations:8083
                       predicates:
-                           - Path=/api/organizations/**
+                           - Path=/api/organizations/**,/api/zones/**,/api/streets/**,/api/fares/**,/api/parameters/**
                       filters:
                            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
                            - name: CircuitBreaker
@@ -45,7 +45,7 @@ spring:
                     - id: distribution-service
                       uri: http://vg-ms-distribution:8091
                       predicates:
-                           - Path=/api/distribution/**
+                           - Path=/api/distribution-programs/**,/api/distribution-routes/**,/api/distribution-schedules/**
                       filters:
                            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
                            - name: CircuitBreaker
@@ -67,7 +67,7 @@ spring:
                     - id: commercial-service
                       uri: http://vg-ms-commercial:8094
                       predicates:
-                           - Path=/api/receipts/**,/api/debts/**,/api/payments/**,/api/petty-cash/**,/api/service-cuts/**
+                           - Path=/api/receipts/**,/api/debts/**,/api/payments/**,/api/petty-cash/**,/api/petty-cash-movements/**,/api/service-cuts/**
                       filters:
                            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
                            - name: CircuitBreaker
@@ -78,7 +78,7 @@ spring:
                     - id: claims-service
                       uri: http://vg-ms-claims:8085
                       predicates:
-                           - Path=/api/incidents/**,/api/incident-resolutions/**,/api/incident-types/**,/api/complaints/**,/api/complaint-categories/**
+                           - Path=/api/incidents/**,/api/incident-resolutions/**,/api/incident-types/**,/api/complaints/**,/api/complaint-categories/**,/api/complaint-responses/**
                       filters:
                            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
                            - name: CircuitBreaker

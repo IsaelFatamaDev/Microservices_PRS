@@ -3,8 +3,8 @@ import { RecordStatus } from './user.model';
 export interface Organization {
      id: string;
      organizationName: string;
+     organization_name?: string;
      name?: string;
-     ruc?: string;
      district: string;
      province: string;
      department: string;
@@ -12,18 +12,23 @@ export interface Organization {
      phone?: string;
      email?: string;
      logoUrl?: string;
+     logo_url?: string;
      logo?: string;
      recordStatus: RecordStatus;
+     record_status?: RecordStatus;
      createdAt: string;
+     created_at?: string;
      createdBy?: string;
+     created_by?: string;
      updatedAt?: string;
+     updated_at?: string;
      updatedBy?: string;
+     updated_by?: string;
 }
 
 export interface CreateOrganizationRequest {
      organizationName: string;
      name?: string;
-     ruc?: string;
      district: string;
      province: string;
      department: string;
@@ -36,7 +41,6 @@ export interface CreateOrganizationRequest {
 export interface UpdateOrganizationRequest {
      organizationName?: string;
      name?: string;
-     ruc?: string;
      district?: string;
      province?: string;
      department?: string;
@@ -54,44 +58,55 @@ export interface Zone {
      description?: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     createdBy?: string;
+     updatedAt?: string;
+     updatedBy?: string;
 }
 
 export interface Street {
      id: string;
      organizationId: string;
      zoneId: string;
+     streetType: string;
+     streetTypeDisplayName?: string;
      streetName: string;
+     fullStreetName?: string;
      name?: string;
      description?: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     createdBy?: string;
+     updatedAt?: string;
+     updatedBy?: string;
 }
 
 export interface Fare {
      id: string;
      organizationId: string;
-     zoneId?: string;
-     fareName: string;
-     name?: string;
+     fareType: string;
+     fareTypeDisplayName?: string;
      amount: number;
-     minCubicMeters?: number;
-     maxCubicMeters?: number;
-     pricePerCubicMeter?: number;
-     basePrice?: number;
      description?: string;
+     validFrom?: string;
+     validTo?: string;
+     currentlyValid?: boolean;
      recordStatus: RecordStatus;
      createdAt: string;
+     createdBy?: string;
+     updatedAt?: string;
+     updatedBy?: string;
 }
 
 export interface Parameter {
      id: string;
      organizationId: string;
-     parameterKey: string;
-     key?: string;
-     name?: string;
+     parameterType: string;
+     parameterTypeDisplayName?: string;
      parameterValue: string;
-     value?: string;
      description?: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     createdBy?: string;
+     updatedAt?: string;
+     updatedBy?: string;
 }

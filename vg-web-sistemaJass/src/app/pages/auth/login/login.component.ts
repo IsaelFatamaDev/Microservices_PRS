@@ -333,9 +333,10 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   private startPolling(): void {
     this.pollingSubscription = this.evolutionApi.startPolling().subscribe({
-      next: status => {
-        if (status.state === 'open') {
-          setTimeout(() => this.completeLogin(), 1500);
+      next: res => {
+        const state = res?.state || res?.instance?.state || res?.instance?.status || res?.status;
+        if (state === 'open') {
+          setTimeout(() => this.completeLogin(), 1000);
         }
       },
       error: () => { }
