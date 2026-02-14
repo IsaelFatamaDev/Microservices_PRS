@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import pe.edu.vallegrande.vgmscommercial.domain.models.Payment;
 import pe.edu.vallegrande.vgmscommercial.domain.models.PaymentDetail;
-import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.ConceptType;
 import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.PaymentMethod;
 import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.PaymentStatus;
 import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.RecordStatus;
@@ -143,7 +142,7 @@ public class PaymentRepositoryImpl implements IPaymentRepository {
           return PaymentDetailEntity.builder()
                     .id(d.getId())
                     .paymentId(paymentId)
-                    .paymentType(d.getPaymentType().name())
+                    .paymentType(d.getPaymentType())
                     .description(d.getDescription())
                     .amount(d.getAmount())
                     .periodMonth(d.getPeriodMonth())
@@ -156,7 +155,7 @@ public class PaymentRepositoryImpl implements IPaymentRepository {
           return PaymentDetail.builder()
                     .id(e.getId())
                     .paymentId(e.getPaymentId())
-                    .paymentType(ConceptType.valueOf(e.getPaymentType()))
+                    .paymentType(e.getPaymentType())
                     .description(e.getDescription())
                     .amount(e.getAmount())
                     .periodMonth(e.getPeriodMonth())

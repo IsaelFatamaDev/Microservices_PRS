@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.ConceptType;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +15,7 @@ public class PaymentDetail {
 
     private String id;
     private String paymentId;
-    private ConceptType paymentType;
+    private String paymentType;
     private String description;
     private Double amount;
     private Integer periodMonth;

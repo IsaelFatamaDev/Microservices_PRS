@@ -7,7 +7,6 @@ import pe.edu.vallegrande.vgmscommercial.application.dto.response.PaymentDetailR
 import pe.edu.vallegrande.vgmscommercial.application.dto.response.PaymentResponse;
 import pe.edu.vallegrande.vgmscommercial.domain.models.Payment;
 import pe.edu.vallegrande.vgmscommercial.domain.models.PaymentDetail;
-import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.ConceptType;
 import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.PaymentMethod;
 import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.PaymentStatus;
 import pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.RecordStatus;
@@ -46,7 +45,7 @@ public class PaymentMapper {
      private PaymentDetail toDetailDomain(CreatePaymentDetailRequest request) {
           return PaymentDetail.builder()
                     .id(UUID.randomUUID().toString())
-                    .paymentType(ConceptType.valueOf(request.getPaymentType()))
+                    .paymentType(request.getPaymentType())
                     .description(request.getDescription())
                     .amount(request.getAmount())
                     .periodMonth(request.getPeriodMonth())
@@ -81,7 +80,7 @@ public class PaymentMapper {
           return PaymentDetailResponse.builder()
                     .id(detail.getId())
                     .paymentId(detail.getPaymentId())
-                    .paymentType(detail.getPaymentType().name())
+                    .paymentType(detail.getPaymentType())
                     .description(detail.getDescription())
                     .amount(detail.getAmount())
                     .periodMonth(detail.getPeriodMonth())
