@@ -22,9 +22,9 @@ CREATE TABLE IF NOT EXISTS users
     role            VARCHAR(20)  NOT NULL DEFAULT 'CLIENT',
 
     CONSTRAINT uk_users_document_number UNIQUE (document_number),
-    CONSTRAINT chk_users_document_type CHECK (document_type IN ('DNI', 'RUC', 'CE')),
+    CONSTRAINT chk_users_document_type CHECK (document_type IN ('DNI', 'CNE')),
     CONSTRAINT chk_users_record_status CHECK (record_status IN ('ACTIVE', 'INACTIVE')),
-    CONSTRAINT chk_users_role CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'CLIENT')),
+    CONSTRAINT chk_users_role CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'CLIENT', 'OPERATOR')),
     CONSTRAINT chk_users_contact CHECK (email IS NOT NULL OR phone IS NOT NULL)
 );
 

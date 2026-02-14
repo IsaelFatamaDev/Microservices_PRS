@@ -17,6 +17,7 @@ import pe.edu.vallegrande.vgmsauthentication.domain.ports.out.IKeycloakClient;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -444,6 +445,22 @@ public class KeycloakClientImpl implements IKeycloakClient {
         Map<String, Object> result = new HashMap<>();
         map.forEach((key, value) -> result.put(key.toString(), value));
         return result;
+    }
+
+    @Override
+    public Mono<Boolean> existsByUsername(String username) {
+        return getAdminToken()
+                .flatMap(adminToken -> adminWebClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path("/users")
+                                .queryParam("username", username)
+                                .queryParam("exact", true)
+                                .build())
+                        .header("Authorization", "Bearer " + adminToken)
+                        .retrieve()
+                        .bodyToMono(List.class)
+                        .map(users -> !users.isEmpty())
+                        .defaultIfEmpty(false));
     }
 
 }

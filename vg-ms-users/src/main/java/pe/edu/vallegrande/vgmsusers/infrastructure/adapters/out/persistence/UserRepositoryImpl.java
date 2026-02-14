@@ -31,8 +31,9 @@ public class UserRepositoryImpl implements IUserRepository {
     @Override
     public Mono<User> update(User user) {
         log.debug("Updating user: {}", user.getId());
-        return r2dbcRepository.save(userMapper.toEntity(user))
-                .doOnNext(entity -> entity.setNotNew())
+        var entity = userMapper.toEntity(user);
+        entity.setNotNew();
+        return r2dbcRepository.save(entity)
                 .map(userMapper::toModel);
     }
 

@@ -24,6 +24,7 @@ public class WaterBoxAssignmentRepositoryImpl implements IWaterBoxAssignmentRepo
         WaterBoxAssignmentEntity entity = toEntity(assignment);
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID().toString());
+            entity.setNewEntity(true);
         }
         return r2dbcRepository.save(entity).map(this::toDomain);
     }
@@ -60,7 +61,8 @@ public class WaterBoxAssignmentRepositoryImpl implements IWaterBoxAssignmentRepo
                 .waterBoxId(domain.getWaterBoxId())
                 .userId(domain.getUserId())
                 .assignmentDate(domain.getAssignmentDate())
-                .assignmentStatus(domain.getAssignmentStatus() != null ? domain.getAssignmentStatus().name() : AssignmentStatus.ACTIVE.name())
+                .assignmentStatus(domain.getAssignmentStatus() != null ? domain.getAssignmentStatus().name()
+                        : AssignmentStatus.ACTIVE.name())
                 .endDate(domain.getEndDate())
                 .recordStatus(domain.getRecordStatus() != null ? domain.getRecordStatus().name() : "ACTIVE")
                 .createdAt(domain.getCreatedAt())
@@ -77,9 +79,12 @@ public class WaterBoxAssignmentRepositoryImpl implements IWaterBoxAssignmentRepo
                 .waterBoxId(entity.getWaterBoxId())
                 .userId(entity.getUserId())
                 .assignmentDate(entity.getAssignmentDate())
-                .assignmentStatus(entity.getAssignmentStatus() != null ? AssignmentStatus.valueOf(entity.getAssignmentStatus()) : AssignmentStatus.ACTIVE)
+                .assignmentStatus(
+                        entity.getAssignmentStatus() != null ? AssignmentStatus.valueOf(entity.getAssignmentStatus())
+                                : AssignmentStatus.ACTIVE)
                 .endDate(entity.getEndDate())
-                .recordStatus(entity.getRecordStatus() != null ? RecordStatus.valueOf(entity.getRecordStatus()) : RecordStatus.ACTIVE)
+                .recordStatus(entity.getRecordStatus() != null ? RecordStatus.valueOf(entity.getRecordStatus())
+                        : RecordStatus.ACTIVE)
                 .createdAt(entity.getCreatedAt())
                 .createdBy(entity.getCreatedBy())
                 .updatedAt(entity.getUpdatedAt())

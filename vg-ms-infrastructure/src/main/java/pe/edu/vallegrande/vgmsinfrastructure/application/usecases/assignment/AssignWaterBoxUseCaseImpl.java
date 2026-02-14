@@ -38,6 +38,7 @@ public class AssignWaterBoxUseCaseImpl implements IAssignWaterBoxUseCase {
                             }
                             LocalDateTime now = LocalDateTime.now();
                             WaterBoxAssignment assignment = WaterBoxAssignment.builder()
+                                    .organizationId(waterBox.getOrganizationId())
                                     .waterBoxId(waterBoxId)
                                     .userId(userId)
                                     .assignmentDate(now)
@@ -53,6 +54,7 @@ public class AssignWaterBoxUseCaseImpl implements IAssignWaterBoxUseCase {
                 .flatMap(saved -> eventPublisher.publishWaterBoxAssigned(waterBoxId, userId, assignedBy)
                         .thenReturn(saved))
                 .doOnSuccess(saved -> log.info("Water box {} assigned to user {} successfully", waterBoxId, userId))
-                .doOnError(error -> log.error("Error assigning water box {} to user {}: {}", waterBoxId, userId, error.getMessage()));
+                .doOnError(error -> log.error("Error assigning water box {} to user {}: {}", waterBoxId, userId,
+                        error.getMessage()));
     }
 }

@@ -7,6 +7,8 @@ import pe.edu.vallegrande.vgmsauthentication.application.events.external.*;
 import pe.edu.vallegrande.vgmsauthentication.domain.ports.out.IKeycloakClient;
 import reactor.core.publisher.Mono;
 
+import java.text.Normalizer;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -17,15 +19,19 @@ public class UserEventHandler {
         public Mono<Void> handleUserCreated(UserCreatedEvent event) {
                 log.info("Processing UserCreatedEvent for user: {}", event.getUserId());
 
-                return keycloakClient.createUser(
-                                event.getUserId(),
-                                event.getEmail(),
-                                generateUsername(event.getFirstName(), event.getLastName()),
-                                event.getFirstName(),
-                                event.getLastName(),
-                                event.getDocumentNumber(),
-                                event.getRole(),
-                                event.getOrganizationId())
+                return generateUniqueUsername(event.getFirstName(), event.getLastName())
+                                .flatMap(username -> {
+                                        log.info("Generated username for user {}: {}", event.getUserId(), username);
+                                        return keycloakClient.createUser(
+                                                        event.getUserId(),
+                                                        event.getEmail(),
+                                                        username,
+                                                        event.getFirstName(),
+                                                        event.getLastName(),
+                                                        event.getDocumentNumber(),
+                                                        event.getRole(),
+                                                        event.getOrganizationId());
+                                })
                                 .doOnSuccess(keycloakId -> log.info(
                                                 "User created in Keycloak. UserId: {}, KeycloakId: {}",
                                                 event.getUserId(), keycloakId))
@@ -87,9 +93,60 @@ public class UserEventHandler {
                 return keycloakClient.assignRole(event.getUserId(), event.getRole());
         }
 
-        private String generateUsername(String firstName, String lastName) {
-                String first = firstName.split(" ")[0].toLowerCase();
-                String last = lastName.split(" ")[0].toLowerCase();
-                return String.format("%s.%s@jass.gob.pe", first, last);
+        private Mono<String> generateUniqueUsername(String firstName, String lastName) {
+                String[] firstNames = normalize(firstName).split(" ");
+                String[] lastNames = normalize(lastName).split(" ");
+                String first = firstNames[0];
+                String last1 = lastNames[0];
+                String last2 = lastNames.length > 1 ? lastNames[1] : null;
+
+                // Attempt 1: primer.apellido1@jass.gob.pe
+                String candidate1 = String.format("%s.%s@jass.gob.pe", first, last1);
+                return keycloakClient.existsByUsername(candidate1)
+                                .flatMap(exists -> {
+                                        if (!exists)
+                                                return Mono.just(candidate1);
+
+                                        // Attempt 2: primer.apellido1.apellido2@jass.gob.pe
+                                        if (last2 != null && !last2.isEmpty()) {
+                                                String candidate2 = String.format("%s.%s.%s@jass.gob.pe", first, last1,
+                                                                last2);
+                                                return keycloakClient.existsByUsername(candidate2)
+                                                                .flatMap(exists2 -> {
+                                                                        if (!exists2)
+                                                                                return Mono.just(candidate2);
+                                                                        return findAvailableUsername(first, last1,
+                                                                                        last2);
+                                                                });
+                                        }
+                                        return findAvailableUsername(first, last1, null);
+                                });
+        }
+
+        private Mono<String> findAvailableUsername(String first, String last1, String last2) {
+                String base = last2 != null ? String.format("%s.%s.%s", first, last1, last2)
+                                : String.format("%s.%s", first, last1);
+                return findAvailableUsernameRecursive(base, 2);
+        }
+
+        private Mono<String> findAvailableUsernameRecursive(String base, int counter) {
+                String candidate = String.format("%s%d@jass.gob.pe", base, counter);
+                return keycloakClient.existsByUsername(candidate)
+                                .flatMap(exists -> {
+                                        if (!exists)
+                                                return Mono.just(candidate);
+                                        return findAvailableUsernameRecursive(base, counter + 1);
+                                });
+        }
+
+        private String normalize(String input) {
+                if (input == null)
+                        return "";
+                String normalized = Normalizer.normalize(input.trim(), Normalizer.Form.NFD);
+                return normalized.replaceAll("[\\p{InCombiningDiacriticalMarks}]", "")
+                                .toLowerCase()
+                                .replaceAll("[^a-z\\s]", "")
+                                .replaceAll("\\s+", " ")
+                                .trim();
         }
 }

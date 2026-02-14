@@ -1,24 +1,23 @@
 import { RecordStatus } from './user.model';
 
-export type BoxType = 'RESIDENTIAL' | 'COMMERCIAL' | 'INDUSTRIAL' | 'INSTITUTIONAL';
+export type BoxType = 'RESIDENTIAL' | 'COMMERCIAL' | 'COMMUNAL' | 'INSTITUTIONAL';
 export type BoxStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'TRANSFERRED';
 
 export interface WaterBox {
      id: string;
      organizationId: string;
-     userId: string;
-     supplyNumber: string;
-     code?: string;
+     boxCode: string;
      boxType: BoxType;
-     boxStatus: BoxStatus;
      zoneId: string;
      streetId: string;
      address: string;
-     description?: string;
+     currentAssignmentId?: string;
+     isActive: boolean;
      installationDate: string;
-     installedBy: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     updatedAt?: string;
+     // display helpers
      userName?: string;
      zoneName?: string;
      streetName?: string;
@@ -26,12 +25,17 @@ export interface WaterBox {
 
 export interface CreateWaterBoxRequest {
      organizationId: string;
-     userId: string;
+     boxCode: string;
      boxType: BoxType;
+     installationDate: string;
      zoneId: string;
      streetId: string;
      address: string;
-     installedBy: string;
+}
+
+export interface AssignWaterBoxRequest {
+     waterBoxId: string;
+     userId: string;
 }
 
 export interface WaterBoxAssignment {

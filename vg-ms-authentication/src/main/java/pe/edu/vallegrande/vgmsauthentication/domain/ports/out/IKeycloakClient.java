@@ -49,4 +49,6 @@ public interface IKeycloakClient {
         Mono<Void> removeRole(String userId, String roleName);
 
         Mono<Void> resetPassword(String userId, String newPassword, boolean temporary);
+
+        Mono<Boolean> existsByUsername(String username);
 }

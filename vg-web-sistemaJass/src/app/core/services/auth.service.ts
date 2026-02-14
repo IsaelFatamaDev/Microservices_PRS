@@ -33,7 +33,7 @@ export class AuthService {
      readonly isAuthenticated = computed(() => !!this._accessToken() && !!this._user());
      readonly userRole = computed(() => this._user()?.role || null);
      readonly userId = computed(() => this._user()?.id || null);
-     readonly organizationId = computed(() => this._user()?.organizationId || this._user()?.organization_id || null);
+     readonly organizationId = computed(() => this._user()?.organizationId || null);
      readonly userFullName = computed(() => {
           const user = this._user();
           return user ? `${user.firstName} ${user.lastName}` : '';

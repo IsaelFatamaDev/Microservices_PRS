@@ -24,6 +24,7 @@ public class WaterBoxRepositoryImpl implements IWaterBoxRepository {
         WaterBoxEntity entity = toEntity(waterBox);
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID().toString());
+            entity.setNewEntity(true);
         }
         return r2dbcRepository.save(entity).map(this::toDomain);
     }
@@ -65,7 +66,8 @@ public class WaterBoxRepositoryImpl implements IWaterBoxRepository {
                 .address(domain.getAddress())
                 .currentAssignmentId(domain.getCurrentAssignmentId())
                 .isActive(domain.getIsActive())
-                .recordStatus(domain.getRecordStatus() != null ? domain.getRecordStatus().name() : RecordStatus.ACTIVE.name())
+                .recordStatus(
+                        domain.getRecordStatus() != null ? domain.getRecordStatus().name() : RecordStatus.ACTIVE.name())
                 .createdAt(domain.getCreatedAt())
                 .createdBy(domain.getCreatedBy())
                 .updatedAt(domain.getUpdatedAt())
@@ -85,7 +87,8 @@ public class WaterBoxRepositoryImpl implements IWaterBoxRepository {
                 .address(entity.getAddress())
                 .currentAssignmentId(entity.getCurrentAssignmentId())
                 .isActive(entity.getIsActive())
-                .recordStatus(entity.getRecordStatus() != null ? RecordStatus.valueOf(entity.getRecordStatus()) : RecordStatus.ACTIVE)
+                .recordStatus(entity.getRecordStatus() != null ? RecordStatus.valueOf(entity.getRecordStatus())
+                        : RecordStatus.ACTIVE)
                 .createdAt(entity.getCreatedAt())
                 .createdBy(entity.getCreatedBy())
                 .updatedAt(entity.getUpdatedAt())

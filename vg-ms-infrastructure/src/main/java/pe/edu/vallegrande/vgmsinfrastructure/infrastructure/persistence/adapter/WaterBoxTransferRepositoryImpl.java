@@ -22,6 +22,7 @@ public class WaterBoxTransferRepositoryImpl implements IWaterBoxTransferReposito
         WaterBoxTransferEntity entity = toEntity(transfer);
         if (entity.getId() == null) {
             entity.setId(UUID.randomUUID().toString());
+            entity.setNewEntity(true);
         }
         return r2dbcRepository.save(entity).map(this::toDomain);
     }
