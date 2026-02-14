@@ -37,7 +37,7 @@ jobs:
                            image: prs_microservices-vg-ms-commercial
                          - service: vg-ms-inventory-purchases
                            image: prs_microservices-vg-ms-inventory-purchases
-                         - service: Microservicio-main
+                         - service: vg-ms-waterquality
                            image: prs_microservices-vg-ms-water-quality
                          - service: vg-web-sistemaJass
                            image: prs_microservices-vg-web-sistemajass
