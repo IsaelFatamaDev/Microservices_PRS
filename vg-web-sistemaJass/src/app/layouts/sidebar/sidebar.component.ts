@@ -179,7 +179,6 @@ export class SidebarComponent {
 
     { label: 'Dashboard', icon: Home, route: '/admin/dashboard', roles: ['ADMIN'] },
     { label: 'Usuarios', icon: Users, route: '/admin/users', roles: ['ADMIN'] },
-    { label: 'Configuración', icon: Settings, route: '/admin/config', roles: ['ADMIN'] },
     {
       label: 'Infraestructura',
       icon: Droplets,
@@ -238,7 +237,7 @@ export class SidebarComponent {
     },
     { label: 'Notificaciones', icon: Bell, route: '/admin/notifications', roles: ['ADMIN'] },
     { label: 'Reportes', icon: BarChart3, route: '/admin/reports', roles: ['ADMIN'] },
-
+    { label: 'Configuración', icon: Settings, route: '/admin/config', roles: ['ADMIN'] },
     { label: 'Dashboard', icon: Home, route: '/operator/dashboard', roles: ['OPERATOR'] },
     { label: 'Usuarios', icon: Users, route: '/operator/users', roles: ['OPERATOR'] },
     { label: 'Recibos', icon: FileText, route: '/operator/receipts', roles: ['OPERATOR'] },

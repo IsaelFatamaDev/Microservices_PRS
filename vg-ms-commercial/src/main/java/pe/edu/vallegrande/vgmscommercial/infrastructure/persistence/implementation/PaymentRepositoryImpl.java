@@ -65,19 +65,28 @@ public class PaymentRepositoryImpl implements IPaymentRepository {
      @Override
      public Flux<Payment> findByOrganizationId(String organizationId) {
           return paymentR2dbc.findByOrganizationId(organizationId)
-                    .map(entity -> toDomain(entity, Collections.emptyList()));
+                    .flatMap(entity -> detailR2dbc.findByPaymentId(entity.getId())
+                              .map(this::toDetailDomain)
+                              .collectList()
+                              .map(details -> toDomain(entity, details)));
      }
 
      @Override
      public Flux<Payment> findByUserId(String userId) {
           return paymentR2dbc.findByUserId(userId)
-                    .map(entity -> toDomain(entity, Collections.emptyList()));
+                    .flatMap(entity -> detailR2dbc.findByPaymentId(entity.getId())
+                              .map(this::toDetailDomain)
+                              .collectList()
+                              .map(details -> toDomain(entity, details)));
      }
 
      @Override
      public Flux<Payment> findByOrganizationIdAndStatus(String organizationId, String status) {
           return paymentR2dbc.findByOrganizationIdAndPaymentStatus(organizationId, status)
-                    .map(entity -> toDomain(entity, Collections.emptyList()));
+                    .flatMap(entity -> detailR2dbc.findByPaymentId(entity.getId())
+                              .map(this::toDetailDomain)
+                              .collectList()
+                              .map(details -> toDomain(entity, details)));
      }
 
      @Override
