@@ -25,10 +25,7 @@
 ############################
 # Tests (si NO quieres subirlos)
 ############################
-**/src/test/
-**/*Test.java
-**/*Tests.java
-**/*IntegrationTest.java
+
 
 ############################
 # IDEs
