@@ -63,16 +63,21 @@ public class PaymentRepositoryImpl implements IPaymentRepository {
 
      @Override
      public Flux<Payment> findByOrganizationId(String organizationId) {
-          return paymentR2dbc.findByOrganizationId(organizationId)
-                    .flatMap(entity -> detailR2dbc.findByPaymentId(entity.getId())
-                              .map(this::toDetailDomain)
-                              .collectList()
-                              .map(details -> toDomain(entity, details)));
+          log.info("Searching payments for organizationId: {}", organizationId);
+          return paymentR2dbc.findByOrganizationIdAndRecordStatus(organizationId, "ACTIVE")
+                    .flatMap(entity -> {
+                         log.debug("Found payment: {} for org: {}", entity.getId(), entity.getOrganizationId());
+                         return detailR2dbc.findByPaymentId(entity.getId())
+                                   .map(this::toDetailDomain)
+                                   .collectList()
+                                   .map(details -> toDomain(entity, details));
+                    })
+                    .doOnComplete(() -> log.info("Completed payment search for organizationId: {}", organizationId));
      }
 
      @Override
      public Flux<Payment> findByUserId(String userId) {
-          return paymentR2dbc.findByUserId(userId)
+          return paymentR2dbc.findByUserIdAndRecordStatus(userId, "ACTIVE")
                     .flatMap(entity -> detailR2dbc.findByPaymentId(entity.getId())
                               .map(this::toDetailDomain)
                               .collectList()
@@ -81,7 +86,7 @@ public class PaymentRepositoryImpl implements IPaymentRepository {
 
      @Override
      public Flux<Payment> findByOrganizationIdAndStatus(String organizationId, String status) {
-          return paymentR2dbc.findByOrganizationIdAndPaymentStatus(organizationId, status)
+          return paymentR2dbc.findByOrganizationIdAndPaymentStatusAndRecordStatus(organizationId, status, "ACTIVE")
                     .flatMap(entity -> detailR2dbc.findByPaymentId(entity.getId())
                               .map(this::toDetailDomain)
                               .collectList()
@@ -96,7 +101,7 @@ public class PaymentRepositoryImpl implements IPaymentRepository {
 
      @Override
      public Mono<Long> countByOrganizationIdAndStatus(String organizationId, String status) {
-          return paymentR2dbc.countByOrganizationIdAndPaymentStatus(organizationId, status);
+          return paymentR2dbc.countByOrganizationIdAndPaymentStatusAndRecordStatus(organizationId, status, "ACTIVE");
      }
 
      private PaymentEntity toEntity(Payment p) {

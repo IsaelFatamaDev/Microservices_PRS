@@ -1,26 +1,26 @@
 spring:
      r2dbc:
-          url: r2dbc:postgresql://localhost:5432/sistemajass
-          username: sistemajass_user
-          password: SISTEMAJASS
+          url: ${DATABASE_URL:r2dbc:postgresql://144.126.140.79:5410/sistemajass}
+          username: ${DB_USER:postgres}
+          password: ${DB_PASSWORD:SistemaJass12}
           pool:
                initial-size: 5
                max-size: 20
 
      flyway:
           enabled: true
-          url: jdbc:postgresql://localhost:5432/sistemajass
-          user: sistemajass_user
-          password: SISTEMAJASS
+          url: ${SPRING_FLYWAY_URL:jdbc:postgresql://144.126.140.79:5410/sistemajass}
+          user: ${SPRING_FLYWAY_USER:postgres}
+          password: ${SPRING_FLYWAY_PASSWORD:SistemaJass12}
           locations: classpath:db/migration
           table: flyway_schema_history_users
           baseline-on-migrate: true
 
      rabbitmq:
-          host: localhost
-          port: 5672
-          username: guest
-          password: guest
+          host: ${RABBITMQ_HOST:localhost}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USER:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
           publisher-confirm-type: correlated
 
 webclient:

@@ -256,7 +256,7 @@ interface WaterBox {
                 <div><p class="text-xs text-gray-400">Usuario</p><p class="text-sm text-gray-700">{{ getUserName(selectedComplaint()!.userId) }}</p></div>
                 <div><p class="text-xs text-gray-400">Categoría</p><p class="text-sm text-gray-700">{{ getCategoryName(selectedComplaint()!.categoryId) }}</p></div>
                 <div><p class="text-xs text-gray-400">Prioridad</p>
-                  <span [class]="getPriorityBadge(selectedComplaint()!.priority)" class="text-xs px-2 py-1 rounded-lg font-medium inline-block">{{ getPriorityLabel(selected Complaint()!.priority) }}</span>
+                  <span [class]="getPriorityBadge(selectedComplaint()!.priority)" class="text-xs px-2 py-1 rounded-lg font-medium inline-block">{{ getPriorityLabel(selectedComplaint()!.priority) }}</span>
                 </div>
                 <div><p class="text-xs text-gray-400">Estado</p>
                   <span [class]="getStatusBadge(selectedComplaint()!.status)" class="text-xs px-2 py-1 rounded-lg font-medium inline-block">{{ getStatusLabel(selectedComplaint()!.status) }}</span>
@@ -264,7 +264,7 @@ interface WaterBox {
               </div>
               <div><p class="text-xs text-gray-400 mb-1">Asunto</p><p class="text-sm font-medium text-gray-800">{{ selectedComplaint()!.subject }}</p></div>
               <div><p class="text-xs text-gray-400 mb-1">Descripción</p><p class="text-sm text-gray-700">{{ selectedComplaint()!.description }}</p></div>
-              
+
               @if (selectedComplaint()!.satisfactionRating) {
                 <div class="bg-emerald-50 rounded-xl p-4">
                   <p class="text-xs text-emerald-600 font-medium mb-2">Calificación de Satisfacción</p>
@@ -275,40 +275,6 @@ interface WaterBox {
                   </div>
                 </div>
               }
-
-              <!-- Responses Timeline -->
-              <div class="border-t border-gray-100 pt-4">
-                <div class="flex items-center justify-between mb-3">
-                  <h4 class="text-sm font-semibold text-gray-700">Respuestas</h4>
-                  <button (click)="openResponseModal()" class="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-1">
-                    <lucide-icon [img]="messageIcon" [size]="14"></lucide-icon>
-                    <span>Agregar Respuesta</span>
-                  </button>
-                </div>
-                @if (complaintResponses().length > 0) {
-                  <div class="space-y-3">
-                    @for (r of complaintResponses(); track r.id) {
-                      <div class="bg-gray-50 rounded-xl p-4">
-                        <div class="flex items-start justify-between mb-2">
-                          <div>
-                            <span [class]="r.responseType === 'OFFICIAL' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-700'" class="text-xs px-2 py-0.5 rounded font-medium">
-                              {{ r.responseType === 'OFFICIAL' ? 'Oficial' : 'Interna' }}
-                            </span>
-                          </div>
-                          <span class="text-xs text-gray-400">{{ r.respondedAt | date:'dd/MM/yyyy HH:mm' }}</span>
-                        </div>
-                        <p class="text-sm text-gray-700 mb-1">{{ r.message }}</p>
-                        @if (r.internalNotes) {
-                          <p class="text-xs text-gray-500 italic">Notas internas: {{ r.internalNotes }}</p>
-                        }
-                        <p class="text-xs text-gray-400 mt-2">Por: {{ getUserName(r.respondedBy) }}</p>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <p class="text-sm text-gray-400 text-center py-4">No hay respuestas aún</p>
-                }
-              </div>
 
               @if (selectedComplaint()!.status === 'RESOLVED') {
                 <div class="border-t border-gray-100 pt-4">
@@ -335,14 +301,18 @@ interface WaterBox {
             <form (ngSubmit)="addResponse()" class="p-6 space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Respuesta *</label>
-                <div class="flex gap-4">
+                <div class="flex flex-col gap-2">
                   <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" [(ngModel)]="responseData.responseType" name="responseType" value="OFFICIAL" required class="w-4 h-4 text-blue-600">
-                    <span class="text-sm text-gray-700">Oficial (visible para usuario)</span>
+                    <input type="radio" [(ngModel)]="responseData.responseType" name="responseType" value="INVESTIGACION" required class="w-4 h-4 text-blue-600">
+                    <span class="text-sm text-gray-700">Investigación</span>
                   </label>
                   <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" [(ngModel)]="responseData.responseType" name="responseType" value="INTERNAL" required class="w-4 h-4 text-gray-600">
-                    <span class="text-sm text-gray-700">Interna</span>
+                    <input type="radio" [(ngModel)]="responseData.responseType" name="responseType" value="SOLUCION" required class="w-4 h-4 text-emerald-600">
+                    <span class="text-sm text-gray-700">Solución</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" [(ngModel)]="responseData.responseType" name="responseType" value="SEGUIMIENTO" required class="w-4 h-4 text-amber-600">
+                    <span class="text-sm text-gray-700">Seguimiento</span>
                   </label>
                 </div>
               </div>
@@ -441,7 +411,7 @@ export class ComplaintsComponent implements OnInit {
 
   // Form data
   formData: any = {};
-  responseData: AddComplaintResponseRequest = { responseType: 'OFFICIAL', message: '', internalNotes: '' };
+  responseData: AddComplaintResponseRequest = { responseType: 'INVESTIGACION', message: '', internalNotes: '' };
   satisfactionRating = 0;
 
   // Computed
@@ -545,13 +515,13 @@ export class ComplaintsComponent implements OnInit {
   }
 
   openResponseModal(): void {
-    this.responseData = { responseType: 'OFFICIAL', message: '', internalNotes: '' };
+    this.responseData = { responseType: 'INVESTIGACION', message: '', internalNotes: '' };
     this.showResponseModal.set(true);
   }
 
   closeResponseModal(): void {
     this.showResponseModal.set(false);
-    this.responseData = { responseType: 'OFFICIAL', message: '', internalNotes: '' };
+    this.responseData = { responseType: 'INVESTIGACION', message: '', internalNotes: '' };
   }
 
   addResponse(): void {
@@ -645,5 +615,23 @@ export class ComplaintsComponent implements OnInit {
       CLOSED: 'bg-gray-100 text-gray-600'
     };
     return map[s] || 'bg-gray-100 text-gray-600';
+  }
+
+  getResponseTypeLabel(t: string): string {
+    const map: Record<string, string> = {
+      INVESTIGACION: 'Investigación',
+      SOLUCION: 'Solución',
+      SEGUIMIENTO: 'Seguimiento'
+    };
+    return map[t] || t;
+  }
+
+  getResponseTypeBadge(t: string): string {
+    const map: Record<string, string> = {
+      INVESTIGACION: 'bg-blue-100 text-blue-700',
+      SOLUCION: 'bg-emerald-100 text-emerald-700',
+      SEGUIMIENTO: 'bg-amber-100 text-amber-700'
+    };
+    return map[t] || 'bg-gray-100 text-gray-700';
   }
 }

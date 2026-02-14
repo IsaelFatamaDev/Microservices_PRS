@@ -10,13 +10,13 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface IPaymentR2dbcRepository extends R2dbcRepository<PaymentEntity, String> {
 
-     Flux<PaymentEntity> findByOrganizationId(String organizationId);
+     Flux<PaymentEntity> findByOrganizationIdAndRecordStatus(String organizationId, String recordStatus);
 
-     Flux<PaymentEntity> findByUserId(String userId);
+     Flux<PaymentEntity> findByUserIdAndRecordStatus(String userId, String recordStatus);
 
-     Flux<PaymentEntity> findByOrganizationIdAndPaymentStatus(String organizationId, String paymentStatus);
+     Flux<PaymentEntity> findByOrganizationIdAndPaymentStatusAndRecordStatus(String organizationId, String paymentStatus, String recordStatus);
 
-     Mono<Long> countByOrganizationIdAndPaymentStatus(String organizationId, String paymentStatus);
+     Mono<Long> countByOrganizationIdAndPaymentStatusAndRecordStatus(String organizationId, String paymentStatus, String recordStatus);
 
      @Query("SELECT COUNT(*) FROM payments WHERE organization_id = :orgId")
      Mono<Long> countByOrganizationId(String orgId);

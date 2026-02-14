@@ -221,7 +221,9 @@ export class SidebarComponent {
       roles: ['ADMIN'],
       children: [
         { label: 'Quejas', icon: AlertCircle, route: '/admin/claims/complaints', roles: ['ADMIN'] },
-        { label: 'Incidencias', icon: AlertCircle, route: '/admin/claims/incidents', roles: ['ADMIN'] }
+        { label: 'Incidencias', icon: AlertCircle, route: '/admin/claims/incidents', roles: ['ADMIN'] },
+        { label: 'Tipos de Incidencias', icon: AlertCircle, route: '/admin/claims/incident-types', roles: ['ADMIN'] },
+        { label: 'Categorías de Quejas', icon: AlertCircle, route: '/admin/claims/complaint-categories', roles: ['ADMIN'] }
       ]
     },
     {

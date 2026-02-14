@@ -422,7 +422,7 @@ export class IncidentsComponent implements OnInit {
     });
 
     this.http.get<ApiResponse<User[]>>(`${environment.apiUrl}/users`).subscribe({
-      next: r => this.allUsers.set((r.data || []).filter(u => u.organizationId === orgId))
+      next: r => this.allUsers.set((r.data || []).filter(u => u.organizationId === orgId && u.role === 'OPERATOR'))
     });
   }
 

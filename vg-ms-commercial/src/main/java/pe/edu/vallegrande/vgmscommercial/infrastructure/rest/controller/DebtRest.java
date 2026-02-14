@@ -109,12 +109,24 @@ public class DebtRest {
                ServerWebExchange exchange) {
           return headersExtractor.extract(exchange)
                     .flatMap(headers -> {
-                         var debt = pe.edu.vallegrande.vgmscommercial.domain.models.Debt.builder()
+                         var debtBuilder = pe.edu.vallegrande.vgmscommercial.domain.models.Debt.builder()
                                    .pendingAmount(request.getPendingAmount())
                                    .lateFee(request.getLateFee())
-                                   .updatedBy(headers.getUserId())
-                                   .build();
-                         return updateDebtUseCase.execute(id, debt);
+                                   .updatedBy(headers.getUserId());
+
+                         // Map debtStatus from String to enum if provided
+                         if (request.getDebtStatus() != null) {
+                              try {
+                                   debtBuilder.debtStatus(
+                                             pe.edu.vallegrande.vgmscommercial.domain.models.valueobjects.DebtStatus
+                                                       .valueOf(
+                                                                 request.getDebtStatus().toUpperCase()));
+                              } catch (IllegalArgumentException e) {
+                                   log.warn("Invalid debt status: {}", request.getDebtStatus());
+                              }
+                         }
+
+                         return updateDebtUseCase.execute(id, debtBuilder.build());
                     })
                     .map(saved -> ResponseEntity
                               .ok(ApiResponse.success(debtMapper.toResponse(saved), "Updated successfully")));

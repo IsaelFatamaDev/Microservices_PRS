@@ -1,22 +1,22 @@
 spring:
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/db_jass_organizations
-      auto-index-creation: true
+     data:
+          mongodb:
+               uri: ${MONGODB_URI:mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000}
+               auto-index-creation: true
 
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+     rabbitmq:
+          host: ${RABBITMQ_HOST:localhost}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USERNAME:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
 
 logging:
-  level:
-    root: INFO
-    pe.edu.vallegrande.vgmsorganizations: DEBUG
-    org.springframework.data.mongodb: DEBUG
+     level:
+          root: INFO
+          pe.edu.vallegrande.vgmsorganizations: DEBUG
+          org.springframework.data.mongodb: DEBUG
 
 cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME:drqpwb5rq}
-  api-key: ${CLOUDINARY_API_KEY:376462778114431}
-  api-secret: ${CLOUDINARY_API_SECRET:47C9YZgGsnXTCEu-yrifnY8NC5E}
+     cloud-name: ${CLOUDINARY_CLOUD_NAME:drqpwb5rq}
+     api-key: ${CLOUDINARY_API_KEY:376462778114431}
+     api-secret: ${CLOUDINARY_API_SECRET:47C9YZgGsnXTCEu-yrifnY8NC5E}

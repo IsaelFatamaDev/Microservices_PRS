@@ -58,6 +58,11 @@ public class FallbackController {
         return buildFallbackResponse("inventory", "Servicio de inventario y compras no disponible");
     }
 
+    @RequestMapping("/water-quality")
+    public Mono<ResponseEntity<Map<String, Object>>> waterQualityFallback() {
+        return buildFallbackResponse("water-quality", "Servicio de calidad de agua no disponible");
+    }
+
     private Mono<ResponseEntity<Map<String, Object>>> buildFallbackResponse(String service, String message) {
         Map<String, Object> response = Map.of(
                 "success", false,

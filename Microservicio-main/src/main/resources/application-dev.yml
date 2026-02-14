@@ -1,14 +1,14 @@
 spring:
      data:
           mongodb:
-               uri: mongodb+srv://Programador:zCZtYDpyvSL7b8Wz@sistemajass.tobosre.mongodb.net/SistemaJASS?retryWrites=true&w=majority&appName=SistemaJASS
+               uri: ${MONGODB_URI:mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000}
                auto-index-creation: true
 
      rabbitmq:
-          host: localhost
-          port: 5672
-          username: guest
-          password: guest
+          host: ${RABBITMQ_HOST:localhost}
+          port: ${RABBITMQ_PORT:5672}
+          username: ${RABBITMQ_USER:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
           publisher-confirm-type: correlated
           publisher-returns: true
 

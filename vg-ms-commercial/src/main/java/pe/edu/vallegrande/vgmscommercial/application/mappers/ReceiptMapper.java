@@ -25,6 +25,12 @@ public class ReceiptMapper {
                     .map(this::toDetailDomain)
                     .collect(Collectors.toList());
 
+          double paidAmount = request.getPaidAmount() != null ? request.getPaidAmount() : 0.0;
+          double pendingAmount = request.getTotalAmount() - paidAmount;
+          ReceiptStatus status = request.getReceiptStatus() != null
+                    ? ReceiptStatus.valueOf(request.getReceiptStatus())
+                    : ReceiptStatus.PENDING;
+
           return Receipt.builder()
                     .id(UUID.randomUUID().toString())
                     .organizationId(organizationId)
@@ -38,9 +44,9 @@ public class ReceiptMapper {
                     .issueDate(LocalDateTime.now())
                     .dueDate(dueDate)
                     .totalAmount(request.getTotalAmount())
-                    .paidAmount(0.0)
-                    .pendingAmount(request.getTotalAmount())
-                    .receiptStatus(ReceiptStatus.PENDING)
+                    .paidAmount(paidAmount)
+                    .pendingAmount(pendingAmount)
+                    .receiptStatus(status)
                     .notes(request.getNotes())
                     .details(details)
                     .build();

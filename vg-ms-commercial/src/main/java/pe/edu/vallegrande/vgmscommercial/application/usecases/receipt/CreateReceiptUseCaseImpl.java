@@ -35,14 +35,13 @@ public class CreateReceiptUseCaseImpl implements ICreateReceiptUseCase {
                     })
                     .flatMap(exists -> {
                          if (exists) {
-                              return Mono.error(new BusinessRuleException(
-                                        String.format("Receipt already exists for user %s period %02d/%d",
-                                                  receipt.getUserId(), receipt.getPeriodMonth(),
-                                                  receipt.getPeriodYear())));
+                              log.warn("Receipt already exists for user {} period {}/{} - skipping creation",
+                                        receipt.getUserId(), receipt.getPeriodMonth(), receipt.getPeriodYear());
+                              return Mono.empty();
                          }
                          return receiptRepository.save(receipt);
                     })
-                    .doOnSuccess(saved -> {
+                    .doOnNext(saved -> {
                          log.info("Receipt created successfully: {}", saved.getReceiptNumber());
                          eventPublisher.publishReceiptCreated(saved, saved.getCreatedBy());
                     });

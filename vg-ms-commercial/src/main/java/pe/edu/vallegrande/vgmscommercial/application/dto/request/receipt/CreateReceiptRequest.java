@@ -31,6 +31,10 @@ public class CreateReceiptRequest {
      @DecimalMin(value = "0.01", message = "Total amount must be greater than 0")
      private Double totalAmount;
 
+     private Double paidAmount;
+
+     private String receiptStatus;
+
      private String notes;
 
      @Valid

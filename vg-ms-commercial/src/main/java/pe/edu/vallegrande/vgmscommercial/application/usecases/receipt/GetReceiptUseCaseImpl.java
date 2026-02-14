@@ -27,7 +27,8 @@ public class GetReceiptUseCaseImpl implements IGetReceiptUseCase {
 
      @Override
      public Flux<Receipt> findAll(String organizationId, String status, String userId, Integer page, Integer size) {
-          log.debug("Finding receipts for organization: {}, status: {}", organizationId, status);
+          log.info("Finding receipts - OrgId: {}, Status: {}, UserId: {}, Page: {}, Size: {}",
+                    organizationId, status, userId, page, size);
           Flux<Receipt> receipts;
           if (status != null && !status.isEmpty()) {
                receipts = receiptRepository.findByOrganizationIdAndStatus(organizationId, status);
@@ -40,7 +41,10 @@ public class GetReceiptUseCaseImpl implements IGetReceiptUseCase {
           if (page != null && size != null) {
                receipts = receipts.skip((long) page * size).take(size);
           }
-          return receipts;
+          return receipts
+                    .doOnNext(r -> log.debug("Returning receipt: {} for user: {} with {} details",
+                                             r.getId(), r.getUserId(), r.getDetails() != null ? r.getDetails().size() : 0))
+                    .doOnComplete(() -> log.info("Completed receipt search for organizationId: {}", organizationId));
      }
 
      @Override

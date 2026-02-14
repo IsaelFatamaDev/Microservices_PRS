@@ -9,7 +9,7 @@ export type IncidentSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type ComplaintStatus = 'RECEIVED' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 export type ComplaintPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type ResolutionType = 'REPAIR' | 'REPLACEMENT' | 'ADJUSTMENT' | 'OTHER';
-export type ResponseType = 'OFFICIAL' | 'INTERNAL';
+export type ResponseType = 'INVESTIGACION' | 'SOLUCION' | 'SEGUIMIENTO';
 export type PriorityLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'URGENT';
 
 // ============================================================================

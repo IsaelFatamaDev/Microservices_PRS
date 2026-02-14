@@ -63,31 +63,49 @@ public class ReceiptRepositoryImpl implements IReceiptRepository {
 
      @Override
      public Flux<Receipt> findByOrganizationId(String organizationId) {
-          return receiptR2dbc.findByOrganizationId(organizationId)
-                    .map(entity -> toDomain(entity, Collections.emptyList()));
+          log.info("Searching receipts for organizationId: {}", organizationId);
+          return receiptR2dbc.findByOrganizationIdAndRecordStatus(organizationId, "ACTIVE")
+                    .flatMap(entity -> {
+                         log.debug("Found receipt: {} for org: {}", entity.getId(), entity.getOrganizationId());
+                         return detailR2dbc.findByReceiptId(entity.getId())
+                                   .map(this::toDetailDomain)
+                                   .collectList()
+                                   .map(details -> toDomain(entity, details));
+                    })
+                    .doOnComplete(() -> log.info("Completed receipt search for organizationId: {}", organizationId));
      }
 
      @Override
      public Flux<Receipt> findByUserId(String userId) {
-          return receiptR2dbc.findByUserId(userId)
-                    .map(entity -> toDomain(entity, Collections.emptyList()));
+          log.info("Searching receipts for userId: {}", userId);
+          return receiptR2dbc.findByUserIdAndRecordStatus(userId, "ACTIVE")
+                    .flatMap(entity -> detailR2dbc.findByReceiptId(entity.getId())
+                              .map(this::toDetailDomain)
+                              .collectList()
+                              .map(details -> toDomain(entity, details)));
      }
 
      @Override
      public Flux<Receipt> findByOrganizationIdAndStatus(String organizationId, String status) {
-          return receiptR2dbc.findByOrganizationIdAndReceiptStatus(organizationId, status)
-                    .map(entity -> toDomain(entity, Collections.emptyList()));
+          return receiptR2dbc.findByOrganizationIdAndReceiptStatusAndRecordStatus(organizationId, status, "ACTIVE")
+                    .flatMap(entity -> detailR2dbc.findByReceiptId(entity.getId())
+                              .map(this::toDetailDomain)
+                              .collectList()
+                              .map(details -> toDomain(entity, details)));
      }
 
      @Override
      public Flux<Receipt> findByOrganizationIdAndPeriod(String organizationId, Integer month, Integer year) {
-          return receiptR2dbc.findByOrganizationIdAndPeriodMonthAndPeriodYear(organizationId, month, year)
-                    .map(entity -> toDomain(entity, Collections.emptyList()));
+          return receiptR2dbc.findByOrganizationIdAndPeriodMonthAndPeriodYearAndRecordStatus(organizationId, month, year, "ACTIVE")
+                    .flatMap(entity -> detailR2dbc.findByReceiptId(entity.getId())
+                              .map(this::toDetailDomain)
+                              .collectList()
+                              .map(details -> toDomain(entity, details)));
      }
 
      @Override
      public Mono<Boolean> existsByUserIdAndPeriod(String userId, Integer month, Integer year) {
-          return receiptR2dbc.existsByUserIdAndPeriodMonthAndPeriodYear(userId, month, year);
+          return receiptR2dbc.existsByUserIdAndPeriodMonthAndPeriodYearAndRecordStatus(userId, month, year, "ACTIVE");
      }
 
      @Override
@@ -98,7 +116,7 @@ public class ReceiptRepositoryImpl implements IReceiptRepository {
 
      @Override
      public Mono<Long> countByOrganizationIdAndStatus(String organizationId, String status) {
-          return receiptR2dbc.countByOrganizationIdAndReceiptStatus(organizationId, status);
+          return receiptR2dbc.countByOrganizationIdAndReceiptStatusAndRecordStatus(organizationId, status, "ACTIVE");
      }
 
      private ReceiptEntity toEntity(Receipt r) {

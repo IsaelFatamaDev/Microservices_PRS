@@ -27,7 +27,8 @@ public class GetPaymentUseCaseImpl implements IGetPaymentUseCase {
 
      @Override
      public Flux<Payment> findAll(String organizationId, String status, String userId, Integer page, Integer size) {
-          log.debug("Finding payments for organization: {}", organizationId);
+          log.info("Finding payments - OrgId: {}, Status: {}, UserId: {}, Page: {}, Size: {}",
+                    organizationId, status, userId, page, size);
           Flux<Payment> payments;
           if (status != null && !status.isEmpty()) {
                payments = paymentRepository.findByOrganizationIdAndStatus(organizationId, status);
@@ -40,7 +41,9 @@ public class GetPaymentUseCaseImpl implements IGetPaymentUseCase {
           if (page != null && size != null) {
                payments = payments.skip((long) page * size).take(size);
           }
-          return payments;
+          return payments
+                    .doOnNext(p -> log.debug("Returning payment: {} for user: {}", p.getId(), p.getUserId()))
+                    .doOnComplete(() -> log.info("Completed payment search for organizationId: {}", organizationId));
      }
 
      @Override

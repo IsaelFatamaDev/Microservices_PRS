@@ -67,11 +67,18 @@ public class PaymentRest {
                @RequestParam(required = false) Integer size,
                ServerWebExchange exchange) {
           return headersExtractor.extract(exchange)
-                    .flatMap(headers -> getPaymentUseCase
-                              .findAll(headers.getOrganizationId(), status, userId, page, size)
-                              .map(paymentMapper::toResponse)
-                              .collectList())
-                    .map(list -> ResponseEntity.ok(ApiResponse.success(list, "Retrieved successfully")));
+                    .flatMap(headers -> {
+                         log.info("GET /payments - OrgId from header: {}, Status: {}, UserId: {}, Page: {}, Size: {}",
+                                   headers.getOrganizationId(), status, userId, page, size);
+                         return getPaymentUseCase
+                                   .findAll(headers.getOrganizationId(), status, userId, page, size)
+                                   .map(paymentMapper::toResponse)
+                                   .collectList();
+                    })
+                    .map(list -> {
+                         log.info("Returning {} payments", list.size());
+                         return ResponseEntity.ok(ApiResponse.success(list, "Retrieved successfully"));
+                    });
      }
 
      @GetMapping("/user/{userId}")

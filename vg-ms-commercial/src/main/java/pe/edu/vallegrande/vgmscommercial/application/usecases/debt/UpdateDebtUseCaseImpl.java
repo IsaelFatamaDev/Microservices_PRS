@@ -27,19 +27,32 @@ public class UpdateDebtUseCaseImpl implements IUpdateDebtUseCase {
           return debtRepository.findById(id)
                     .switchIfEmpty(Mono.error(new DebtNotFoundException(id)))
                     .flatMap(existing -> {
-                         if (existing.isPaid()) {
+                         // Allow updating to PAID status
+                         boolean isMarkingAsPaid = debt.getDebtStatus() != null &&
+                                   debt.getDebtStatus().name().equals("PAID");
+
+                         if (existing.isPaid() && !isMarkingAsPaid) {
                               return Mono.error(new BusinessRuleException("Cannot update a paid debt"));
                          }
-                         Debt updated = existing.toBuilder()
+
+                         var builder = existing.toBuilder()
                                    .pendingAmount(debt.getPendingAmount() != null ? debt.getPendingAmount()
                                              : existing.getPendingAmount())
                                    .lateFee(debt.getLateFee() != null ? debt.getLateFee() : existing.getLateFee())
                                    .dueDate(debt.getDueDate() != null ? debt.getDueDate() : existing.getDueDate())
                                    .updatedAt(LocalDateTime.now())
-                                   .updatedBy(debt.getUpdatedBy())
-                                   .build();
+                                   .updatedBy(debt.getUpdatedBy());
+
+                         // Update debtStatus if provided
+                         if (debt.getDebtStatus() != null) {
+                              builder.debtStatus(debt.getDebtStatus());
+                              log.info("Updating debt {} status to: {}", id, debt.getDebtStatus());
+                         }
+
+                         Debt updated = builder.build();
                          return debtRepository.save(updated);
                     })
-                    .doOnSuccess(saved -> log.info("Debt updated successfully: {}", saved.getId()));
+                    .doOnSuccess(saved -> log.info("Debt updated successfully: {} - Status: {}",
+                              saved.getId(), saved.getDebtStatus()));
      }
 }

@@ -255,6 +255,23 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  vg-ms-water-quality:
+    image: isaelfatamadev/prs_microservices-vg-ms-water-quality:latest
+    container_name: vg-ms-water-quality
+    mem_limit: 250m
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      MONGODB_URI: mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: admin
+      RABBITMQ_PASSWORD: admin
+    networks: [ jass-net ]
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   vg-ms-gateway:
     image: isaelfatamadev/prs_microservices-vg-ms-gateway:latest
     container_name: vg-ms-gateway
@@ -281,6 +298,7 @@ services:
       - vg-ms-infrastructure
       - vg-ms-commercial
       - vg-ms-inventory-purchases
+      - vg-ms-water-quality
 
 networks:
   jass-net:

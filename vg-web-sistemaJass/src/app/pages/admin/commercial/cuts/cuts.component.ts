@@ -336,7 +336,7 @@ export class CutsComponent implements OnInit {
     const req: CreateServiceCutRequest = {
       userId: this.newCut.userId,
       waterBoxId: this.newCut.waterBoxId,
-      scheduledDate: this.newCut.scheduledDate,
+      scheduledDate: this.newCut.scheduledDate + 'T00:00:00',
       cutReason: this.newCut.cutReason,
       debtAmount: this.newCut.debtAmount || undefined,
       notes: this.newCut.notes || undefined

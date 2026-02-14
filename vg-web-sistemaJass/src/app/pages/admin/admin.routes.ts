@@ -74,6 +74,14 @@ export const ADMIN_ROUTES: Routes = [
           loadComponent: () => import('./claims/incidents/incidents.component').then(m => m.IncidentsComponent)
      },
      {
+          path: 'claims/incident-types',
+          loadComponent: () => import('./claims/incident-types/incident-types.component').then(m => m.IncidentTypesComponent)
+     },
+     {
+          path: 'claims/complaint-categories',
+          loadComponent: () => import('./claims/complaint-categories/complaint-categories.component').then(m => m.ComplaintCategoriesComponent)
+     },
+     {
           path: 'distribution/programs',
           loadComponent: () => import('./distribution/programs/programs.component').then(m => m.ProgramsComponent)
      },

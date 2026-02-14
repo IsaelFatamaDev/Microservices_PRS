@@ -83,6 +83,8 @@ export interface CreateReceiptRequest {
      periodMonth: number;
      periodYear: number;
      totalAmount: number;
+     paidAmount?: number;
+     receiptStatus?: string;
      notes?: string;
      details: CreateReceiptDetailRequest[];
 }

@@ -530,6 +530,8 @@ export class PaymentsComponent implements OnInit {
     const year = this.selectedYear();
     const debts = this.userDebts();
     const selected = this.selectedMonths();
+    const payments = this.allPayments();
+    const selectedUser = this.selectedUserBox();
     const now = new Date();
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
@@ -539,7 +541,22 @@ export class PaymentsComponent implements OnInit {
       const month = i + 1;
       const debt = debts.find(d => d.periodMonth === month && d.periodYear === year);
       const isSelected = selected.some(s => s.month === month && s.year === year);
-      const isPaid = debt?.debtStatus === 'PAID';
+
+      // Check if paid via debt status OR if there's a COMPLETED payment for this month
+      let isPaid = debt?.debtStatus === 'PAID';
+      if (!isPaid && selectedUser) {
+        const monthPayment = payments.find(p =>
+          p.userId === selectedUser.user.id &&
+          p.paymentStatus === 'COMPLETED' &&
+          p.details?.some(d =>
+            d.periodMonth === month &&
+            d.periodYear === year &&
+            d.paymentType === 'MONTHLY_FEE'
+          )
+        );
+        isPaid = !!monthPayment;
+      }
+
       const isOverdue = !isPaid && (year < currentYear || (year === currentYear && month < currentMonth));
 
       let status: MonthCell['status'] = 'pending';
@@ -747,25 +764,32 @@ export class PaymentsComponent implements OnInit {
         // Update paid debts
         this.updatePaidDebts(paidMonths);
 
-        this.loadUserDebts(ub.user.id);
-        this.loadBaseData();
+        // Wait 2 seconds before reloading to ensure DB updates are committed
+        setTimeout(() => {
+          this.loadUserDebts(ub.user.id);
+          this.loadBaseData();
+        }, 2000);
 
         // Get full payment with details before generating PDF and create receipt
         if (res.data?.id) {
-          this.commercialService.getPayment(res.data.id).subscribe({
-            next: (fullRes) => {
-              if (fullRes.data) {
-                this.generateReceiptPdf(fullRes.data, ub);
-                this.createReceiptFromPayment(fullRes.data);
+          // Wait longer for DB consistency (increased from 500ms to 1500ms)
+          setTimeout(() => {
+            console.log('Fetching payment details for:', res.data!.id);
+            this.commercialService.getPayment(res.data!.id).subscribe({
+              next: (fullRes) => {
+                if (fullRes.data) {
+                  this.generateReceiptPdf(fullRes.data, ub);
+                  this.createReceiptFromPayment(fullRes.data);
+                }
+              },
+              error: () => {
+                if (res.data) {
+                  this.generateReceiptPdf(res.data, ub);
+                  this.createReceiptFromPayment(res.data);
+                }
               }
-            },
-            error: () => {
-              if (res.data) {
-                this.generateReceiptPdf(res.data, ub);
-                this.createReceiptFromPayment(res.data);
-              }
-            }
-          });
+            });
+          }, 1500);
         }
       },
       error: (err) => {
@@ -840,13 +864,15 @@ export class PaymentsComponent implements OnInit {
     const monthlyDetails = payment.details.filter(d => d.paymentType === 'MONTHLY_FEE');
     if (monthlyDetails.length === 0) return;
 
-    // For each monthly detail, create a receipt
+    // For each monthly detail, create a receipt (backend will skip if already exists)
     monthlyDetails.forEach(detail => {
       const receiptReq: CreateReceiptRequest = {
         userId: payment.userId,
         periodMonth: detail.periodMonth || 1,
         periodYear: detail.periodYear || new Date().getFullYear(),
         totalAmount: detail.amount,
+        paidAmount: detail.amount,
+        receiptStatus: 'PAID',
         notes: `Pago registrado: ${payment.receiptNumber}`,
         details: [{
           conceptType: 'MONTHLY_FEE',
@@ -856,8 +882,13 @@ export class PaymentsComponent implements OnInit {
       };
 
       this.commercialService.createReceipt(receiptReq).subscribe({
-        next: () => console.log(`Receipt created for period ${detail.periodMonth}/${detail.periodYear}`),
-        error: (err) => console.error('Error creating receipt:', err)
+        next: () => console.log(`Receipt created or already exists for period ${detail.periodMonth}/${detail.periodYear}`),
+        error: (err) => {
+          // Only log non-duplicate errors
+          if (!err?.error?.message?.includes('already exists')) {
+            console.error('Error creating receipt:', err);
+          }
+        }
       });
     });
   }

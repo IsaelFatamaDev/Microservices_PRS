@@ -3,7 +3,7 @@ spring:
           gateway:
                routes:
                     - id: auth-service
-                      uri: http://vg-ms-authentication:8082
+                      uri: http://localhost:8082
                       predicates:
                            - Path=/api/auth/**
                       filters:
@@ -13,7 +13,7 @@ spring:
                                   name: authCircuitBreaker
                                   fallbackUri: forward:/fallback/auth
                     - id: users-service
-                      uri: http://vg-ms-users:8081
+                      uri: http://localhost:8081
                       predicates:
                            - Path=/api/users/**
                       filters:
@@ -23,7 +23,7 @@ spring:
                                   name: usersCircuitBreaker
                                   fallbackUri: forward:/fallback/users
                     - id: organizations-service
-                      uri: http://vg-ms-organizations:8083
+                      uri: http://localhost:8083
                       predicates:
                            - Path=/api/organizations/**,/api/zones/**,/api/streets/**,/api/fares/**,/api/parameters/**
                       filters:
@@ -33,7 +33,7 @@ spring:
                                   name: organizationsCircuitBreaker
                                   fallbackUri: forward:/fallback/organizations
                     - id: notifications-service
-                      uri: http://vg-ms-notifications:8090
+                      uri: http://localhost:8090
                       predicates:
                            - Path=/api/notifications/**
                       filters:
@@ -43,9 +43,9 @@ spring:
                                   name: notificationsCircuitBreaker
                                   fallbackUri: forward:/fallback/notifications
                     - id: distribution-service
-                      uri: http://vg-ms-distribution:8091
+                      uri: http://localhost:8091
                       predicates:
-                           - Path=/api/distribution-programs/**,/api/distribution-routes/**,/api/distribution-schedules/**
+                           - Path=/api/programs/**,/api/routes/**,/api/schedules/**
                       filters:
                            - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
                            - name: CircuitBreaker
@@ -54,7 +54,7 @@ spring:
                                   fallbackUri: forward:/fallback/distribution
 
                     - id: infrastructure-service
-                      uri: http://vg-ms-infrastructure:8089
+                      uri: http://localhost:8089
                       predicates:
                            - Path=/api/water-boxes/**,/api/water-box-assignments/**,/api/water-box-transfers/**
                       filters:
@@ -65,7 +65,7 @@ spring:
                                   fallbackUri: forward:/fallback/infrastructure
 
                     - id: commercial-service
-                      uri: http://vg-ms-commercial:8094
+                      uri: http://localhost:8094
                       predicates:
                            - Path=/api/receipts/**,/api/debts/**,/api/payments/**,/api/petty-cash/**,/api/petty-cash-movements/**,/api/service-cuts/**
                       filters:
@@ -76,7 +76,7 @@ spring:
                                   fallbackUri: forward:/fallback/commercial
 
                     - id: claims-service
-                      uri: http://vg-ms-claims:8085
+                      uri: http://localhost:8085
                       predicates:
                            - Path=/api/incidents/**,/api/incident-resolutions/**,/api/incident-types/**,/api/complaints/**,/api/complaint-categories/**,/api/complaint-responses/**
                       filters:
@@ -87,7 +87,7 @@ spring:
                                   fallbackUri: forward:/fallback/claims
 
                     - id: inventory-service
-                      uri: http://vg-ms-inventory-purchases:8087
+                      uri: http://localhost:8087
                       predicates:
                            - Path=/api/suppliers/**,/api/product-categories/**,/api/materials/**,/api/purchases/**,/api/purchase-details/**,/api/inventory-movements/**
                       filters:
@@ -96,6 +96,22 @@ spring:
                              args:
                                   name: inventoryCircuitBreaker
                                   fallbackUri: forward:/fallback/inventory
+
+                    - id: water-quality-service
+                      uri: http://localhost:8095
+                      predicates:
+                           - Path=/api/quality-tests/**,/api/testing-points/**
+                      filters:
+                           - RewritePath=/api/(?<segment>.*), /api/v1/${segment}
+                           - name: CircuitBreaker
+                             args:
+                                  name: waterQualityCircuitBreaker
+                                  fallbackUri: forward:/fallback/water-quality
+     data:
+          redis:
+               host: ${REDIS_HOST:localhost}
+               port: ${REDIS_PORT:6379}
+
 cors:
      allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,https://lab.vallegrande.edu.pe/jass/SistemaJass}
 logging:

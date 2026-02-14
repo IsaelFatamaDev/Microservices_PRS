@@ -71,11 +71,18 @@ public class ReceiptRest {
                @RequestParam(required = false) Integer size,
                ServerWebExchange exchange) {
           return headersExtractor.extract(exchange)
-                    .flatMap(headers -> getReceiptUseCase
-                              .findAll(headers.getOrganizationId(), status, userId, page, size)
-                              .map(receiptMapper::toResponse)
-                              .collectList())
-                    .map(list -> ResponseEntity.ok(ApiResponse.success(list, "Retrieved successfully")));
+                    .flatMap(headers -> {
+                         log.info("GET /receipts - OrgId from header: {}, Status: {}, UserId: {}, Page: {}, Size: {}",
+                                   headers.getOrganizationId(), status, userId, page, size);
+                         return getReceiptUseCase
+                                   .findAll(headers.getOrganizationId(), status, userId, page, size)
+                                   .map(receiptMapper::toResponse)
+                                   .collectList();
+                    })
+                    .map(list -> {
+                         log.info("Returning {} receipts", list.size());
+                         return ResponseEntity.ok(ApiResponse.success(list, "Retrieved successfully"));
+                    });
      }
 
      @GetMapping("/user/{userId}")
