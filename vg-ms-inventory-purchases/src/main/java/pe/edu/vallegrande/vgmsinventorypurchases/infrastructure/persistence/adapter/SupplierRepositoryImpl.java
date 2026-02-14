@@ -10,8 +10,6 @@ import pe.edu.vallegrande.vgmsinventorypurchases.infrastructure.persistence.repo
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class SupplierRepositoryImpl implements ISupplierRepository {
@@ -21,9 +19,7 @@ public class SupplierRepositoryImpl implements ISupplierRepository {
     @Override
     public Mono<Supplier> save(Supplier supplier) {
         SupplierEntity entity = toEntity(supplier);
-        if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID().toString());
-        }
+        entity.setNew(entity.getId() == null);
         return r2dbcRepository.save(entity).map(this::toDomain);
     }
 

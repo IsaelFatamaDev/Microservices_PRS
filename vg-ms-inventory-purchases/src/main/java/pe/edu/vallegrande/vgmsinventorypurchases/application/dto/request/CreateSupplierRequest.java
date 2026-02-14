@@ -13,7 +13,6 @@ public class CreateSupplierRequest {
     private final String organizationId;
     @NotBlank(message = "Supplier name is required")
     private final String supplierName;
-    @NotBlank(message = "RUC is required")
     private final String ruc;
     private final String address;
     private final String phone;

@@ -2,24 +2,25 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { SKIP_ERROR_ALERT } from '../../../core/interceptors/error.interceptor';
 import {
-     LucideAngularModule, ArrowLeft, Save, Loader2, UserCog, UserCheck,
-     MapPin, Phone, Mail, Droplets, FileText, Hash, ChevronRight, Printer, CheckCircle
+  LucideAngularModule, ArrowLeft, Save, Loader2, UserCog, UserCheck,
+  MapPin, Phone, Mail, Droplets, FileText, Hash, ChevronRight, Printer, CheckCircle
 } from 'lucide-angular';
 import { environment } from '../../../../environments/environment';
 import {
-     User, ApiResponse, CreateUserRequest, UpdateUserRequest, Zone, Street,
-     Role, DocumentType, CreateWaterBoxRequest, AssignWaterBoxRequest, BoxType
+  User, ApiResponse, CreateUserRequest, UpdateUserRequest, Zone, Street,
+  Role, DocumentType, CreateWaterBoxRequest, AssignWaterBoxRequest, BoxType
 } from '../../../core';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-     selector: 'app-user-form',
-     standalone: true,
-     imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
-     template: `
+  selector: 'app-user-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
+  template: `
     <div class="max-w-4xl mx-auto space-y-5">
       <div class="flex items-center gap-4">
         <a routerLink="/admin/users" class="p-2.5 hover:bg-gray-100 rounded-xl transition-colors">
@@ -380,138 +381,138 @@ import { AuthService } from '../../../core/services/auth.service';
   `
 })
 export class UserFormComponent implements OnInit {
-     private http = inject(HttpClient);
-     private router = inject(Router);
-     private route = inject(ActivatedRoute);
-     private alertService = inject(AlertService);
-     private authService = inject(AuthService);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private alertService = inject(AlertService);
+  private authService = inject(AuthService);
 
-     isEditMode = signal(false);
-     isSubmitting = signal(false);
-     userId = signal<string | null>(null);
-     currentStep = signal(0);
-     stepMessage = signal('Procesando...');
-     showCredentialReport = signal(false);
+  isEditMode = signal(false);
+  isSubmitting = signal(false);
+  userId = signal<string | null>(null);
+  currentStep = signal(0);
+  stepMessage = signal('Procesando...');
+  showCredentialReport = signal(false);
 
-     zones = signal<Zone[]>([]);
-     allStreets = signal<Street[]>([]);
-     filteredStreets = signal<Street[]>([]);
-     generatedBoxCode = signal('');
+  zones = signal<Zone[]>([]);
+  allStreets = signal<Street[]>([]);
+  filteredStreets = signal<Street[]>([]);
+  generatedBoxCode = signal('');
 
-     selectedRole: Role = 'CLIENT';
-     selectedZoneId = '';
-     selectedStreetId = '';
-     selectedBoxType: BoxType = 'RESIDENTIAL';
-     hasWhatsApp = true;
-     fieldErrors = signal<Record<string, string>>({});
-     private allOrgUsers = signal<User[]>([]);
+  selectedRole: Role = 'CLIENT';
+  selectedZoneId = '';
+  selectedStreetId = '';
+  selectedBoxType: BoxType = 'RESIDENTIAL';
+  hasWhatsApp = true;
+  fieldErrors = signal<Record<string, string>>({});
+  private allOrgUsers = signal<User[]>([]);
 
-     form: {
-          firstName: string; lastName: string; documentType: DocumentType;
-          documentNumber: string; email: string; phone: string; address: string;
-     } = {
-               firstName: '', lastName: '', documentType: 'DNI',
-               documentNumber: '', email: '', phone: '', address: ''
-          };
+  form: {
+    firstName: string; lastName: string; documentType: DocumentType;
+    documentNumber: string; email: string; phone: string; address: string;
+  } = {
+      firstName: '', lastName: '', documentType: 'DNI',
+      documentNumber: '', email: '', phone: '', address: ''
+    };
 
-     backIcon = ArrowLeft; saveIcon = Save; loaderIcon = Loader2;
-     userCogIcon = UserCog; userCheckIcon = UserCheck;
-     mapPinIcon = MapPin; phoneIcon = Phone; mailIcon = Mail;
-     dropletsIcon = Droplets; fileIcon = FileText; hashIcon = Hash;
-     chevronIcon = ChevronRight; printerIcon = Printer; checkIcon = CheckCircle;
+  backIcon = ArrowLeft; saveIcon = Save; loaderIcon = Loader2;
+  userCogIcon = UserCog; userCheckIcon = UserCheck;
+  mapPinIcon = MapPin; phoneIcon = Phone; mailIcon = Mail;
+  dropletsIcon = Droplets; fileIcon = FileText; hashIcon = Hash;
+  chevronIcon = ChevronRight; printerIcon = Printer; checkIcon = CheckCircle;
 
-     createdUserFullName = computed(() => `${this.form.lastName}, ${this.form.firstName}`);
+  createdUserFullName = computed(() => `${this.form.lastName}, ${this.form.firstName}`);
 
-     private get headers() {
-          return { 'X-User-Id': this.authService.userId() || '', 'Content-Type': 'application/json' };
-     }
+  private get headers() {
+    return { 'X-User-Id': this.authService.userId() || '', 'Content-Type': 'application/json' };
+  }
 
-     private get orgId(): string {
-          return this.authService.organizationId() || '';
-     }
+  private get orgId(): string {
+    return this.authService.organizationId() || '';
+  }
 
-     ngOnInit(): void {
-          const id = this.route.snapshot.paramMap.get('id');
-          const roleParam = this.route.snapshot.queryParamMap.get('role');
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    const roleParam = this.route.snapshot.queryParamMap.get('role');
 
-          if (roleParam === 'OPERATOR' || roleParam === 'CLIENT') {
-               this.selectedRole = roleParam;
-          }
+    if (roleParam === 'OPERATOR' || roleParam === 'CLIENT') {
+      this.selectedRole = roleParam;
+    }
 
-          if (id) {
-               this.userId.set(id);
-               this.isEditMode.set(true);
-               this.loadUser(id);
-          }
+    if (id) {
+      this.userId.set(id);
+      this.isEditMode.set(true);
+      this.loadUser(id);
+    }
 
-          this.loadZones();
-          this.loadStreets();
-          this.generateBoxCode();
-          this.loadAllUsers();
-     }
+    this.loadZones();
+    this.loadStreets();
+    this.generateBoxCode();
+    this.loadAllUsers();
+  }
 
-     onZoneChange(): void {
-          this.selectedStreetId = '';
-          if (this.selectedZoneId) {
-               this.filteredStreets.set(
-                    this.allStreets().filter(s => s.zoneId === this.selectedZoneId && s.recordStatus === 'ACTIVE')
-               );
-          } else {
-               this.filteredStreets.set([]);
-          }
-     }
+  onZoneChange(): void {
+    this.selectedStreetId = '';
+    if (this.selectedZoneId) {
+      this.filteredStreets.set(
+        this.allStreets().filter(s => s.zoneId === this.selectedZoneId && s.recordStatus === 'ACTIVE')
+      );
+    } else {
+      this.filteredStreets.set([]);
+    }
+  }
 
-     onSubmit(): void {
-          const currentErrors = this.fieldErrors();
-          if (Object.keys(currentErrors).length > 0) {
-               this.alertService.warning('Datos inválidos', Object.values(currentErrors)[0]);
-               return;
-          }
-          if (!this.form.firstName || !this.form.lastName || !this.form.documentNumber) {
-               this.alertService.warning('Campos requeridos', 'Complete apellidos, nombres y N° de documento');
-               return;
-          }
-          if (this.form.documentType === 'DNI' && this.form.documentNumber.length !== 8) {
-               this.alertService.warning('Documento inválido', 'El DNI debe tener exactamente 8 dígitos numéricos');
-               return;
-          }
-          if (this.form.phone && this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
-               this.alertService.warning('Teléfono inválido', 'El número debe comenzar con 9');
-               return;
-          }
-          if (this.form.phone && this.form.phone.length > 0 && this.form.phone.length !== 9) {
-               this.alertService.warning('Teléfono inválido', 'El número debe tener 9 dígitos');
-               return;
-          }
-          if (this.form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
-               this.alertService.warning('Email inválido', 'Ingrese un correo electrónico válido');
-               return;
-          }
-          if (this.selectedRole === 'OPERATOR' && (!this.form.email || !this.form.phone)) {
-               this.alertService.warning('Campos requeridos', 'Para operadores el email y teléfono son obligatorios');
-               return;
-          }
-          if (!this.isEditMode() && (!this.selectedZoneId || !this.selectedStreetId)) {
-               this.alertService.warning('Campos requeridos', 'Seleccione zona y calle');
-               return;
-          }
+  onSubmit(): void {
+    const currentErrors = this.fieldErrors();
+    if (Object.keys(currentErrors).length > 0) {
+      this.alertService.warning('Datos inválidos', Object.values(currentErrors)[0]);
+      return;
+    }
+    if (!this.form.firstName || !this.form.lastName || !this.form.documentNumber) {
+      this.alertService.warning('Campos requeridos', 'Complete apellidos, nombres y N° de documento');
+      return;
+    }
+    if (this.form.documentType === 'DNI' && this.form.documentNumber.length !== 8) {
+      this.alertService.warning('Documento inválido', 'El DNI debe tener exactamente 8 dígitos numéricos');
+      return;
+    }
+    if (this.form.phone && this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
+      this.alertService.warning('Teléfono inválido', 'El número debe comenzar con 9');
+      return;
+    }
+    if (this.form.phone && this.form.phone.length > 0 && this.form.phone.length !== 9) {
+      this.alertService.warning('Teléfono inválido', 'El número debe tener 9 dígitos');
+      return;
+    }
+    if (this.form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
+      this.alertService.warning('Email inválido', 'Ingrese un correo electrónico válido');
+      return;
+    }
+    if (this.selectedRole === 'OPERATOR' && (!this.form.email || !this.form.phone)) {
+      this.alertService.warning('Campos requeridos', 'Para operadores el email y teléfono son obligatorios');
+      return;
+    }
+    if (!this.isEditMode() && (!this.selectedZoneId || !this.selectedStreetId)) {
+      this.alertService.warning('Campos requeridos', 'Seleccione zona y calle');
+      return;
+    }
 
-          this.isSubmitting.set(true);
-          if (this.isEditMode()) {
-               this.updateUser();
-          } else {
-               this.createUserFlow();
-          }
-     }
+    this.isSubmitting.set(true);
+    if (this.isEditMode()) {
+      this.updateUser();
+    } else {
+      this.createUserFlow();
+    }
+  }
 
-     printReport(): void {
-          const el = document.getElementById('credentialReport');
-          if (!el) return;
+  printReport(): void {
+    const el = document.getElementById('credentialReport');
+    if (!el) return;
 
-          const printWindow = window.open('', '_blank', 'width=400,height=500');
-          if (!printWindow) return;
+    const printWindow = window.open('', '_blank', 'width=400,height=500');
+    if (!printWindow) return;
 
-          printWindow.document.write(`
+    printWindow.document.write(`
       <html><head><title>Credenciales</title>
       <style>
         body { font-family: Arial, sans-serif; padding: 24px; max-width: 360px; margin: 0 auto; }
@@ -530,330 +531,331 @@ export class UserFormComponent implements OnInit {
         <div class="note">La contraseña inicial es su número de documento. Cámbiela en su primer inicio de sesión.</div>
       </body></html>
     `);
-          printWindow.document.close();
-          printWindow.print();
-     }
+    printWindow.document.close();
+    printWindow.print();
+  }
 
-     closeAndNavigate(): void {
-          this.showCredentialReport.set(false);
+  closeAndNavigate(): void {
+    this.showCredentialReport.set(false);
+    this.router.navigate(['/admin/users']);
+  }
+
+  // --- Validation methods ---
+
+  sanitizeName(field: 'firstName' | 'lastName', value: string): void {
+    this.form[field] = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+  }
+
+  sanitizeDocument(value: string): void {
+    if (this.form.documentType === 'DNI') {
+      this.form.documentNumber = value.replace(/\D/g, '').slice(0, 8);
+    } else {
+      this.form.documentNumber = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20);
+    }
+    this.clearFieldError('documentNumber');
+  }
+
+  onDocumentTypeChange(): void {
+    this.form.documentNumber = '';
+    this.clearFieldError('documentNumber');
+  }
+
+  sanitizePhone(value: string): void {
+    this.form.phone = value.replace(/\D/g, '').slice(0, 9);
+    if (this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
+      this.setFieldError('phone', 'El número debe comenzar con 9');
+    } else {
+      this.clearFieldError('phone');
+    }
+  }
+
+  validateEmail(): void {
+    if (!this.form.email) {
+      this.clearFieldError('email');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.form.email)) {
+      this.setFieldError('email', 'Ingrese un correo electrónico válido');
+    } else {
+      this.clearFieldError('email');
+      this.checkDuplicate('email');
+    }
+  }
+
+  checkDuplicate(field: 'documentNumber' | 'email' | 'phone'): void {
+    const value = field === 'documentNumber' ? this.form.documentNumber
+      : field === 'email' ? this.form.email : this.form.phone;
+    if (!value) return;
+
+    const editId = this.userId();
+    const duplicate = this.allOrgUsers().find(u => {
+      if (editId && u.id === editId) return false;
+      if (field === 'documentNumber') return (u.documentNumber || u.dni) === value;
+      if (field === 'email') return u.email === value;
+      if (field === 'phone') return u.phone === value;
+      return false;
+    });
+
+    if (duplicate) {
+      const labels: Record<string, string> = { documentNumber: 'N° documento', email: 'Email', phone: 'Teléfono' };
+      this.setFieldError(field, `${labels[field]} ya registrado: ${duplicate.lastName}, ${duplicate.firstName}`);
+    } else {
+      this.clearFieldError(field);
+    }
+  }
+
+  private setFieldError(field: string, msg: string): void {
+    this.fieldErrors.update(e => ({ ...e, [field]: msg }));
+  }
+
+  private clearFieldError(field: string): void {
+    this.fieldErrors.update(e => {
+      const copy = { ...e };
+      delete copy[field];
+      return copy;
+    });
+  }
+
+  private loadAllUsers(): void {
+    this.http.get<ApiResponse<User[]>>(
+      `${environment.apiUrl}/users/organization/${this.orgId}`,
+      { params: { includeInactive: 'true' }, headers: this.headers, context: new HttpContext().set(SKIP_ERROR_ALERT, true) }
+    ).subscribe({
+      next: res => this.allOrgUsers.set(res.data || []),
+      error: () => this.allOrgUsers.set([])
+    });
+  }
+
+  // --- Private methods ---
+
+  private loadUser(id: string): void {
+    this.http.get<ApiResponse<User>>(`${environment.apiUrl}/users/${id}`, { headers: this.headers }).subscribe({
+      next: res => {
+        const u = res.data;
+        this.selectedRole = u.role;
+        this.form = {
+          firstName: u.firstName, lastName: u.lastName,
+          documentType: u.documentType || 'DNI',
+          documentNumber: u.documentNumber || u.dni || '',
+          email: u.email || '', phone: u.phone || '',
+          address: u.address || ''
+        };
+        this.selectedZoneId = u.zoneId || '';
+        const savedStreetId = u.streetId || '';
+        this.onZoneChange();
+        this.selectedStreetId = savedStreetId;
+      },
+      error: () => {
+        this.alertService.error('Error', 'No se pudo cargar el usuario');
+        this.router.navigate(['/admin/users']);
+      }
+    });
+  }
+
+  private loadZones(): void {
+    this.http.get<ApiResponse<Zone[]>>(
+      `${environment.apiUrl}/zones/organization/${this.orgId}`,
+      { headers: this.headers }
+    ).subscribe({
+      next: res => this.zones.set((res.data || []).filter(z => z.recordStatus === 'ACTIVE'))
+    });
+  }
+
+  private loadStreets(): void {
+    this.http.get<ApiResponse<Street[]>>(
+      `${environment.apiUrl}/streets`,
+      { headers: this.headers }
+    ).subscribe({
+      next: res => {
+        this.allStreets.set((res.data || []).filter(s => s.recordStatus === 'ACTIVE'));
+        if (this.selectedZoneId) this.onZoneChange();
+      }
+    });
+  }
+
+  private generateBoxCode(): void {
+    this.http.get<ApiResponse<any[]>>(
+      `${environment.apiUrl}/water-boxes`,
+      { headers: this.headers, context: new HttpContext().set(SKIP_ERROR_ALERT, true) }
+    ).subscribe({
+      next: res => {
+        const count = (res.data || []).length;
+        this.generatedBoxCode.set(`SUP-${String(count + 1).padStart(5, '0')}`);
+      },
+      error: () => this.generatedBoxCode.set(`SUP-00001`)
+    });
+  }
+
+  private createUserFlow(): void {
+    if (this.selectedRole === 'CLIENT') {
+      this.createClientWithWaterBox();
+    } else {
+      this.createOperator();
+    }
+  }
+
+  private createOperator(): void {
+    const payload: CreateUserRequest = {
+      organizationId: this.orgId,
+      firstName: this.form.firstName,
+      lastName: this.form.lastName,
+      documentType: this.form.documentType,
+      documentNumber: this.form.documentNumber,
+      email: this.form.email || undefined,
+      phone: this.form.phone || undefined,
+      address: this.form.address || undefined,
+      zoneId: this.selectedZoneId || undefined,
+      streetId: this.selectedStreetId || undefined,
+      role: 'OPERATOR'
+    };
+
+    this.stepMessage.set('Creando operador...');
+    this.http.post<ApiResponse<User>>(`${environment.apiUrl}/users`, payload, { headers: this.headers }).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        if (!this.hasWhatsApp) {
+          this.showCredentialReport.set(true);
+        } else {
+          this.alertService.success('Registrado', 'Operador registrado correctamente');
           this.router.navigate(['/admin/users']);
-     }
+        }
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        const msg = err.error?.message || 'No se pudo crear el operador';
+        this.alertService.error('Error', msg);
+      }
+    });
+  }
 
-     // --- Validation methods ---
+  private createClientWithWaterBox(): void {
+    // Step 1: Create user
+    this.currentStep.set(1);
+    this.stepMessage.set('Creando usuario...');
 
-     sanitizeName(field: 'firstName' | 'lastName', value: string): void {
-          this.form[field] = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
-     }
+    const userPayload: CreateUserRequest = {
+      organizationId: this.orgId,
+      firstName: this.form.firstName,
+      lastName: this.form.lastName,
+      documentType: this.form.documentType,
+      documentNumber: this.form.documentNumber,
+      email: this.form.email || undefined,
+      phone: this.form.phone || undefined,
+      address: this.form.address || undefined,
+      zoneId: this.selectedZoneId,
+      streetId: this.selectedStreetId,
+      role: 'CLIENT'
+    };
 
-     sanitizeDocument(value: string): void {
-          if (this.form.documentType === 'DNI') {
-               this.form.documentNumber = value.replace(/\D/g, '').slice(0, 8);
-          } else {
-               this.form.documentNumber = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20);
+    this.http.post<ApiResponse<User>>(`${environment.apiUrl}/users`, userPayload, { headers: this.headers }).subscribe({
+      next: (userRes) => {
+        const newUser = userRes.data;
+        const newUserId = newUser?.id;
+        if (!newUserId) {
+          this.isSubmitting.set(false);
+          this.alertService.error('Error', 'No se obtuvo el ID del usuario creado');
+          return;
+        }
+
+        // Step 2: Create water box
+        this.currentStep.set(2);
+        this.stepMessage.set('Creando caja de agua...');
+
+        const boxPayload: CreateWaterBoxRequest = {
+          organizationId: this.orgId,
+          boxCode: this.generatedBoxCode() || `SUP-${Date.now()}`,
+          boxType: this.selectedBoxType,
+          installationDate: new Date().toISOString().split('.')[0],
+          zoneId: this.selectedZoneId,
+          streetId: this.selectedStreetId,
+          address: this.form.address
+        };
+
+        this.http.post<ApiResponse<any>>(`${environment.apiUrl}/water-boxes`, boxPayload, { headers: this.headers }).subscribe({
+          next: (boxRes) => {
+            const newBox = boxRes.data;
+            const waterBoxId = newBox?.id;
+            if (!waterBoxId) {
+              this.isSubmitting.set(false);
+              this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear el Suministro de agua');
+              this.navigateOrReport();
+              return;
+            }
+
+            // Step 3: Assign water box to user
+            this.currentStep.set(3);
+            this.stepMessage.set('Asignando Suministro de agua...');
+
+            const assignPayload: AssignWaterBoxRequest = {
+              waterBoxId: waterBoxId,
+              userId: newUserId
+            };
+
+            this.http.post<ApiResponse<any>>(
+              `${environment.apiUrl}/water-box-assignments`, assignPayload, { headers: this.headers }
+            ).subscribe({
+              next: () => {
+                this.isSubmitting.set(false);
+                this.navigateOrReport();
+              },
+              error: () => {
+                this.isSubmitting.set(false);
+                this.alertService.warning('Parcial', 'Usuario y Suministro creados, pero la asignación falló');
+                this.navigateOrReport();
+              }
+            });
+          },
+          error: () => {
+            this.isSubmitting.set(false);
+            this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear el Suministro de agua');
+            this.navigateOrReport();
           }
-          this.clearFieldError('documentNumber');
-     }
+        });
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.currentStep.set(0);
+        const msg = err.error?.message || 'No se pudo crear el usuario';
+        this.alertService.error('Error', msg);
+      }
+    });
+  }
 
-     onDocumentTypeChange(): void {
-          this.form.documentNumber = '';
-          this.clearFieldError('documentNumber');
-     }
+  private navigateOrReport(): void {
+    if (!this.hasWhatsApp) {
+      this.showCredentialReport.set(true);
+    } else {
+      this.alertService.success('Registrado', 'Cliente registrado correctamente con caja de agua');
+      this.router.navigate(['/admin/users']);
+    }
+  }
 
-     sanitizePhone(value: string): void {
-          this.form.phone = value.replace(/\D/g, '').slice(0, 9);
-          if (this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
-               this.setFieldError('phone', 'El número debe comenzar con 9');
-          } else {
-               this.clearFieldError('phone');
-          }
-     }
+  private updateUser(): void {
+    const payload: UpdateUserRequest = {
+      firstName: this.form.firstName,
+      lastName: this.form.lastName,
+      email: this.form.email || undefined,
+      phone: this.form.phone || undefined,
+      address: this.form.address || undefined
+    };
 
-     validateEmail(): void {
-          if (!this.form.email) {
-               this.clearFieldError('email');
-               return;
-          }
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(this.form.email)) {
-               this.setFieldError('email', 'Ingrese un correo electrónico válido');
-          } else {
-               this.clearFieldError('email');
-               this.checkDuplicate('email');
-          }
-     }
-
-     checkDuplicate(field: 'documentNumber' | 'email' | 'phone'): void {
-          const value = field === 'documentNumber' ? this.form.documentNumber
-               : field === 'email' ? this.form.email : this.form.phone;
-          if (!value) return;
-
-          const editId = this.userId();
-          const duplicate = this.allOrgUsers().find(u => {
-               if (editId && u.id === editId) return false;
-               if (field === 'documentNumber') return (u.documentNumber || u.dni) === value;
-               if (field === 'email') return u.email === value;
-               if (field === 'phone') return u.phone === value;
-               return false;
-          });
-
-          if (duplicate) {
-               const labels: Record<string, string> = { documentNumber: 'N° documento', email: 'Email', phone: 'Teléfono' };
-               this.setFieldError(field, `${labels[field]} ya registrado: ${duplicate.lastName}, ${duplicate.firstName}`);
-          } else {
-               this.clearFieldError(field);
-          }
-     }
-
-     private setFieldError(field: string, msg: string): void {
-          this.fieldErrors.update(e => ({ ...e, [field]: msg }));
-     }
-
-     private clearFieldError(field: string): void {
-          this.fieldErrors.update(e => {
-               const copy = { ...e };
-               delete copy[field];
-               return copy;
-          });
-     }
-
-     private loadAllUsers(): void {
-          this.http.get<ApiResponse<User[]>>(
-               `${environment.apiUrl}/users/organization/${this.orgId}`,
-               { params: { includeInactive: 'true' }, headers: this.headers }
-          ).subscribe({
-               next: res => this.allOrgUsers.set(res.data || [])
-          });
-     }
-
-     // --- Private methods ---
-
-     private loadUser(id: string): void {
-          this.http.get<ApiResponse<User>>(`${environment.apiUrl}/users/${id}`, { headers: this.headers }).subscribe({
-               next: res => {
-                    const u = res.data;
-                    this.selectedRole = u.role;
-                    this.form = {
-                         firstName: u.firstName, lastName: u.lastName,
-                         documentType: u.documentType || 'DNI',
-                         documentNumber: u.documentNumber || u.dni || '',
-                         email: u.email || '', phone: u.phone || '',
-                         address: u.address || ''
-                    };
-                    this.selectedZoneId = u.zoneId || '';
-                    const savedStreetId = u.streetId || '';
-                    this.onZoneChange();
-                    this.selectedStreetId = savedStreetId;
-               },
-               error: () => {
-                    this.alertService.error('Error', 'No se pudo cargar el usuario');
-                    this.router.navigate(['/admin/users']);
-               }
-          });
-     }
-
-     private loadZones(): void {
-          this.http.get<ApiResponse<Zone[]>>(
-               `${environment.apiUrl}/zones/organization/${this.orgId}`,
-               { headers: this.headers }
-          ).subscribe({
-               next: res => this.zones.set((res.data || []).filter(z => z.recordStatus === 'ACTIVE'))
-          });
-     }
-
-     private loadStreets(): void {
-          this.http.get<ApiResponse<Street[]>>(
-               `${environment.apiUrl}/streets`,
-               { headers: this.headers }
-          ).subscribe({
-               next: res => {
-                    this.allStreets.set((res.data || []).filter(s => s.recordStatus === 'ACTIVE'));
-                    if (this.selectedZoneId) this.onZoneChange();
-               }
-          });
-     }
-
-     private generateBoxCode(): void {
-          this.http.get<ApiResponse<any[]>>(
-               `${environment.apiUrl}/water-boxes`,
-               { headers: this.headers }
-          ).subscribe({
-               next: res => {
-                    const count = (res.data || []).length;
-                    this.generatedBoxCode.set(`SUP-${String(count + 1).padStart(5, '0')}`);
-               },
-               error: () => this.generatedBoxCode.set(`SUP-00001`)
-          });
-     }
-
-     private createUserFlow(): void {
-          if (this.selectedRole === 'CLIENT') {
-               this.createClientWithWaterBox();
-          } else {
-               this.createOperator();
-          }
-     }
-
-     private createOperator(): void {
-          const payload: CreateUserRequest = {
-               organizationId: this.orgId,
-               firstName: this.form.firstName,
-               lastName: this.form.lastName,
-               documentType: this.form.documentType,
-               documentNumber: this.form.documentNumber,
-               email: this.form.email || undefined,
-               phone: this.form.phone || undefined,
-               address: this.form.address || undefined,
-               zoneId: this.selectedZoneId || undefined,
-               streetId: this.selectedStreetId || undefined,
-               role: 'OPERATOR'
-          };
-
-          this.stepMessage.set('Creando operador...');
-          this.http.post<ApiResponse<User>>(`${environment.apiUrl}/users`, payload, { headers: this.headers }).subscribe({
-               next: () => {
-                    this.isSubmitting.set(false);
-                    if (!this.hasWhatsApp) {
-                         this.showCredentialReport.set(true);
-                    } else {
-                         this.alertService.success('Registrado', 'Operador registrado correctamente');
-                         this.router.navigate(['/admin/users']);
-                    }
-               },
-               error: (err) => {
-                    this.isSubmitting.set(false);
-                    const msg = err.error?.message || 'No se pudo crear el operador';
-                    this.alertService.error('Error', msg);
-               }
-          });
-     }
-
-     private createClientWithWaterBox(): void {
-          // Step 1: Create user
-          this.currentStep.set(1);
-          this.stepMessage.set('Creando usuario...');
-
-          const userPayload: CreateUserRequest = {
-               organizationId: this.orgId,
-               firstName: this.form.firstName,
-               lastName: this.form.lastName,
-               documentType: this.form.documentType,
-               documentNumber: this.form.documentNumber,
-               email: this.form.email || undefined,
-               phone: this.form.phone || undefined,
-               address: this.form.address || undefined,
-               zoneId: this.selectedZoneId,
-               streetId: this.selectedStreetId,
-               role: 'CLIENT'
-          };
-
-          this.http.post<ApiResponse<User>>(`${environment.apiUrl}/users`, userPayload, { headers: this.headers }).subscribe({
-               next: (userRes) => {
-                    const newUser = userRes.data;
-                    const newUserId = newUser?.id;
-                    if (!newUserId) {
-                         this.isSubmitting.set(false);
-                         this.alertService.error('Error', 'No se obtuvo el ID del usuario creado');
-                         return;
-                    }
-
-                    // Step 2: Create water box
-                    this.currentStep.set(2);
-                    this.stepMessage.set('Creando caja de agua...');
-
-                    const boxPayload: CreateWaterBoxRequest = {
-                         organizationId: this.orgId,
-                         boxCode: this.generatedBoxCode() || `SUP-${Date.now()}`,
-                         boxType: this.selectedBoxType,
-                         installationDate: new Date().toISOString().split('.')[0],
-                         zoneId: this.selectedZoneId,
-                         streetId: this.selectedStreetId,
-                         address: this.form.address
-                    };
-
-                    this.http.post<ApiResponse<any>>(`${environment.apiUrl}/water-boxes`, boxPayload, { headers: this.headers }).subscribe({
-                         next: (boxRes) => {
-                              const newBox = boxRes.data;
-                              const waterBoxId = newBox?.id;
-                              if (!waterBoxId) {
-                                   this.isSubmitting.set(false);
-                                   this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear el Suministro de agua');
-                                   this.navigateOrReport();
-                                   return;
-                              }
-
-                              // Step 3: Assign water box to user
-                              this.currentStep.set(3);
-                              this.stepMessage.set('Asignando Suministro de agua...');
-
-                              const assignPayload: AssignWaterBoxRequest = {
-                                   waterBoxId: waterBoxId,
-                                   userId: newUserId
-                              };
-
-                              this.http.post<ApiResponse<any>>(
-                                   `${environment.apiUrl}/water-box-assignments`, assignPayload, { headers: this.headers }
-                              ).subscribe({
-                                   next: () => {
-                                        this.isSubmitting.set(false);
-                                        this.navigateOrReport();
-                                   },
-                                   error: () => {
-                                        this.isSubmitting.set(false);
-                                        this.alertService.warning('Parcial', 'Usuario y Suministro creados, pero la asignación falló');
-                                        this.navigateOrReport();
-                                   }
-                              });
-                         },
-                         error: () => {
-                              this.isSubmitting.set(false);
-                              this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear el Suministro de agua');
-                              this.navigateOrReport();
-                         }
-                    });
-               },
-               error: (err) => {
-                    this.isSubmitting.set(false);
-                    this.currentStep.set(0);
-                    const msg = err.error?.message || 'No se pudo crear el usuario';
-                    this.alertService.error('Error', msg);
-               }
-          });
-     }
-
-     private navigateOrReport(): void {
-          if (!this.hasWhatsApp) {
-               this.showCredentialReport.set(true);
-          } else {
-               this.alertService.success('Registrado', 'Cliente registrado correctamente con caja de agua');
-               this.router.navigate(['/admin/users']);
-          }
-     }
-
-     private updateUser(): void {
-          const payload: UpdateUserRequest = {
-               firstName: this.form.firstName,
-               lastName: this.form.lastName,
-               email: this.form.email || undefined,
-               phone: this.form.phone || undefined,
-               address: this.form.address || undefined
-          };
-
-          this.stepMessage.set('Actualizando...');
-          this.http.put<ApiResponse<User>>(
-               `${environment.apiUrl}/users/${this.userId()}`,
-               payload,
-               { headers: this.headers }
-          ).subscribe({
-               next: () => {
-                    this.isSubmitting.set(false);
-                    this.alertService.success('Actualizado', 'Usuario actualizado correctamente');
-                    this.router.navigate(['/admin/users']);
-               },
-               error: (err) => {
-                    this.isSubmitting.set(false);
-                    const msg = err.error?.message || 'No se pudo actualizar el usuario';
-                    this.alertService.error('Error', msg);
-               }
-          });
-     }
+    this.stepMessage.set('Actualizando...');
+    this.http.put<ApiResponse<User>>(
+      `${environment.apiUrl}/users/${this.userId()}`,
+      payload,
+      { headers: this.headers }
+    ).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.alertService.success('Actualizado', 'Usuario actualizado correctamente');
+        this.router.navigate(['/admin/users']);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        const msg = err.error?.message || 'No se pudo actualizar el usuario';
+        this.alertService.error('Error', msg);
+      }
+    });
+  }
 }

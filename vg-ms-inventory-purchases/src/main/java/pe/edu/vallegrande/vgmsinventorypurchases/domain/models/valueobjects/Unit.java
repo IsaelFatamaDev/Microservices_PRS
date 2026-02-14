@@ -4,5 +4,12 @@ public enum Unit {
     UNIT,
     METERS,
     KG,
-    LITERS
+    LITERS,
+    UNIDAD,
+    KILOGRAMO,
+    GRAMO,
+    LITRO,
+    METRO,
+    CAJA,
+    PAQUETE
 }

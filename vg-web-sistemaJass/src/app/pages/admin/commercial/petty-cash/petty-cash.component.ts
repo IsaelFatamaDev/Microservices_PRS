@@ -393,12 +393,12 @@ export class PettyCashComponent implements OnInit {
 
     this.commercialService.getActivePettyCash().subscribe({
       next: r => {
-        if (r.data) {
+        if (r?.data) {
           this.activePettyCash.set(r.data);
           this.loadMovements(r.data.id);
         }
       },
-      error: () => {}
+      error: () => { }
     });
   }
 

@@ -1,15 +1,15 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import {
   LucideAngularModule, AlertTriangle, Search, Plus, Eye, X,
-  ChevronLeft, ChevronRight, UserPlus, CheckCircle, XCircle
+  ChevronLeft, ChevronRight, UserPlus, CheckCircle, XCircle, Wrench, Package
 } from 'lucide-angular';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AlertService } from '../../../../core/services/alert.service';
 import { ClaimsService } from '../../../../core/services/claims.service';
-import { Incident, IncidentType, CreateIncidentRequest, AssignIncidentRequest } from '../../../../core/models/claims.model';
-import { User, ApiResponse } from '../../../../core/models';
+import { Incident, IncidentType, CreateIncidentRequest, AssignIncidentRequest, ResolveIncidentRequest, MaterialUsed } from '../../../../core/models/claims.model';
+import { User, ApiResponse, Product, Material } from '../../../../core/models';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 
@@ -21,7 +21,7 @@ interface Zone {
 @Component({
   selector: 'app-incidents',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   template: `
     <div class="space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -139,6 +139,11 @@ interface Zone {
                           <lucide-icon [img]="userPlusIcon" [size]="15"></lucide-icon>
                         </button>
                       }
+                      @if (inc.status === 'ASSIGNED' || inc.status === 'IN_PROGRESS') {
+                        <button (click)="openResolveModal(inc)" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-emerald-600 transition-colors" title="Resolver">
+                          <lucide-icon [img]="wrenchIcon" [size]="15"></lucide-icon>
+                        </button>
+                      }
                     </div>
                   </td>
                 </tr>
@@ -170,6 +175,9 @@ interface Zone {
                 <button (click)="viewDetail(inc)" class="flex-1 py-1.5 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">Ver detalle</button>
                 @if (inc.status === 'REPORTED') {
                   <button (click)="openAssignModal(inc)" class="flex-1 py-1.5 text-xs border border-blue-200 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors">Asignar</button>
+                }
+                @if (inc.status === 'ASSIGNED' || inc.status === 'IN_PROGRESS') {
+                  <button (click)="openResolveModal(inc)" class="flex-1 py-1.5 text-xs border border-emerald-200 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors">Resolver</button>
                 }
               </div>
             </div>
@@ -333,6 +341,133 @@ interface Zone {
           </div>
         </div>
       }
+
+      <!-- Resolve Modal -->
+      @if (showResolveModal() && selectedIncident()) {
+        <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" (click)="closeResolveModal()">
+          <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[85vh] overflow-y-auto" (click)="$event.stopPropagation()">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-800">Resolver Incidencia</h3>
+                <p class="text-sm text-gray-500 mt-0.5">{{ selectedIncident()!.incidentCode }} - {{ selectedIncident()!.title }}</p>
+              </div>
+              <button (click)="closeResolveModal()" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+                <lucide-icon [img]="xIcon" [size]="18"></lucide-icon>
+              </button>
+            </div>
+            <form [formGroup]="resolveForm" (ngSubmit)="resolveIncident()" class="p-6 space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Resolución *</label>
+                  <select formControlName="resolutionType" class="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                    <option value="REPAIR">Reparación</option>
+                    <option value="REPLACEMENT">Reemplazo</option>
+                    <option value="ADJUSTMENT">Ajuste</option>
+                    <option value="OTHER">Otro</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Horas Laborales *</label>
+                  <input type="number" formControlName="laborHours" min="0" step="0.5" class="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400" placeholder="0">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Acciones Realizadas *</label>
+                <textarea formControlName="actionsTaken" rows="3" class="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 resize-none" placeholder="Describa las acciones realizadas para resolver la incidencia"></textarea>
+              </div>
+
+              <!-- Materiales Usados -->
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-sm font-medium text-gray-700">Materiales Usados</label>
+                  <button type="button" (click)="addMaterial()" class="px-3 py-1.5 text-xs bg-violet-50 hover:bg-violet-100 text-violet-600 rounded-lg font-medium transition-colors flex items-center gap-1">
+                    <lucide-icon [img]="packageIcon" [size]="14"></lucide-icon>
+                    Agregar Material
+                  </button>
+                </div>
+
+                @if (materialsArray.length > 0) {
+                  <div class="space-y-3">
+                    @for (material of materialsArray.controls; track $index; let i = $index) {
+                      <div [formGroup]="$any(material)" class="border border-gray-200 rounded-xl p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                          <div class="md:col-span-5">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Producto *</label>
+                            <select formControlName="productId" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                              <option value="">Seleccionar...</option>
+                              @for (product of allProducts(); track product.productId) {
+                                <option [value]="product.productId">{{ product.productName }} (Stock: {{ product.currentStock }})</option>
+                              }
+                            </select>
+                            @if (getStockWarning(i)) {
+                              <p class="text-xs text-red-600 mt-1">{{ getStockWarning(i) }}</p>
+                            }
+                          </div>
+                          <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Cantidad *</label>
+                            <input type="number" formControlName="quantity" min="1" step="1" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                          </div>
+                          <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Unidad</label>
+                            <input type="text" formControlName="unit" readonly class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50">
+                          </div>
+                          <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Costo Unit.</label>
+                            <input type="number" formControlName="unitCost" min="0" step="0.01" readonly class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50">
+                          </div>
+                          <div class="md:col-span-1 flex items-end">
+                            <button type="button" (click)="removeMaterial(i)" class="w-full p-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors">
+                              <lucide-icon [img]="xIcon" [size]="16"></lucide-icon>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="text-center py-8 text-gray-400 text-sm border border-dashed border-gray-200 rounded-xl">
+                    No se han agregado materiales
+                  </div>
+                }
+
+                @if (totalCost() > 0) {
+                  <div class="mt-3 flex items-center justify-between p-3 bg-violet-50 rounded-lg">
+                    <span class="text-sm font-medium text-gray-700">Costo Total de Materiales:</span>
+                    <span class="text-lg font-bold text-violet-600">S/ {{ totalCost().toFixed(2) }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Checks -->
+              <div class="flex items-center gap-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="qualityCheck" class="w-4 h-4 text-violet-600 rounded">
+                  <span class="text-sm text-gray-700">Control de Calidad Realizado</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="followUpRequired" class="w-4 h-4 text-violet-600 rounded">
+                  <span class="text-sm text-gray-700">Requiere Seguimiento</span>
+                </label>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Notas Adicionales</label>
+                <textarea formControlName="resolutionNotes" rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 resize-none" placeholder="Notas adicionales sobre la resolución"></textarea>
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <button type="button" (click)="closeResolveModal()" class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+                  Cancelar
+                </button>
+                <button type="submit" [disabled]="saving() || !resolveForm.valid" class="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {{ saving() ? 'Resolviendo...' : 'Resolver Incidencia' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
     </div>
   `
 })
@@ -341,11 +476,13 @@ export class IncidentsComponent implements OnInit {
   private alertService = inject(AlertService);
   private claimsService = inject(ClaimsService);
   private http = inject(HttpClient);
+  private fb = inject(FormBuilder);
 
   // Icons
   alertIcon = AlertTriangle; searchIcon = Search; plusIcon = Plus; eyeIcon = Eye;
   xIcon = X; chevronLeftIcon = ChevronLeft; chevronRightIcon = ChevronRight;
   userPlusIcon = UserPlus; checkIcon = CheckCircle; closeIcon = XCircle;
+  wrenchIcon = Wrench; packageIcon = Package;
 
   Math = Math;
 
@@ -354,6 +491,7 @@ export class IncidentsComponent implements OnInit {
   allIncidentTypes = signal<IncidentType[]>([]);
   allZones = signal<Zone[]>([]);
   allUsers = signal<User[]>([]);
+  allProducts = signal<Product[]>([]);
 
   // Filters
   searchTerm = '';
@@ -368,12 +506,16 @@ export class IncidentsComponent implements OnInit {
   showCreateModal = signal(false);
   showDetailModal = signal(false);
   showAssignModal = signal(false);
+  showResolveModal = signal(false);
   selectedIncident = signal<Incident | null>(null);
   saving = signal(false);
 
   // Form data
   formData: any = {};
   assignData: AssignIncidentRequest = { userId: '', notes: '' };
+  resolveForm!: FormGroup;
+  totalCost = signal(0);
+  stockWarnings = signal<Map<number, string>>(new Map());
 
   // Computed
   reportedCount = computed(() => this.allIncidents().filter(i => i.status === 'REPORTED').length);
@@ -402,7 +544,25 @@ export class IncidentsComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    this.initializeResolveForm();
     this.loadData();
+  }
+
+  private initializeResolveForm(): void {
+    this.resolveForm = this.fb.group({
+      resolutionType: ['REPAIR', Validators.required],
+      actionsTaken: ['', [Validators.required, Validators.minLength(10)]],
+      materialsUsed: this.fb.array([]),
+      laborHours: [0, [Validators.required, Validators.min(0)]],
+      totalCost: [0, [Validators.required, Validators.min(0)]],
+      qualityCheck: [false],
+      followUpRequired: [false],
+      resolutionNotes: ['']
+    });
+  }
+
+  get materialsArray(): FormArray {
+    return this.resolveForm.get('materialsUsed') as FormArray;
   }
 
   private loadData(): void {
@@ -424,7 +584,29 @@ export class IncidentsComponent implements OnInit {
     this.http.get<ApiResponse<User[]>>(`${environment.apiUrl}/users`).subscribe({
       next: r => this.allUsers.set((r.data || []).filter(u => u.organizationId === orgId && u.role === 'OPERATOR'))
     });
+
+    // Cargar productos del inventario (materials mapeados a Product)
+    this.http.get<ApiResponse<Material[]>>(`${environment.apiUrl}/materials`).subscribe({
+      next: r => {
+        const materials = (r.data || []).filter(m => m.recordStatus === 'ACTIVE');
+        const products: Product[] = materials.map(m => ({
+          productId: m.id,
+          organizationId: m.organizationId,
+          categoryId: m.categoryId,
+          productName: m.materialName,
+          unitOfMeasure: m.unit,
+          currentStock: m.currentStock,
+          minStock: m.minStock,
+          unitPrice: m.unitPrice,
+          recordStatus: m.recordStatus,
+          createdAt: m.createdAt,
+          categoryName: m.categoryName
+        }));
+        this.allProducts.set(products);
+      }
+    });
   }
+
 
   openCreateModal(): void {
     this.formData = {
@@ -550,5 +732,224 @@ export class IncidentsComponent implements OnInit {
       CLOSED: 'bg-gray-100 text-gray-600'
     };
     return map[s] || 'bg-gray-100 text-gray-600';
+  }
+
+  // ============================================================================
+  // RESOLUCIÓN DE INCIDENCIAS
+  // ============================================================================
+
+  openResolveModal(incident: Incident): void {
+    this.selectedIncident.set(incident);
+    this.initializeResolveForm();
+    this.showResolveModal.set(true);
+  }
+
+  closeResolveModal(): void {
+    this.showResolveModal.set(false);
+    this.selectedIncident.set(null);
+    this.resolveForm.reset();
+    while (this.materialsArray.length) {
+      this.materialsArray.removeAt(0);
+    }
+    this.stockWarnings.set(new Map());
+    this.totalCost.set(0);
+  }
+
+  addMaterial(): void {
+    const materialGroup = this.fb.group({
+      productId: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      unit: ['unidades', Validators.required],
+      unitCost: [0, [Validators.required, Validators.min(0)]]
+    });
+
+    const currentIndex = this.materialsArray.length;
+
+    // Autocompletar precio al seleccionar producto
+    materialGroup.get('productId')?.valueChanges.subscribe(productId => {
+      if (productId) {
+        const product = this.allProducts().find(p => p.productId === productId);
+        if (product) {
+          materialGroup.patchValue({
+            unitCost: product.unitPrice || 0,
+            unit: product.unitOfMeasure || 'unidades'
+          });
+          this.calculateTotal();
+          this.checkStock(currentIndex);
+        }
+      }
+    });
+
+    materialGroup.get('quantity')?.valueChanges.subscribe(() => {
+      this.calculateTotal();
+      this.checkStock(currentIndex);
+    });
+
+    materialGroup.get('unitCost')?.valueChanges.subscribe(() => {
+      this.calculateTotal();
+    });
+
+    this.materialsArray.push(materialGroup);
+  }
+
+  removeMaterial(index: number): void {
+    this.materialsArray.removeAt(index);
+    const warnings = new Map(this.stockWarnings());
+    warnings.delete(index);
+    this.stockWarnings.set(warnings);
+    this.calculateTotal();
+  }
+
+  calculateTotal(): void {
+    let total = 0;
+    this.materialsArray.controls.forEach(control => {
+      const quantity = control.get('quantity')?.value || 0;
+      const unitCost = control.get('unitCost')?.value || 0;
+      total += quantity * unitCost;
+    });
+    this.totalCost.set(total);
+    this.resolveForm.patchValue({ totalCost: total }, { emitEvent: false });
+  }
+
+  checkStock(index: number): void {
+    const materialGroup = this.materialsArray.at(index) as FormGroup;
+    const productId = materialGroup.get('productId')?.value;
+    const quantity = materialGroup.get('quantity')?.value || 0;
+
+    if (!productId || quantity <= 0) {
+      const warnings = new Map(this.stockWarnings());
+      warnings.delete(index);
+      this.stockWarnings.set(warnings);
+      return;
+    }
+
+    const product = this.allProducts().find(p => p.productId === productId);
+    if (product) {
+      const availableStock = product.currentStock || 0;
+      const warnings = new Map(this.stockWarnings());
+
+      if (quantity > availableStock) {
+        warnings.set(index, `Stock insuficiente: solicitado ${quantity}, disponible ${availableStock}`);
+      } else {
+        warnings.delete(index);
+      }
+
+      this.stockWarnings.set(warnings);
+    }
+  }
+
+  getStockWarning(index: number): string | undefined {
+    return this.stockWarnings().get(index);
+  }
+
+  getProductStock(index: number): number | null {
+    const materialGroup = this.materialsArray.at(index) as FormGroup;
+    const productId = materialGroup?.get('productId')?.value;
+
+    if (!productId) return null;
+
+    const product = this.allProducts().find(p => p.productId === productId);
+    return product ? (product.currentStock || 0) : null;
+  }
+
+  getProductName(productId: string): string {
+    return this.allProducts().find(p => p.productId === productId)?.productName || productId;
+  }
+
+  resolveIncident(): void {
+    if (!this.resolveForm.valid) {
+      this.alertService.error('Por favor complete todos los campos requeridos');
+      return;
+    }
+
+    const inc = this.selectedIncident();
+    if (!inc) return;
+
+    // Verificar stock antes de enviar
+    let hasStockIssues = false;
+    this.materialsArray.controls.forEach((control, index) => {
+      const warning = this.getStockWarning(index);
+      if (warning) hasStockIssues = true;
+    });
+
+    if (hasStockIssues) {
+      this.alertService.error('No hay suficiente stock para algunos materiales');
+      return;
+    }
+
+    const formValue = this.resolveForm.value;
+    const req: ResolveIncidentRequest = {
+      resolutionType: formValue.resolutionType,
+      actionsTaken: formValue.actionsTaken,
+      materialsUsed: formValue.materialsUsed || [],
+      laborHours: formValue.laborHours,
+      totalCost: formValue.totalCost,
+      qualityCheck: formValue.qualityCheck,
+      followUpRequired: formValue.followUpRequired,
+      resolutionNotes: formValue.resolutionNotes
+    };
+
+    this.saving.set(true);
+    this.claimsService.resolveIncident(inc.id, req).subscribe({
+      next: () => {
+        // Actualizar stock de productos
+        this.updateProductStocks(req.materialsUsed || []);
+
+        this.alertService.success('Incidencia resuelta exitosamente');
+        this.closeResolveModal();
+        this.loadData();
+        this.saving.set(false);
+      },
+      error: (err) => {
+        this.alertService.error(err?.error?.message || 'Error al resolver la incidencia');
+        this.saving.set(false);
+      }
+    });
+  }
+
+  private updateProductStocks(materials: MaterialUsed[]): void {
+    if (!materials || materials.length === 0) return;
+
+    materials.forEach(material => {
+      if (material.productId && material.quantity > 0) {
+        const product = this.allProducts().find(p => p.productId === material.productId);
+        if (product) {
+          const newStock = (product.currentStock || 0) - material.quantity;
+          this.updateProductStock(material.productId, newStock);
+        }
+      }
+    });
+  }
+
+  private updateProductStock(productId: string, newStock: number): void {
+    const url = `${environment.apiUrl}/materials/${productId}`;
+    this.http.patch(url, { currentStock: newStock }).subscribe({
+      next: () => {
+        console.log(`Stock actualizado para producto ${productId}: ${newStock}`);
+        // Recargar productos
+        this.http.get<ApiResponse<Material[]>>(`${environment.apiUrl}/materials`).subscribe({
+          next: r => {
+            const materials = (r.data || []).filter(m => m.recordStatus === 'ACTIVE');
+            const products: Product[] = materials.map(m => ({
+              productId: m.id,
+              organizationId: m.organizationId,
+              categoryId: m.categoryId,
+              productName: m.materialName,
+              unitOfMeasure: m.unit,
+              currentStock: m.currentStock,
+              minStock: m.minStock,
+              unitPrice: m.unitPrice,
+              recordStatus: m.recordStatus,
+              createdAt: m.createdAt,
+              categoryName: m.categoryName
+            }));
+            this.allProducts.set(products);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error actualizando stock:', err);
+      }
+    });
   }
 }

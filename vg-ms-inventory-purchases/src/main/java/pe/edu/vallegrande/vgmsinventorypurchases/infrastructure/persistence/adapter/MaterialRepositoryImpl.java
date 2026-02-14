@@ -11,8 +11,6 @@ import pe.edu.vallegrande.vgmsinventorypurchases.infrastructure.persistence.repo
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class MaterialRepositoryImpl implements IMaterialRepository {
@@ -22,9 +20,7 @@ public class MaterialRepositoryImpl implements IMaterialRepository {
     @Override
     public Mono<Material> save(Material material) {
         MaterialEntity entity = toEntity(material);
-        if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID().toString());
-        }
+        entity.setNew(entity.getId() == null);
         return r2dbcRepository.save(entity).map(this::toDomain);
     }
 

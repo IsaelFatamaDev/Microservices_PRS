@@ -2,6 +2,8 @@ package pe.edu.vallegrande.vgmsinventorypurchases.infrastructure.persistence.ent
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("inventory_movements")
-public class InventoryMovementEntity {
+public class InventoryMovementEntity implements Persistable<String> {
     @Id
     private String id;
     @Column("organization_id")
@@ -40,4 +42,13 @@ public class InventoryMovementEntity {
     private String referenceType;
     @Column("notes")
     private String notes;
+
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+
+    @Override
+    public boolean isNew() {
+        return isNew || id == null;
+    }
 }

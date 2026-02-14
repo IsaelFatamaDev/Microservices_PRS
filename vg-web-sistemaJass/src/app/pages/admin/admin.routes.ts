@@ -50,12 +50,20 @@ export const ADMIN_ROUTES: Routes = [
           loadComponent: () => import('./commercial/petty-cash/petty-cash.component').then(m => m.PettyCashComponent)
      },
      {
-          path: 'inventory/suppliers',
-          loadComponent: () => import('./inventory/suppliers/suppliers.component').then(m => m.SuppliersComponent)
+          path: 'inventory/dashboard',
+          loadComponent: () => import('./inventory/dashboard/dashboard.component').then(m => m.DashboardComponent)
+     },
+     {
+          path: 'inventory/categories',
+          loadComponent: () => import('./inventory/categories/categories.component').then(m => m.CategoriesComponent)
      },
      {
           path: 'inventory/materials',
           loadComponent: () => import('./inventory/materials/materials.component').then(m => m.MaterialsComponent)
+     },
+     {
+          path: 'inventory/suppliers',
+          loadComponent: () => import('./inventory/suppliers/suppliers.component').then(m => m.SuppliersComponent)
      },
      {
           path: 'inventory/purchases',
@@ -92,6 +100,14 @@ export const ADMIN_ROUTES: Routes = [
      {
           path: 'distribution/schedules',
           loadComponent: () => import('./distribution/schedules/schedules.component').then(m => m.SchedulesComponent)
+     },
+     {
+          path: 'water-quality/testing-points',
+          loadComponent: () => import('./water-quality/testing-points/testing-points.component').then(m => m.TestingPointsComponent)
+     },
+     {
+          path: 'water-quality/quality-tests',
+          loadComponent: () => import('./water-quality/quality-tests/quality-tests.component').then(m => m.QualityTestsComponent)
      },
      {
           path: 'notifications',

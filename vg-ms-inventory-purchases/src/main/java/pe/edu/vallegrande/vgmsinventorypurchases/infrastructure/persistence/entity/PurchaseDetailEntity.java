@@ -2,6 +2,8 @@ package pe.edu.vallegrande.vgmsinventorypurchases.infrastructure.persistence.ent
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("purchase_details")
-public class PurchaseDetailEntity {
+public class PurchaseDetailEntity implements Persistable<String> {
     @Id
     private String id;
     @Column("purchase_id")
@@ -28,4 +30,13 @@ public class PurchaseDetailEntity {
     private Double subtotal;
     @Column("created_at")
     private LocalDateTime createdAt;
+
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+
+    @Override
+    public boolean isNew() {
+        return isNew || id == null;
+    }
 }

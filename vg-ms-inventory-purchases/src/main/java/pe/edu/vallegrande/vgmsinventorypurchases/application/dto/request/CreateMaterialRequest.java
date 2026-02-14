@@ -11,7 +11,6 @@ import lombok.extern.jackson.Jacksonized;
 public class CreateMaterialRequest {
     @NotBlank(message = "Organization ID is required")
     private final String organizationId;
-    @NotBlank(message = "Material code is required")
     private final String materialCode;
     @NotBlank(message = "Material name is required")
     private final String materialName;

@@ -24,7 +24,9 @@ import {
   Calendar,
   Truck,
   AlertCircle,
-  CreditCard
+  CreditCard,
+  Tag,
+  LayoutDashboard
 } from 'lucide-angular';
 
 interface MenuItem {
@@ -208,8 +210,10 @@ export class SidebarComponent {
       route: '/admin/inventory',
       roles: ['ADMIN'],
       children: [
-        { label: 'Proveedores', icon: Building2, route: '/admin/inventory/suppliers', roles: ['ADMIN'] },
+        { label: 'Dashboard', icon: LayoutDashboard, route: '/admin/inventory/dashboard', roles: ['ADMIN'] },
+        { label: 'Categorías', icon: Tag, route: '/admin/inventory/categories', roles: ['ADMIN'] },
         { label: 'Materiales', icon: Package, route: '/admin/inventory/materials', roles: ['ADMIN'] },
+        { label: 'Proveedores', icon: Building2, route: '/admin/inventory/suppliers', roles: ['ADMIN'] },
         { label: 'Compras', icon: ClipboardList, route: '/admin/inventory/purchases', roles: ['ADMIN'] },
         { label: 'Movimientos', icon: Truck, route: '/admin/inventory/movements', roles: ['ADMIN'] }
       ]
@@ -235,6 +239,16 @@ export class SidebarComponent {
         { label: 'Programas', icon: Calendar, route: '/admin/distribution/programs', roles: ['ADMIN'] },
         { label: 'Rutas', icon: Route, route: '/admin/distribution/routes', roles: ['ADMIN'] },
         { label: 'Horarios', icon: Calendar, route: '/admin/distribution/schedules', roles: ['ADMIN'] }
+      ]
+    },
+    {
+      label: 'Calidad de Agua',
+      icon: Droplets,
+      route: '/admin/water-quality',
+      roles: ['ADMIN'],
+      children: [
+        { label: 'Puntos de Prueba', icon: MapPin, route: '/admin/water-quality/testing-points', roles: ['ADMIN'] },
+        { label: 'Pruebas de Calidad', icon: ClipboardList, route: '/admin/water-quality/quality-tests', roles: ['ADMIN'] }
       ]
     },
     { label: 'Notificaciones', icon: Bell, route: '/admin/notifications', roles: ['ADMIN'] },

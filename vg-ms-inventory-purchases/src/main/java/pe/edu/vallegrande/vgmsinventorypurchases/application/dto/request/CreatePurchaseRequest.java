@@ -15,7 +15,6 @@ import java.util.List;
 public class CreatePurchaseRequest {
     @NotBlank(message = "Organization ID is required")
     private final String organizationId;
-    @NotBlank(message = "Purchase code is required")
     private final String purchaseCode;
     @NotBlank(message = "Supplier ID is required")
     private final String supplierId;

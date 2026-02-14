@@ -1,6 +1,6 @@
 import { RecordStatus } from './user.model';
 
-export type MovementTypeInventory = 'ENTRY' | 'EXIT' | 'ADJUSTMENT';
+export type MovementTypeInventory = 'IN' | 'OUT' | 'ADJUSTMENT';
 export type PurchaseStatus = 'PENDING' | 'RECEIVED' | 'CANCELLED';
 
 export interface Supplier {
@@ -11,8 +11,12 @@ export interface Supplier {
      phone?: string;
      email?: string;
      address?: string;
+     contactPerson?: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     createdBy?: string;
+     updatedAt?: string;
+     updatedBy?: string;
 }
 
 export interface CreateSupplierRequest {
@@ -22,6 +26,7 @@ export interface CreateSupplierRequest {
      phone?: string;
      email?: string;
      address?: string;
+     contactPerson?: string;
 }
 
 export interface ProductCategory {
@@ -36,13 +41,31 @@ export interface ProductCategory {
 export interface Material {
      id: string;
      organizationId: string;
+     materialCode?: string;
      categoryId: string;
      materialName: string;
-     description?: string;
      unit: string;
      currentStock: number;
      minStock: number;
-     unitCost: number;
+     unitPrice: number;
+     recordStatus: RecordStatus;
+     createdAt: string;
+     createdBy?: string;
+     updatedAt?: string;
+     updatedBy?: string;
+     categoryName?: string;
+}
+
+// Alias para uso en resolución de incidencias
+export interface Product {
+     productId: string;      // alias de id
+     organizationId: string;
+     categoryId: string;
+     productName: string;     // alias de materialName
+     unitOfMeasure: string;   // alias de unit
+     currentStock: number;
+     minStock: number;
+     unitPrice: number;
      recordStatus: RecordStatus;
      createdAt: string;
      categoryName?: string;
@@ -50,25 +73,29 @@ export interface Material {
 
 export interface CreateMaterialRequest {
      organizationId: string;
+     materialCode?: string;
      categoryId: string;
      materialName: string;
-     description?: string;
      unit: string;
+     currentStock?: number;
      minStock: number;
-     unitCost: number;
+     unitPrice: number;
 }
 
 export interface Purchase {
      id: string;
      organizationId: string;
      supplierId: string;
-     purchaseNumber: string;
+     purchaseCode: string;
      purchaseDate: string;
      totalAmount: number;
      purchaseStatus: PurchaseStatus;
-     registeredBy: string;
+     invoiceNumber?: string;
+     createdBy: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     updatedAt?: string;
+     updatedBy?: string;
      supplierName?: string;
      details?: PurchaseDetail[];
 }
@@ -78,23 +105,25 @@ export interface PurchaseDetail {
      purchaseId: string;
      materialId: string;
      quantity: number;
-     unitCost: number;
-     totalCost: number;
+     unitPrice: number;
+     subtotal: number;
+     createdAt?: string;
      materialName?: string;
+}
+
+export interface CreatePurchaseDetailRequest {
+     materialId: string;
+     quantity: number;
+     unitPrice: number;
 }
 
 export interface CreatePurchaseRequest {
      organizationId: string;
      supplierId: string;
+     purchaseDate?: string;
+     totalAmount?: number;
+     invoiceNumber?: string;
      details: CreatePurchaseDetailRequest[];
-}
-
-export interface CreatePurchaseDetailRequest {
-     materialId?: string;
-     materialName?: string;
-     categoryId?: string;
-     quantity: number;
-     unitCost: number;
 }
 
 export interface InventoryMovement {
@@ -103,12 +132,13 @@ export interface InventoryMovement {
      materialId: string;
      movementType: MovementTypeInventory;
      quantity: number;
+     unitPrice?: number;
      previousStock: number;
      newStock: number;
-     reason: string;
+     notes: string;
      referenceId?: string;
-     registeredBy: string;
-     movementDate: string;
+     referenceType?: string;
+     createdBy: string;
      createdAt: string;
      materialName?: string;
 }

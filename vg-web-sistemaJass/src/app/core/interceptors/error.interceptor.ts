@@ -1,13 +1,20 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse, HttpContextToken } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
 import { AlertService } from '../services/alert.service';
+
+/** Set to true in HttpContext to suppress the global error alert for a request */
+export const SKIP_ERROR_ALERT = new HttpContextToken<boolean>(() => false);
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
      const alertService = inject(AlertService);
 
      return next(req).pipe(
           catchError((error: HttpErrorResponse) => {
+               if (req.context.get(SKIP_ERROR_ALERT)) {
+                    return throwError(() => error);
+               }
+
                let message = 'Ocurrió un error inesperado';
 
                if (error.status === 0) {

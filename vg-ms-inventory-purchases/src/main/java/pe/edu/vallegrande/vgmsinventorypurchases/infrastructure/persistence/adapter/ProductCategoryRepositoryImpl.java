@@ -10,8 +10,6 @@ import pe.edu.vallegrande.vgmsinventorypurchases.infrastructure.persistence.repo
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class ProductCategoryRepositoryImpl implements IProductCategoryRepository {
@@ -21,9 +19,8 @@ public class ProductCategoryRepositoryImpl implements IProductCategoryRepository
     @Override
     public Mono<ProductCategory> save(ProductCategory category) {
         ProductCategoryEntity entity = toEntity(category);
-        if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID().toString());
-        }
+        // Marcar como nueva si no tiene ID para que Spring Data haga INSERT
+        entity.setNew(entity.getId() == null);
         return r2dbcRepository.save(entity).map(this::toDomain);
     }
 

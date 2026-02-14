@@ -25,23 +25,28 @@ public class SupplierUseCaseImpl implements ISupplierUseCase {
 
     @Override
     public Mono<Supplier> create(Supplier supplier, String createdBy) {
-        log.info("Creating supplier with RUC: {}", supplier.getRuc());
-        return repository.existsByRuc(supplier.getRuc())
-                .flatMap(exists -> {
-                    if (exists) {
-                        return Mono.error(
-                                new ConflictException("Supplier with RUC '" + supplier.getRuc() + "' already exists"));
-                    }
-                    LocalDateTime now = LocalDateTime.now();
-                    Supplier newSupplier = supplier.toBuilder()
-                            .recordStatus(RecordStatus.ACTIVE)
-                            .createdAt(now)
-                            .createdBy(createdBy)
-                            .updatedAt(now)
-                            .updatedBy(createdBy)
-                            .build();
-                    return repository.save(newSupplier);
-                })
+        log.info("Creating supplier: {}", supplier.getSupplierName());
+
+        // Solo validar RUC duplicado si el RUC no es null/empty
+        Mono<Boolean> validateRuc = (supplier.getRuc() != null && !supplier.getRuc().trim().isEmpty())
+                ? repository.existsByRuc(supplier.getRuc())
+                : Mono.just(false);
+
+        return validateRuc.flatMap(exists -> {
+            if (exists) {
+                return Mono.error(
+                        new ConflictException("Supplier with RUC '" + supplier.getRuc() + "' already exists"));
+            }
+            LocalDateTime now = LocalDateTime.now();
+            Supplier newSupplier = supplier.toBuilder()
+                    .recordStatus(RecordStatus.ACTIVE)
+                    .createdAt(now)
+                    .createdBy(createdBy)
+                    .updatedAt(now)
+                    .updatedBy(createdBy)
+                    .build();
+            return repository.save(newSupplier);
+        })
                 .doOnSuccess(saved -> log.info("Supplier created successfully: {}", saved.getId()))
                 .doOnError(error -> log.error("Error creating supplier: {}", error.getMessage()));
     }

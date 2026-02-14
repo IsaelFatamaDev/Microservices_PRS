@@ -25,15 +25,22 @@ public class MaterialUseCaseImpl implements IMaterialUseCase {
 
     @Override
     public Mono<Material> create(Material material, String createdBy) {
-        log.info("Creating material with code: {}", material.getMaterialCode());
-        return repository.existsByMaterialCode(material.getMaterialCode())
+        log.info("Creating material: {}", material.getMaterialName());
+
+        // Generar código si no viene
+        String materialCode = (material.getMaterialCode() != null && !material.getMaterialCode().trim().isEmpty())
+                ? material.getMaterialCode()
+                : generateMaterialCode();
+
+        return repository.existsByMaterialCode(materialCode)
                 .flatMap(exists -> {
                     if (exists) {
                         return Mono.error(new ConflictException(
-                                "Material with code '" + material.getMaterialCode() + "' already exists"));
+                                "Material with code '" + materialCode + "' already exists"));
                     }
                     LocalDateTime now = LocalDateTime.now();
                     Material newMaterial = material.toBuilder()
+                            .materialCode(materialCode)
                             .recordStatus(RecordStatus.ACTIVE)
                             .currentStock(material.getCurrentStock() != null ? material.getCurrentStock() : 0.0)
                             .createdAt(now)
@@ -111,5 +118,9 @@ public class MaterialUseCaseImpl implements IMaterialUseCase {
                 .flatMap(repository::save)
                 .doOnSuccess(saved -> log.info("Material restored: {}", saved.getId()))
                 .doOnError(error -> log.error("Error restoring material {}: {}", id, error.getMessage()));
+    }
+
+    private String generateMaterialCode() {
+        return "MAT" + System.currentTimeMillis();
     }
 }

@@ -9,8 +9,6 @@ import pe.edu.vallegrande.vgmsinventorypurchases.infrastructure.persistence.repo
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class PurchaseDetailRepositoryImpl implements IPurchaseDetailRepository {
@@ -20,9 +18,7 @@ public class PurchaseDetailRepositoryImpl implements IPurchaseDetailRepository {
     @Override
     public Mono<PurchaseDetail> save(PurchaseDetail detail) {
         PurchaseDetailEntity entity = toEntity(detail);
-        if (entity.getId() == null) {
-            entity.setId(UUID.randomUUID().toString());
-        }
+        entity.setNew(entity.getId() == null);
         return r2dbcRepository.save(entity).map(this::toDomain);
     }
 

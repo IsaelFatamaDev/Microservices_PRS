@@ -7,3 +7,4 @@ export * from './commercial.model';
 export * from './inventory.model';
 export * from './claims.model';
 export * from './distribution.model';
+export * from './water-quality.model';
