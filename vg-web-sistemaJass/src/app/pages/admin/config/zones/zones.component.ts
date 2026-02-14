@@ -384,7 +384,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 [(ngModel)]="zoneForm.zoneName"
                 name="zoneName"
                 required
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-400 transition-all"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all"
                 placeholder="Ej: Zona A, Zona Central">
             </div>
             <div>
@@ -393,7 +393,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 [(ngModel)]="zoneForm.description"
                 name="description"
                 rows="3"
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm resize-none placeholder:text-gray-400 transition-all"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm resize-none placeholder:text-gray-300 transition-all"
                 placeholder="Descripción opcional de la zona"></textarea>
             </div>
 
@@ -419,7 +419,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                       type="text"
                       [(ngModel)]="st.streetName"
                       [name]="'isn_' + idx"
-                      class="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-400 transition-all"
+                      class="flex-1 min-w-0 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all"
                       placeholder="Nombre de la calle">
                     <button type="button" (click)="removeInlineStreet(idx)" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0">
                       <lucide-icon [img]="trashIcon" [size]="16"></lucide-icon>
@@ -511,7 +511,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   [(ngModel)]="streetForm.streetName"
                   name="streetName"
                   required
-                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-400 transition-all"
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all"
                   placeholder="Ej: Los Rosales">
               </div>
             </div>

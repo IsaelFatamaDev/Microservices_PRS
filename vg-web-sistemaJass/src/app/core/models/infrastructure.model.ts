@@ -1,7 +1,7 @@
 import { RecordStatus } from './user.model';
 
 export type BoxType = 'RESIDENTIAL' | 'COMMERCIAL' | 'COMMUNAL' | 'INSTITUTIONAL';
-export type BoxStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'TRANSFERRED';
+export type AssignmentStatus = 'ACTIVE' | 'INACTIVE' | 'TRANSFERRED';
 
 export interface WaterBox {
      id: string;
@@ -16,21 +16,28 @@ export interface WaterBox {
      installationDate: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     createdBy?: string;
      updatedAt?: string;
-     // display helpers
-     userName?: string;
-     zoneName?: string;
-     streetName?: string;
+     updatedBy?: string;
 }
 
 export interface CreateWaterBoxRequest {
      organizationId: string;
      boxCode: string;
      boxType: BoxType;
-     installationDate: string;
-     zoneId: string;
-     streetId: string;
-     address: string;
+     installationDate?: string;
+     zoneId?: string;
+     streetId?: string;
+     address?: string;
+}
+
+export interface UpdateWaterBoxRequest {
+     boxCode?: string;
+     boxType?: string;
+     installationDate?: string;
+     zoneId?: string;
+     streetId?: string;
+     address?: string;
 }
 
 export interface AssignWaterBoxRequest {
@@ -40,29 +47,37 @@ export interface AssignWaterBoxRequest {
 
 export interface WaterBoxAssignment {
      id: string;
+     organizationId: string;
      waterBoxId: string;
      userId: string;
      assignmentDate: string;
-     assignedBy: string;
+     assignmentStatus: AssignmentStatus;
+     endDate?: string;
      recordStatus: RecordStatus;
+     createdAt: string;
+     createdBy?: string;
+     updatedAt?: string;
+     updatedBy?: string;
 }
 
 export interface WaterBoxTransfer {
      id: string;
+     organizationId: string;
      waterBoxId: string;
      fromUserId: string;
      toUserId: string;
      transferDate: string;
-     transferReason: string;
      transferFee: number;
-     processedBy: string;
+     notes?: string;
      recordStatus: RecordStatus;
      createdAt: string;
+     createdBy?: string;
 }
 
-export interface CreateTransferRequest {
+export interface TransferWaterBoxRequest {
      waterBoxId: string;
      fromUserId: string;
      toUserId: string;
-     transferReason: string;
+     transferFee?: number;
+     notes?: string;
 }

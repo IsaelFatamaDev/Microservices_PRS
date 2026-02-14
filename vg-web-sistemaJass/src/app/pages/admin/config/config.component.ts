@@ -41,7 +41,6 @@ interface TabItem {
         <p class="text-sm text-gray-500 mt-0.5">Administra todos los ajustes de la organización</p>
       </div>
 
-      <!-- Tab navigation -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-1.5">
         <div class="flex gap-1 overflow-x-auto">
           @for (tab of tabs; track tab.key) {
@@ -58,7 +57,6 @@ interface TabItem {
         </div>
       </div>
 
-      <!-- Tab content -->
       <div>
         @switch (activeTab()) {
           @case ('organization') {
@@ -85,7 +83,6 @@ interface TabItem {
 
                 <div class="p-6">
                   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <!-- Logo -->
                     <div class="lg:col-span-4 flex flex-col items-center">
                       <div class="w-full aspect-square max-w-[240px] relative rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-blue-400 transition-all group overflow-hidden"
                            (click)="logoInput.click()">
@@ -109,7 +106,6 @@ interface TabItem {
                       </div>
                     </div>
 
-                    <!-- Form fields -->
                     <div class="lg:col-span-8 space-y-5">
                       <div>
                         <label class="block text-sm font-semibold text-gray-800 mb-1.5">Nombre de la Organización <span class="text-red-500">*</span></label>
@@ -120,7 +116,7 @@ interface TabItem {
                           <input
                             type="text"
                             [(ngModel)]="orgForm.organizationName"
-                            class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm font-medium placeholder:text-gray-400 transition-all"
+                            class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm font-medium placeholder:text-gray-300 transition-all"
                             placeholder="Ej. JASS San Pedro del Valle">
                         </div>
                       </div>
@@ -135,7 +131,7 @@ interface TabItem {
                             <input
                               type="email"
                               [(ngModel)]="orgForm.email"
-                              class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-400 transition-all"
+                              class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all"
                               placeholder="ejemplo&#64;jass.com">
                           </div>
                         </div>
@@ -149,7 +145,8 @@ interface TabItem {
                               type="text"
                               [(ngModel)]="orgForm.phone"
                               maxlength="9"
-                              class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-400 transition-all"
+                              (input)="onOrgPhoneInput($event)"
+                              class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all font-mono"
                               placeholder="987654321">
                           </div>
                         </div>
@@ -164,12 +161,11 @@ interface TabItem {
                           <input
                             type="text"
                             [(ngModel)]="orgForm.address"
-                            class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-400 transition-all"
+                            class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all"
                             placeholder="Av. Principal S/N, Sector 2">
                         </div>
                       </div>
 
-                      <!-- Ubigeo -->
                       <div class="bg-gray-50 rounded-xl p-4 space-y-3 border border-gray-100">
                         <div class="flex items-center gap-2 mb-1">
                           <lucide-icon [img]="mapIcon" [size]="16" class="text-gray-500"></lucide-icon>
@@ -212,7 +208,6 @@ interface TabItem {
                     </div>
                   </div>
 
-                  <!-- Save button -->
                   <div class="flex justify-end mt-6 pt-5 border-t border-gray-100">
                     <button
                       (click)="saveOrganization()"
@@ -371,6 +366,12 @@ export class ConfigComponent implements OnInit {
      removeLogo(event: Event): void {
           event.stopPropagation();
           this.orgForm.logoUrl = '';
+     }
+
+     onOrgPhoneInput(event: Event): void {
+          const input = event.target as HTMLInputElement;
+          input.value = input.value.replace(/[^0-9]/g, '').slice(0, 9);
+          this.orgForm.phone = input.value;
      }
 
      saveOrganization(): void {

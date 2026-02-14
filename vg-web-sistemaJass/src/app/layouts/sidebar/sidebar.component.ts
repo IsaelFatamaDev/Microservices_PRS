@@ -186,7 +186,7 @@ export class SidebarComponent {
       route: '/admin/infrastructure',
       roles: ['ADMIN'],
       children: [
-        { label: 'Cajas de Agua', icon: Droplets, route: '/admin/infrastructure/water-boxes', roles: ['ADMIN'] },
+        { label: 'Suministros', icon: Droplets, route: '/admin/infrastructure/water-boxes', roles: ['ADMIN'] },
         { label: 'Transferencias', icon: Truck, route: '/admin/infrastructure/transfers', roles: ['ADMIN'] }
       ]
     },

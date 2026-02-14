@@ -220,7 +220,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                     [(ngModel)]="fareForm.customType"
                     name="customType"
                     required
-                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm uppercase placeholder:text-gray-400 placeholder:normal-case transition-all"
+                    class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm uppercase placeholder:text-gray-300 placeholder:normal-case transition-all"
                     placeholder="Ej: LIMPIEZA_CANAL, CUOTA_EXTRA">
                   <p class="mt-1.5 text-xs text-gray-400 italic">Solo letras mayúsculas, números y guión bajo (A-Z, 0-9, _)</p>
                 </div>
@@ -275,7 +275,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   required
                   step="0.01"
                   min="0"
-                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm tabular-nums placeholder:text-gray-400 transition-all"
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm tabular-nums placeholder:text-gray-300 transition-all"
                   placeholder="0.00">
               </div>
 
@@ -285,7 +285,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                   [(ngModel)]="fareForm.description"
                   name="description"
                   rows="2"
-                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm resize-none placeholder:text-gray-400 transition-all"
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm resize-none placeholder:text-gray-300 transition-all"
                   placeholder="Descripción opcional de la tarifa"></textarea>
               </div>
 

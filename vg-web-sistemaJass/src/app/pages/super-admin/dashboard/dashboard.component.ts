@@ -13,7 +13,6 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [CommonModule, RouterLink, LucideAngularModule],
   template: `
     <div class="space-y-8">
-      <!-- Welcome Section -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div>
           <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
@@ -31,9 +30,7 @@ import { AuthService } from '../../../core/services/auth.service';
         </div>
       </div>
 
-      <!-- Stats Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Organizations Card -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
           <div class="flex items-start justify-between mb-4">
             <div>
@@ -53,7 +50,6 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
         </div>
 
-        <!-- Admins Card -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300">
           <div class="flex items-start justify-between mb-4">
             <div>
@@ -75,15 +71,14 @@ import { AuthService } from '../../../core/services/auth.service';
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Quick Actions -->
         <div class="lg:col-span-2 space-y-6">
           <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
             <lucide-icon [img]="plusIcon" [size]="20" class="text-slate-400"></lucide-icon>
             Acciones Rápidas
           </h2>
-          
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <a routerLink="/super-admin/organizations/new" 
+            <a routerLink="/super-admin/organizations/new"
                class="group p-4 bg-white border border-slate-200 rounded-xl hover:border-blue-400 hover:shadow-md transition-all duration-200 flex items-center gap-4 cursor-pointer">
               <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-600 transition-colors duration-200">
                 <lucide-icon [img]="plusIcon" [size]="24" class="text-blue-600 group-hover:text-white transition-colors duration-200"></lucide-icon>
@@ -94,7 +89,7 @@ import { AuthService } from '../../../core/services/auth.service';
               </div>
             </a>
 
-            <a routerLink="/super-admin/organizations" 
+            <a routerLink="/super-admin/organizations"
                class="group p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-400 hover:shadow-md transition-all duration-200 flex items-center gap-4 cursor-pointer">
               <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center group-hover:bg-slate-800 transition-colors duration-200">
                 <lucide-icon [img]="buildingIcon" [size]="24" class="text-slate-600 group-hover:text-white transition-colors duration-200"></lucide-icon>
@@ -107,13 +102,12 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
         </div>
 
-        <!-- System Status -->
         <div class="space-y-6">
           <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
             <lucide-icon [img]="serverIcon" [size]="20" class="text-slate-400"></lucide-icon>
             Estado del Sistema
           </h2>
-          
+
           <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4">
             <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
               <div class="flex items-center gap-3">
@@ -181,6 +175,6 @@ export class SuperAdminDashboardComponent implements OnInit {
 
     // In a real app we might have a separate endpoint for admin count,
     // for now we'll leave it as 0 or implement a fetch if available.
-    // this.adminsCount.set(0); 
+    // this.adminsCount.set(0);
   }
 }

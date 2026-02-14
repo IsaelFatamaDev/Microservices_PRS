@@ -206,7 +206,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 [(ngModel)]="paramForm.parameterValue"
                 name="parameterValue"
                 required
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm font-mono placeholder:text-gray-400 transition-all"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm font-mono placeholder:text-gray-300 transition-all"
                 [placeholder]="getPlaceholder(paramForm.parameterType)">
             </div>
 
@@ -216,7 +216,7 @@ import { AuthService } from '../../../../core/services/auth.service';
                 [(ngModel)]="paramForm.description"
                 name="description"
                 rows="2"
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm resize-none placeholder:text-gray-400 transition-all"
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm resize-none placeholder:text-gray-300 transition-all"
                 placeholder="Descripción opcional del parámetro"></textarea>
             </div>
 

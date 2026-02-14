@@ -12,7 +12,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
   imports: [CommonModule, RouterOutlet, RouterLink, LucideAngularModule, SidebarComponent, DatePipe],
   template: `
     <div class="min-h-screen bg-slate-50 flex">
-      <app-sidebar 
+      <app-sidebar
         [isOpen]="sidebarOpen()"
         (closeSidebar)="sidebarOpen.set(false)"
       ></app-sidebar>
@@ -36,7 +36,6 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
             </div>
           </div>
 
-          <!-- Clock Display (Absolutely Centered) -->
           <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3 bg-slate-50/80 backdrop-blur-sm px-4 py-2 rounded-2xl border border-slate-200 shadow-sm z-10">
             <div class="hidden sm:block p-1.5 bg-white rounded-lg shadow-sm text-blue-600">
               <lucide-icon [img]="clockIcon" [size]="18"></lucide-icon>
@@ -138,4 +137,3 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.sidebarOpen.update(v => !v);
   }
 }
-

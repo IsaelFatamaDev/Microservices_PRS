@@ -9,7 +9,7 @@ import {
   Phone, Mail, MapPin, FileText, Hash, ChevronsLeft, ChevronsRight, AlertCircle
 } from 'lucide-angular';
 import { environment } from '../../../../environments/environment';
-import { User, ApiResponse, Zone, Street } from '../../../core';
+import { User, ApiResponse, Zone } from '../../../core';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import * as XLSX from 'xlsx';
@@ -32,7 +32,6 @@ interface WaterBoxDetail {
   imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule],
   template: `
     <div class="space-y-5">
-      <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-2xl font-bold text-gray-800">Gestión de Usuarios</h1>
@@ -52,9 +51,8 @@ interface WaterBoxDetail {
         </div>
       </div>
 
-      <!-- Main card -->
+
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <!-- Tabs -->
         <div class="flex border-b border-gray-100">
           <button
             (click)="switchTab('operators')"
@@ -94,7 +92,6 @@ interface WaterBoxDetail {
           </button>
         </div>
 
-        <!-- Toolbar -->
         <div class="p-4 border-b border-gray-100 bg-gray-50/30">
           <div class="flex flex-col lg:flex-row gap-3">
             <div class="relative flex-1">
@@ -103,18 +100,18 @@ interface WaterBoxDetail {
               </div>
               <input
                 type="text"
-                [(ngModel)]="searchTerm"
-                (input)="currentPage.set(1)"
+                [ngModel]="searchTerm()"
+                (ngModelChange)="searchTerm.set($event); currentPage.set(1)"
                 placeholder="Buscar por apellido, nombre o DNI..."
-                class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-400 transition-all">
+                class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all">
             </div>
 
             <div class="flex flex-wrap gap-3">
               @if (activeTab() === 'clients') {
                 <select
-                  [(ngModel)]="zoneFilter"
-                  (ngModelChange)="currentPage.set(1)"
-                  [style.color]="zoneFilter ? '#111827' : '#9ca3af'"
+                  [ngModel]="zoneFilter()"
+                  (ngModelChange)="zoneFilter.set($event); currentPage.set(1)"
+                  [style.color]="zoneFilter() ? '#111827' : '#9ca3af'"
                   class="px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition-all min-w-40">
                   <option value="" style="color: #9ca3af">Todas las zonas</option>
                   @for (zone of zones(); track zone.id) {
@@ -124,12 +121,12 @@ interface WaterBoxDetail {
               }
 
               <select
-                [(ngModel)]="statusFilter"
-                (ngModelChange)="currentPage.set(1)"
+                [ngModel]="statusFilter()"
+                (ngModelChange)="statusFilter.set($event); currentPage.set(1)"
                 class="px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition-all min-w-35">
+                <option value="">Todos</option>
                 <option value="ACTIVE">Activos</option>
                 <option value="INACTIVE">Inactivos</option>
-                <option value="">Todos</option>
               </select>
 
               @if (activeTab() === 'clients') {
@@ -153,47 +150,50 @@ interface WaterBoxDetail {
           </div>
         </div>
 
-        <!-- Table -->
-        <div class="overflow-x-auto">
-          @if (isLoading()) {
-            <div class="p-16 text-center">
-              <div class="inline-flex items-center gap-2.5 text-gray-500">
-                <div class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span class="text-sm">Cargando usuarios...</span>
-              </div>
+        @if (isLoading()) {
+          <div class="p-16 text-center">
+            <div class="inline-flex items-center gap-2.5 text-gray-500">
+              <div class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-sm">Cargando usuarios...</span>
             </div>
-          } @else if (filteredUsers().length === 0) {
-            <div class="p-16 text-center">
-              <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
-                <lucide-icon [img]="usersIcon" [size]="32" class="text-gray-400"></lucide-icon>
-              </div>
-              <p class="text-gray-500 font-medium">No se encontraron {{ activeTab() === 'operators' ? 'operadores' : 'clientes' }}</p>
-              <p class="text-gray-400 text-sm mt-1">Intenta cambiar los filtros o crea uno nuevo</p>
+          </div>
+        } @else if (filteredUsers().length === 0) {
+          <div class="p-16 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
+              <lucide-icon [img]="usersIcon" [size]="32" class="text-gray-400"></lucide-icon>
             </div>
-          } @else {
+            <p class="text-gray-500 font-medium">No se encontraron {{ activeTab() === 'operators' ? 'operadores' : 'clientes' }}</p>
+            <p class="text-gray-400 text-sm mt-1">Intenta cambiar los filtros o crea uno nuevo</p>
+          </div>
+        } @else {
+
+          <div class="hidden lg:block overflow-x-auto">
             <table class="w-full">
               <thead>
-                <tr class="bg-gray-50/80">
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">#</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Apellidos, Nombres</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">DNI</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Teléfono</th>
+                <tr class="bg-gray-50/80 border-b border-gray-100">
+                  <th class="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider w-14">#</th>
+                  <th class="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Apellidos, Nombres</th>
+                  <th class="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Documento</th>
+                  <th class="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Teléfono</th>
                   @if (activeTab() === 'clients') {
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Dirección</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Zona</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Dirección</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Zona</th>
                   } @else {
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Email</th>
+                    <th class="px-4 py-3 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Email</th>
                   }
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
-                  <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">Acciones</th>
+                  <th class="px-4 py-3 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider w-24">Estado</th>
+                  <th class="px-4 py-3 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider w-28">Acciones</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50">
                 @for (user of paginatedUsers(); track user.id; let i = $index) {
                   <tr class="hover:bg-blue-50/30 transition-colors group"
                       [class.bg-red-50/20]="user.recordStatus === 'INACTIVE'">
-                    <td class="px-4 py-3.5 text-sm text-gray-400 font-mono">
-                      {{ (currentPage() - 1) * pageSize + i + 1 }}
+                    <td class="px-4 py-3.5">
+                      <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold"
+                            [class]="activeTab() === 'operators' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'">
+                        {{ (currentPage() - 1) * pageSize + i + 1 }}
+                      </span>
                     </td>
                     <td class="px-4 py-3.5">
                       <div class="flex items-center gap-3">
@@ -209,11 +209,11 @@ interface WaterBoxDetail {
                         </div>
                       </div>
                     </td>
-                    <td class="px-4 py-3.5 text-sm text-gray-600 font-mono">{{ user.documentNumber || user.dni || '-' }}</td>
+                    <td class="px-4 py-3.5 text-sm text-gray-600 font-mono">{{ user.documentNumber || '-' }}</td>
                     <td class="px-4 py-3.5 text-sm text-gray-600">{{ user.phone || '-' }}</td>
                     @if (activeTab() === 'clients') {
-                      <td class="px-4 py-3.5 text-sm text-gray-500 hidden md:table-cell max-w-45 truncate">{{ user.address || '-' }}</td>
-                      <td class="px-4 py-3.5 hidden lg:table-cell">
+                      <td class="px-4 py-3.5 text-sm text-gray-500 max-w-45 truncate">{{ user.address || '-' }}</td>
+                      <td class="px-4 py-3.5">
                         @if (getZoneName(user.zoneId)) {
                           <span class="inline-flex px-2.5 py-1 text-xs font-medium rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
                             {{ getZoneName(user.zoneId) }}
@@ -223,17 +223,14 @@ interface WaterBoxDetail {
                         }
                       </td>
                     } @else {
-                      <td class="px-4 py-3.5 text-sm text-gray-500 hidden md:table-cell truncate max-w-50">{{ user.email || '-' }}</td>
+                      <td class="px-4 py-3.5 text-sm text-gray-500 truncate max-w-50">{{ user.email || '-' }}</td>
                     }
-                    <td class="px-4 py-3.5">
-                      <span
-                        class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg border"
-                        [class.bg-emerald-50]="user.recordStatus === 'ACTIVE'"
-                        [class.text-emerald-700]="user.recordStatus === 'ACTIVE'"
-                        [class.border-emerald-100]="user.recordStatus === 'ACTIVE'"
-                        [class.bg-red-50]="user.recordStatus === 'INACTIVE'"
-                        [class.text-red-600]="user.recordStatus === 'INACTIVE'"
-                        [class.border-red-100]="user.recordStatus === 'INACTIVE'">
+                    <td class="px-4 py-3.5 text-center">
+                      <span class="inline-flex px-2.5 py-1 text-[11px] font-semibold rounded-full"
+                            [class.bg-emerald-50]="user.recordStatus === 'ACTIVE'"
+                            [class.text-emerald-700]="user.recordStatus === 'ACTIVE'"
+                            [class.bg-red-50]="user.recordStatus === 'INACTIVE'"
+                            [class.text-red-600]="user.recordStatus === 'INACTIVE'">
                         {{ user.recordStatus === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
                       </span>
                     </td>
@@ -243,8 +240,8 @@ interface WaterBoxDetail {
                           <button
                             (click)="toggleDetail(user)"
                             class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                            title="Ver detalle">
-                            <lucide-icon [img]="eyeIcon" [size]="16"></lucide-icon>
+                            title="Ver caja de agua">
+                            <lucide-icon [img]="dropletsIcon" [size]="16"></lucide-icon>
                           </button>
                         }
                         <a [routerLink]="['/admin/users', user.id]"
@@ -277,18 +274,18 @@ interface WaterBoxDetail {
                         @if (loadingBoxes()) {
                           <div class="flex items-center gap-2 text-sm text-gray-500">
                             <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                            Cargando cajas de agua...
+                            Cargando suministros de agua...
                           </div>
                         } @else if (userWaterBoxes().length === 0) {
                           <div class="flex items-center gap-2 text-sm text-gray-400">
                             <lucide-icon [img]="alertIcon" [size]="16"></lucide-icon>
-                            Este usuario no tiene cajas de agua asignadas
+                            Este usuario no tiene suministros de agua asignadas
                           </div>
                         } @else {
                           <div class="space-y-2">
                             <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                               <lucide-icon [img]="dropletsIcon" [size]="14" class="inline mr-1"></lucide-icon>
-                              Cajas de Agua Asignadas ({{ userWaterBoxes().length }})
+                              Suministros de Agua Asignadas ({{ userWaterBoxes().length }})
                             </p>
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                               @for (box of userWaterBoxes(); track box.id) {
@@ -316,10 +313,119 @@ interface WaterBoxDetail {
                 }
               </tbody>
             </table>
-          }
-        </div>
+          </div>
+          <div class="lg:hidden p-3 sm:p-4 space-y-3">
+            @for (user of paginatedUsers(); track user.id; let i = $index) {
+              <div class="bg-white rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                   [class]="user.recordStatus === 'INACTIVE' ? 'border-red-200' : 'border-gray-200'">
+                <div class="flex items-stretch">
+                  <div class="w-11 flex items-center justify-center text-white font-bold text-sm shrink-0"
+                       [class]="activeTab() === 'operators'
+                         ? 'bg-linear-to-b from-purple-500 to-purple-600'
+                         : 'bg-linear-to-b from-blue-500 to-blue-600'">
+                    {{ (currentPage() - 1) * pageSize + i + 1 }}
+                  </div>
+                  <div class="flex-1 p-3.5 min-w-0">
+                    <div class="flex items-start justify-between gap-2 mb-1.5">
+                      <div class="min-w-0">
+                        <h4 class="font-semibold text-gray-800 text-sm truncate">{{ user.lastName }}, {{ user.firstName }}</h4>
+                        <p class="text-xs text-gray-400 font-mono">DNI: {{ user.documentNumber || '-' }}</p>
+                      </div>
+                      <span class="inline-flex px-2 py-0.5 text-[10px] font-bold rounded-full shrink-0"
+                            [class.bg-emerald-50]="user.recordStatus === 'ACTIVE'"
+                            [class.text-emerald-700]="user.recordStatus === 'ACTIVE'"
+                            [class.bg-red-50]="user.recordStatus === 'INACTIVE'"
+                            [class.text-red-600]="user.recordStatus === 'INACTIVE'">
+                        {{ user.recordStatus === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </div>
+                    <div class="space-y-1 mb-2">
+                      @if (user.phone) {
+                        <div class="flex items-center gap-1.5 text-xs text-gray-500">
+                          <lucide-icon [img]="phoneIcon" [size]="12" class="text-gray-400"></lucide-icon>
+                          {{ user.phone }}
+                        </div>
+                      }
+                      @if (user.email) {
+                        <div class="flex items-center gap-1.5 text-xs text-gray-500 truncate">
+                          <lucide-icon [img]="mailIcon" [size]="12" class="text-gray-400"></lucide-icon>
+                          {{ user.email }}
+                        </div>
+                      }
+                      @if (user.address && activeTab() === 'clients') {
+                        <div class="flex items-center gap-1.5 text-xs text-gray-500 truncate">
+                          <lucide-icon [img]="mapPinIcon" [size]="12" class="text-gray-400"></lucide-icon>
+                          {{ user.address }}
+                        </div>
+                      }
+                      @if (activeTab() === 'clients' && getZoneName(user.zoneId)) {
+                        <span class="inline-flex px-2 py-0.5 text-[10px] font-medium rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100">
+                          {{ getZoneName(user.zoneId) }}
+                        </span>
+                      }
+                    </div>
+                    <div class="flex items-center justify-end gap-1 pt-1 border-t border-gray-100">
+                      @if (activeTab() === 'clients') {
+                        <button (click)="toggleDetail(user)"
+                                class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                title="Ver caja de agua">
+                          <lucide-icon [img]="dropletsIcon" [size]="16"></lucide-icon>
+                        </button>
+                      }
+                      <a [routerLink]="['/admin/users', user.id]"
+                         class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
+                        <lucide-icon [img]="editIcon" [size]="16"></lucide-icon>
+                      </a>
+                      @if (user.recordStatus === 'ACTIVE') {
+                        <button (click)="deleteUser(user)"
+                                class="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                          <lucide-icon [img]="trashIcon" [size]="16"></lucide-icon>
+                        </button>
+                      } @else {
+                        <button (click)="restoreUser(user)"
+                                class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                          <lucide-icon [img]="restoreIcon" [size]="16"></lucide-icon>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+                @if (expandedUserId() === user.id) {
+                  <div class="px-4 py-3 bg-blue-50/40 border-t border-blue-100">
+                    @if (loadingBoxes()) {
+                      <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <div class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        Cargando suministros...
+                      </div>
+                    } @else if (userWaterBoxes().length === 0) {
+                      <div class="flex items-center gap-2 text-xs text-gray-400">
+                        <lucide-icon [img]="alertIcon" [size]="14"></lucide-icon>
+                        Sin suministros de agua asignadas
+                      </div>
+                    } @else {
+                      <p class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                        Suministros de Agua ({{ userWaterBoxes().length }})
+                      </p>
+                      @for (box of userWaterBoxes(); track box.id) {
+                        <div class="bg-white rounded-lg p-2.5 border border-gray-200 text-xs mb-2 last:mb-0">
+                          <div class="flex items-center justify-between mb-1">
+                            <span class="font-bold text-gray-800 font-mono">{{ box.boxCode }}</span>
+                            <span class="px-1.5 py-0.5 text-[10px] font-semibold rounded"
+                                  [class]="box.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'">
+                              {{ box.isActive ? 'Activa' : 'Suspendida' }}
+                            </span>
+                          </div>
+                          <p class="text-gray-500">{{ getBoxTypeLabel(box.boxType) }} · {{ box.address || '-' }}</p>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
 
-        <!-- Pagination -->
         @if (totalPages() > 1) {
           <div class="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p class="text-sm text-gray-500">
@@ -385,9 +491,10 @@ export class UsersListComponent implements OnInit {
   userWaterBoxes = signal<WaterBoxDetail[]>([]);
   loadingBoxes = signal(false);
 
-  searchTerm = '';
-  zoneFilter = '';
-  statusFilter = 'ACTIVE';
+  // Reactive filters (signals)
+  searchTerm = signal('');
+  zoneFilter = signal('');
+  statusFilter = signal('');
   readonly pageSize = 10;
 
   plusIcon = Plus; searchIcon = Search; editIcon = Edit; trashIcon = Trash2;
@@ -417,18 +524,20 @@ export class UsersListComponent implements OnInit {
     const role = this.activeTab() === 'operators' ? 'OPERATOR' : 'CLIENT';
     let users = this.allUsers().filter(u => u.role === role);
 
-    if (this.statusFilter) {
-      users = users.filter(u => u.recordStatus === this.statusFilter);
+    const status = this.statusFilter();
+    if (status) {
+      users = users.filter(u => u.recordStatus === status);
     }
-    if (this.zoneFilter && this.activeTab() === 'clients') {
-      users = users.filter(u => u.zoneId === this.zoneFilter);
+    const zone = this.zoneFilter();
+    if (zone && this.activeTab() === 'clients') {
+      users = users.filter(u => u.zoneId === zone);
     }
-    if (this.searchTerm.trim()) {
-      const term = this.searchTerm.trim().toLowerCase();
+    const term = this.searchTerm().trim().toLowerCase();
+    if (term) {
       users = users.filter(u =>
         (u.lastName || '').toLowerCase().includes(term) ||
         (u.firstName || '').toLowerCase().includes(term) ||
-        (u.documentNumber || u.dni || '').toLowerCase().includes(term) ||
+        (u.documentNumber || '').toLowerCase().includes(term) ||
         (u.phone || '').includes(term)
       );
     }
@@ -466,8 +575,8 @@ export class UsersListComponent implements OnInit {
   switchTab(tab: UserTab): void {
     this.activeTab.set(tab);
     this.currentPage.set(1);
-    this.searchTerm = '';
-    this.zoneFilter = '';
+    this.searchTerm.set('');
+    this.zoneFilter.set('');
     this.expandedUserId.set(null);
   }
 
@@ -592,7 +701,7 @@ export class UsersListComponent implements OnInit {
     const data = users.map((u, i) => ({
       'N°': i + 1,
       'Apellidos y Nombres': `${u.lastName || ''}, ${u.firstName || ''}`,
-      'N° DNI': u.documentNumber || u.dni || '',
+      'N° DNI': u.documentNumber || '',
       'Teléfono': u.phone || '',
       'Dirección': u.address || '',
       'Zona': this.getZoneName(u.zoneId) || 'Sin zona'

@@ -9,10 +9,10 @@ import { AlertService } from '../../../core/services/alert.service';
 import { ApiResponse, User as UserModel } from '../../../core';
 
 @Component({
-     selector: 'app-admin-profile',
-     standalone: true,
-     imports: [CommonModule, FormsModule, LucideAngularModule],
-     template: `
+  selector: 'app-admin-profile',
+  standalone: true,
+  imports: [CommonModule, FormsModule, LucideAngularModule],
+  template: `
     <div class="max-w-2xl mx-auto">
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Mi Perfil</h1>
@@ -56,7 +56,13 @@ import { ApiResponse, User as UserModel } from '../../../core';
               type="text"
               [(ngModel)]="form.phone"
               name="phone"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              maxlength="9"
+              (input)="onPhoneInput($event)"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono placeholder:text-gray-300"
+              placeholder="987654321">
+            @if (phoneError) {
+              <p class="mt-1 text-xs text-red-500">{{ phoneError }}</p>
+            }
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1.5">Dirección</label>
@@ -103,37 +109,52 @@ import { ApiResponse, User as UserModel } from '../../../core';
   `
 })
 export class AdminProfileComponent {
-     private http = inject(HttpClient);
-     authService = inject(AuthService);
-     private alertService = inject(AlertService);
+  private http = inject(HttpClient);
+  authService = inject(AuthService);
+  private alertService = inject(AlertService);
 
-     isSubmitting = signal(false);
+  isSubmitting = signal(false);
 
-     form = {
-          firstName: this.authService.user()?.firstName || '',
-          lastName: this.authService.user()?.lastName || '',
-          phone: this.authService.user()?.phone || '',
-          address: this.authService.user()?.address || ''
-     };
+  form = {
+    firstName: this.authService.user()?.firstName || '',
+    lastName: this.authService.user()?.lastName || '',
+    phone: this.authService.user()?.phone || '',
+    address: this.authService.user()?.address || ''
+  };
 
-     userIcon = User;
-     mailIcon = Mail;
-     phoneIcon = Phone;
-     mapPinIcon = MapPin;
-     saveIcon = Save;
-     loaderIcon = Loader2;
+  phoneError = '';
 
-     updateProfile(): void {
-          this.isSubmitting.set(true);
-          const userId = this.authService.userId();
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/[^0-9]/g, '').slice(0, 9);
+    this.form.phone = input.value;
+    if (this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
+      this.phoneError = 'Debe comenzar con 9';
+    } else if (this.form.phone.length > 0 && this.form.phone.length !== 9) {
+      this.phoneError = 'Debe tener 9 dígitos';
+    } else {
+      this.phoneError = '';
+    }
+  }
 
-          this.http.put<ApiResponse<UserModel>>(`${environment.apiUrl}/users/${userId}`, this.form).subscribe({
-               next: () => {
-                    this.isSubmitting.set(false);
-                    this.alertService.success('Actualizado', 'Perfil actualizado correctamente');
-                    this.authService.loadUserProfile().subscribe();
-               },
-               error: () => this.isSubmitting.set(false)
-          });
-     }
+  userIcon = User;
+  mailIcon = Mail;
+  phoneIcon = Phone;
+  mapPinIcon = MapPin;
+  saveIcon = Save;
+  loaderIcon = Loader2;
+
+  updateProfile(): void {
+    this.isSubmitting.set(true);
+    const userId = this.authService.userId();
+
+    this.http.put<ApiResponse<UserModel>>(`${environment.apiUrl}/users/${userId}`, this.form).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.alertService.success('Actualizado', 'Perfil actualizado correctamente');
+        this.authService.loadUserProfile().subscribe();
+      },
+      error: () => this.isSubmitting.set(false)
+    });
+  }
 }

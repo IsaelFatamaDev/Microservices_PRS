@@ -21,7 +21,6 @@ import { AuthService } from '../../../core/services/auth.service';
      imports: [CommonModule, FormsModule, RouterLink, LucideAngularModule],
      template: `
     <div class="max-w-4xl mx-auto space-y-5">
-      <!-- Header -->
       <div class="flex items-center gap-4">
         <a routerLink="/admin/users" class="p-2.5 hover:bg-gray-100 rounded-xl transition-colors">
           <lucide-icon [img]="backIcon" [size]="20" class="text-gray-600"></lucide-icon>
@@ -38,7 +37,6 @@ import { AuthService } from '../../../core/services/auth.service';
 
       <form (ngSubmit)="onSubmit()" class="space-y-5">
 
-        <!-- Role Selection (create only) -->
         @if (!isEditMode()) {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4">Tipo de Usuario</h3>
@@ -90,7 +88,6 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
         }
 
-        <!-- Personal Data -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
             <lucide-icon [img]="fileIcon" [size]="16" class="text-gray-400"></lucide-icon>
@@ -143,7 +140,6 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
         </div>
 
-        <!-- Contact Info -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
           <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
             <lucide-icon [img]="phoneIcon" [size]="16" class="text-gray-400"></lucide-icon>
@@ -191,7 +187,6 @@ import { AuthService } from '../../../core/services/auth.service';
             </div>
           </div>
 
-          <!-- WhatsApp toggle -->
           @if (!isEditMode()) {
             <div class="mt-4 pt-4 border-t border-gray-100">
               <label class="flex items-center gap-3 cursor-pointer group">
@@ -211,7 +206,6 @@ import { AuthService } from '../../../core/services/auth.service';
           }
         </div>
 
-        <!-- Location (CLIENT & OPERATOR) -->
         @if (selectedRole === 'CLIENT' || selectedRole === 'OPERATOR') {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -251,17 +245,16 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
         }
 
-        <!-- Water Box (CLIENT + create only) -->
         @if (selectedRole === 'CLIENT' && !isEditMode()) {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-4 flex items-center gap-2">
               <lucide-icon [img]="dropletsIcon" [size]="16" class="text-gray-400"></lucide-icon>
-              Caja de Agua
+              Suministro de Agua
             </h3>
             <p class="text-xs text-gray-400 mb-4">Se creará y asignará automáticamente al registrar el cliente</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de Caja <span class="text-red-500">*</span></label>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipo de Suministro <span class="text-red-500">*</span></label>
                 <select [(ngModel)]="selectedBoxType" name="boxType" required
                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition-all">
                   <option value="RESIDENTIAL">Residencial</option>
@@ -289,7 +282,6 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
         }
 
-        <!-- Steps indicator (create only) -->
         @if (!isEditMode() && selectedRole === 'CLIENT') {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-3">Proceso de Registro</h3>
@@ -303,19 +295,18 @@ import { AuthService } from '../../../core/services/auth.service';
               <div class="flex items-center gap-1.5">
                 <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
                      [class]="currentStep() >= 2 ? 'bg-blue-600' : 'bg-gray-300'">2</div>
-                <span>Crear caja de agua</span>
+                <span>Crear Suministro de agua</span>
               </div>
               <lucide-icon [img]="chevronIcon" [size]="14" class="text-gray-300"></lucide-icon>
               <div class="flex items-center gap-1.5">
                 <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
                      [class]="currentStep() >= 3 ? 'bg-blue-600' : 'bg-gray-300'">3</div>
-                <span>Asignar caja</span>
+                <span>Asignar Suministro</span>
               </div>
             </div>
           </div>
         }
 
-        <!-- Submit -->
         <div class="flex items-center justify-end gap-3">
           <a routerLink="/admin/users"
              class="px-6 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 text-sm font-medium transition-all">
@@ -335,7 +326,6 @@ import { AuthService } from '../../../core/services/auth.service';
         </div>
       </form>
 
-      <!-- Credential Report Modal -->
       @if (showCredentialReport()) {
         <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
           <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" id="credentialReport">
@@ -786,14 +776,14 @@ export class UserFormComponent implements OnInit {
                               const waterBoxId = newBox?.id;
                               if (!waterBoxId) {
                                    this.isSubmitting.set(false);
-                                   this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear la caja de agua');
+                                   this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear el Suministro de agua');
                                    this.navigateOrReport();
                                    return;
                               }
 
                               // Step 3: Assign water box to user
                               this.currentStep.set(3);
-                              this.stepMessage.set('Asignando caja de agua...');
+                              this.stepMessage.set('Asignando Suministro de agua...');
 
                               const assignPayload: AssignWaterBoxRequest = {
                                    waterBoxId: waterBoxId,
@@ -809,14 +799,14 @@ export class UserFormComponent implements OnInit {
                                    },
                                    error: () => {
                                         this.isSubmitting.set(false);
-                                        this.alertService.warning('Parcial', 'Usuario y caja creados, pero la asignación falló');
+                                        this.alertService.warning('Parcial', 'Usuario y Suministro creados, pero la asignación falló');
                                         this.navigateOrReport();
                                    }
                               });
                          },
                          error: () => {
                               this.isSubmitting.set(false);
-                              this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear la caja de agua');
+                              this.alertService.warning('Parcial', 'Usuario creado pero no se pudo crear el Suministro de agua');
                               this.navigateOrReport();
                          }
                     });
