@@ -15,7 +15,7 @@ import { AlertService } from '../../../../core/services/alert.service';
 import { CommercialService } from '../../../../core/services/commercial.service';
 import { ApiResponse, User, WaterBox, WaterBoxAssignment } from '../../../../core/models';
 import {
-  Payment, CreatePaymentRequest, Debt, PaymentMethod, ConceptType
+  Payment, CreatePaymentRequest, CreateReceiptRequest, Debt, PaymentMethod, ConceptType
 } from '../../../../core/models/commercial.model';
 import { Fare } from '../../../../core/models/organization.model';
 
@@ -26,6 +26,13 @@ interface MonthCell {
   status: 'paid' | 'pending' | 'selected' | 'future' | 'overdue';
   debtId?: string;
   amount?: number;
+}
+
+interface ExtraFare {
+  fareId: string;
+  fareType: string;
+  description: string;
+  amount: number;
 }
 
 interface UserWithBox {
@@ -176,7 +183,7 @@ interface UserWithBox {
               <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mb-6">
                 @for (cell of monthCells(); track cell.month + '-' + cell.year) {
                   <button (click)="toggleMonth(cell)"
-                          [disabled]="cell.status === 'paid' || cell.status === 'future'"
+                          [disabled]="cell.status === 'paid'"
                           [class]="getMonthCellClass(cell)"
                           class="p-3 rounded-xl text-center transition-all border relative">
                     <p class="text-xs font-medium">{{ cell.label }}</p>
@@ -210,23 +217,36 @@ interface UserWithBox {
                   <div class="space-y-3">
                     @if (extraFares().length > 0) {
                       <div>
-                        <label class="text-xs text-gray-500 mb-1 block">Concepto adicional (opcional)</label>
-                        <select [(ngModel)]="selectedFareId" (ngModelChange)="onExtraFareChange()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none">
-                          <option value="">Solo cuotas mensuales</option>
-                          @for (f of extraFares(); track f.id) {
-                            <option [value]="f.id">{{ f.fareTypeDisplayName || f.fareType }} — S/ {{ f.amount.toFixed(2) }}</option>
-                          }
-                        </select>
+                        <label class="text-xs text-gray-500 mb-1.5 block">Conceptos adicionales</label>
+                        <div class="flex gap-2">
+                          <select [(ngModel)]="currentExtraFareId" class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 outline-none">
+                            <option value="">Seleccionar concepto...</option>
+                            @for (f of extraFares(); track f.id) {
+                              <option [value]="f.id">{{ f.fareTypeDisplayName || f.fareType }} — S/ {{ f.amount.toFixed(2) }}</option>
+                            }
+                          </select>
+                          <button (click)="addExtraFare()" [disabled]="!currentExtraFareId"
+                                  class="px-4 py-2 bg-violet-600 text-white rounded-xl text-sm font-medium hover:bg-violet-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+                            Agregar
+                          </button>
+                        </div>
                       </div>
                     }
 
-                    @if (selectedFareId && extraAmount > 0) {
-                      <div class="flex items-center gap-3 bg-violet-50/60 rounded-xl px-4 py-2.5">
-                        <lucide-icon [img]="checkCircleIcon" [size]="16" class="text-violet-600 shrink-0"></lucide-icon>
-                        <div class="flex-1">
-                          <p class="text-sm font-medium text-gray-800">{{ extraDescription }}</p>
-                        </div>
-                        <span class="text-sm font-bold text-violet-700">S/ {{ extraAmount.toFixed(2) }}</span>
+                    @if (selectedExtraFares().length > 0) {
+                      <div class="space-y-2">
+                        @for (extra of selectedExtraFares(); track $index) {
+                          <div class="flex items-center gap-3 bg-blue-50/60 rounded-xl px-3 py-2">
+                            <lucide-icon [img]="checkCircleIcon" [size]="16" class="text-blue-600 shrink-0"></lucide-icon>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-sm font-medium text-gray-800 truncate">{{ extra.description }}</p>
+                            </div>
+                            <span class="text-sm font-bold text-blue-700">S/ {{ extra.amount.toFixed(2) }}</span>
+                            <button (click)="removeExtraFare($index)" class="p-1 hover:bg-red-100 rounded-lg transition-colors text-red-500">
+                              <lucide-icon [img]="xIcon" [size]="14"></lucide-icon>
+                            </button>
+                          </div>
+                        }
                       </div>
                     }
 
@@ -256,10 +276,10 @@ interface UserWithBox {
                       <span class="text-gray-600">Meses seleccionados ({{ selectedMonths().length }})</span>
                       <span class="font-medium">S/ {{ (selectedMonths().length * monthlyFee()).toFixed(2) }}</span>
                     </div>
-                    @if (selectedFareId && extraAmount > 0) {
+                    @for (extra of selectedExtraFares(); track $index) {
                       <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">{{ extraDescription }}</span>
-                        <span class="font-medium">S/ {{ extraAmount.toFixed(2) }}</span>
+                        <span class="text-gray-600">{{ extra.description }}</span>
+                        <span class="font-medium">S/ {{ extra.amount.toFixed(2) }}</span>
                       </div>
                     }
                     <div class="flex justify-between text-base font-bold pt-2 border-t border-violet-200">
@@ -481,10 +501,8 @@ export class PaymentsComponent implements OnInit {
   isProcessing = signal(false);
   showPaymentHistory = false;
 
-  selectedFareId = '';
-  extraConcept = '';
-  extraAmount = 0;
-  extraDescription = '';
+  selectedExtraFares = signal<ExtraFare[]>([]);
+  currentExtraFareId = '';
   paymentMethod: PaymentMethod = 'CASH';
   paymentNotes = '';
 
@@ -521,14 +539,12 @@ export class PaymentsComponent implements OnInit {
       const month = i + 1;
       const debt = debts.find(d => d.periodMonth === month && d.periodYear === year);
       const isSelected = selected.some(s => s.month === month && s.year === year);
-      const isFuture = year > currentYear || (year === currentYear && month > currentMonth);
       const isPaid = debt?.debtStatus === 'PAID';
-      const isOverdue = !isPaid && !isFuture && (year < currentYear || (year === currentYear && month < currentMonth));
+      const isOverdue = !isPaid && (year < currentYear || (year === currentYear && month < currentMonth));
 
       let status: MonthCell['status'] = 'pending';
       if (isPaid) status = 'paid';
       else if (isSelected) status = 'selected';
-      else if (isFuture) status = 'future';
       else if (isOverdue) status = 'overdue';
 
       return { month, year, label, status, debtId: debt?.id, amount: debt?.totalAmount || this.monthlyFee() };
@@ -539,8 +555,8 @@ export class PaymentsComponent implements OnInit {
 
   totalPayment = computed(() => {
     const base = this.selectedMonths().length * this.monthlyFee();
-    const extra = this.selectedFareId && this.extraAmount > 0 ? this.extraAmount : 0;
-    return base + extra;
+    const extrasTotal = this.selectedExtraFares().reduce((sum, e) => sum + e.amount, 0);
+    return base + extrasTotal;
   });
 
   filteredPayments = computed(() => {
@@ -594,7 +610,7 @@ export class PaymentsComponent implements OnInit {
     });
 
     this.commercialService.getPayments().subscribe({
-      next: r => this.allPayments.set((r.data || []).filter(p => p.organizationId === orgId && p.recordStatus === 'ACTIVE'))
+      next: r => this.allPayments.set((r.data || []).filter(p => p.recordStatus === 'ACTIVE'))
     });
   }
 
@@ -621,9 +637,8 @@ export class PaymentsComponent implements OnInit {
     this.selectedUserBox.set(ub);
     this.searchResults.set([]);
     this.selectedMonths.set([]);
-    this.selectedFareId = '';
-    this.extraConcept = '';
-    this.extraAmount = 0;
+    this.selectedExtraFares.set([]);
+    this.currentExtraFareId = '';
     this.paymentMethod = 'CASH';
     this.paymentNotes = '';
     this.loadUserDebts(ub.user.id);
@@ -633,23 +648,29 @@ export class PaymentsComponent implements OnInit {
     this.selectedUserBox.set(null);
     this.searchResults.set([]);
     this.selectedMonths.set([]);
+    this.selectedExtraFares.set([]);
     this.userDebts.set([]);
     this.searchTerm = '';
   }
 
-  onExtraFareChange(): void {
-    if (!this.selectedFareId) {
-      this.extraConcept = '';
-      this.extraAmount = 0;
-      this.extraDescription = '';
-      return;
-    }
-    const fare = this.fares().find(f => f.id === this.selectedFareId);
-    if (fare) {
-      this.extraConcept = fare.fareType;
-      this.extraAmount = fare.amount;
-      this.extraDescription = fare.fareTypeDisplayName || fare.fareType;
-    }
+  addExtraFare(): void {
+    if (!this.currentExtraFareId) return;
+    const fare = this.fares().find(f => f.id === this.currentExtraFareId);
+    if (!fare) return;
+
+    const extraFare: ExtraFare = {
+      fareId: fare.id,
+      fareType: fare.fareType,
+      description: fare.fareTypeDisplayName || fare.fareType,
+      amount: fare.amount
+    };
+
+    this.selectedExtraFares.update(list => [...list, extraFare]);
+    this.currentExtraFareId = '';
+  }
+
+  removeExtraFare(index: number): void {
+    this.selectedExtraFares.update(list => list.filter((_, i) => i !== index));
   }
 
   private loadUserDebts(userId: string): void {
@@ -660,7 +681,7 @@ export class PaymentsComponent implements OnInit {
   }
 
   toggleMonth(cell: MonthCell): void {
-    if (cell.status === 'paid' || cell.status === 'future') return;
+    if (cell.status === 'paid') return;
     const current = this.selectedMonths();
     const exists = current.findIndex(s => s.month === cell.month && s.year === cell.year);
     if (exists >= 0) {
@@ -691,16 +712,18 @@ export class PaymentsComponent implements OnInit {
       });
     }
 
-    if (this.selectedFareId && this.extraAmount > 0) {
+    // Add all extra fares
+    for (const extra of this.selectedExtraFares()) {
       details.push({
-        paymentType: this.extraConcept || 'OTHER',
-        description: this.extraDescription,
-        amount: this.extraAmount
+        paymentType: extra.fareType,
+        description: extra.description,
+        amount: extra.amount
       });
     }
 
     const req: CreatePaymentRequest = {
       userId: ub.user.id,
+      organizationId: this.authService.organizationId() || '',
       totalAmount: this.totalPayment(),
       paymentMethod: this.paymentMethod,
       notes: this.paymentNotes || undefined,
@@ -715,14 +738,35 @@ export class PaymentsComponent implements OnInit {
         this.alertService.close();
         this.isProcessing.set(false);
         this.alertService.success('Pago registrado', `Pago por S/ ${this.totalPayment().toFixed(2)} registrado exitosamente`);
+        const paidMonths = this.selectedMonths();
         this.selectedMonths.set([]);
-        this.selectedFareId = '';
-        this.extraConcept = '';
-        this.extraAmount = 0;
+        this.selectedExtraFares.set([]);
+        this.currentExtraFareId = '';
         this.paymentNotes = '';
+
+        // Update paid debts
+        this.updatePaidDebts(paidMonths);
+
         this.loadUserDebts(ub.user.id);
         this.loadBaseData();
-        if (res.data) this.generateReceiptPdf(res.data, ub);
+
+        // Get full payment with details before generating PDF and create receipt
+        if (res.data?.id) {
+          this.commercialService.getPayment(res.data.id).subscribe({
+            next: (fullRes) => {
+              if (fullRes.data) {
+                this.generateReceiptPdf(fullRes.data, ub);
+                this.createReceiptFromPayment(fullRes.data);
+              }
+            },
+            error: () => {
+              if (res.data) {
+                this.generateReceiptPdf(res.data, ub);
+                this.createReceiptFromPayment(res.data);
+              }
+            }
+          });
+        }
       },
       error: (err) => {
         this.alertService.close();
@@ -752,11 +796,70 @@ export class PaymentsComponent implements OnInit {
   }
 
   downloadPaymentReceipt(p: Payment): void {
-    const user = this.allUsers().find(u => u.id === p.userId);
-    const assignment = this.allAssignments().find(a => a.userId === p.userId);
-    const box = assignment ? this.allBoxes().find(b => b.id === assignment.waterBoxId) : undefined;
-    const ub: UserWithBox = { user: user || {} as User, box, assignment };
-    this.generateReceiptPdf(p, ub);
+    // Always fetch full payment with details
+    this.commercialService.getPayment(p.id).subscribe({
+      next: r => {
+        const fullPayment = r.data || p;
+        const user = this.allUsers().find(u => u.id === fullPayment.userId);
+        const assignment = this.allAssignments().find(a => a.userId === fullPayment.userId);
+        const box = assignment ? this.allBoxes().find(b => b.id === assignment.waterBoxId) : undefined;
+        const ub: UserWithBox = { user: user || {} as User, box, assignment };
+        this.generateReceiptPdf(fullPayment, ub);
+      },
+      error: () => {
+        // Fallback to current data
+        const user = this.allUsers().find(u => u.id === p.userId);
+        const assignment = this.allAssignments().find(a => a.userId === p.userId);
+        const box = assignment ? this.allBoxes().find(b => b.id === assignment.waterBoxId) : undefined;
+        const ub: UserWithBox = { user: user || {} as User, box, assignment };
+        this.generateReceiptPdf(p, ub);
+      }
+    });
+  }
+
+  private updatePaidDebts(paidMonths: MonthCell[]): void {
+    const debts = this.userDebts();
+    paidMonths.forEach(month => {
+      const debt = debts.find(d => d.periodMonth === month.month && d.periodYear === month.year);
+      if (debt && debt.id) {
+        this.commercialService.updateDebt(debt.id, {
+          debtStatus: 'PAID',
+          pendingAmount: 0
+        }).subscribe({
+          next: () => console.log(`Debt ${debt.id} marked as PAID`),
+          error: (err) => console.error('Error updating debt:', err)
+        });
+      }
+    });
+  }
+
+  private createReceiptFromPayment(payment: Payment): void {
+    if (!payment.details || payment.details.length === 0) return;
+
+    // Get monthly details for period
+    const monthlyDetails = payment.details.filter(d => d.paymentType === 'MONTHLY_FEE');
+    if (monthlyDetails.length === 0) return;
+
+    // For each monthly detail, create a receipt
+    monthlyDetails.forEach(detail => {
+      const receiptReq: CreateReceiptRequest = {
+        userId: payment.userId,
+        periodMonth: detail.periodMonth || 1,
+        periodYear: detail.periodYear || new Date().getFullYear(),
+        totalAmount: detail.amount,
+        notes: `Pago registrado: ${payment.receiptNumber}`,
+        details: [{
+          conceptType: 'MONTHLY_FEE',
+          description: detail.description,
+          amount: detail.amount
+        }]
+      };
+
+      this.commercialService.createReceipt(receiptReq).subscribe({
+        next: () => console.log(`Receipt created for period ${detail.periodMonth}/${detail.periodYear}`),
+        error: (err) => console.error('Error creating receipt:', err)
+      });
+    });
   }
 
   getUserName(userId: string): string {
@@ -769,8 +872,8 @@ export class PaymentsComponent implements OnInit {
       case 'paid': return 'bg-emerald-50 border-emerald-200 text-emerald-700 cursor-default';
       case 'selected': return 'bg-violet-50 border-violet-300 text-violet-700 ring-2 ring-violet-200';
       case 'overdue': return 'bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 cursor-pointer';
-      case 'pending': return 'bg-amber-50 border-amber-200 text-amber-600 hover:bg-amber-100 cursor-pointer';
-      case 'future': return 'bg-gray-50 border-gray-100 text-gray-300 cursor-default';
+      case 'pending': return 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 cursor-pointer';
+      case 'future': return 'bg-blue-50 border-blue-200 text-blue-600 hover:bg-blue-100 cursor-pointer';
       default: return 'bg-gray-50 border-gray-200 text-gray-600';
     }
   }
@@ -810,149 +913,222 @@ export class PaymentsComponent implements OnInit {
   }
 
   private generateReceiptPdf(payment: Payment, ub: UserWithBox): void {
-    const doc = new jsPDF({ format: [80, 200] });
+    const doc = new jsPDF({ format: 'a4' });
     const org = this.authService.organization();
-    const pw = 80;
-    const m = 5;
-    const cw = pw - m * 2;
+    const pw = 210; // A4 width in mm
+    const mg = 15; // Larger margins
+    const cw = pw - mg * 2;
     const dark = [15, 23, 42] as const;
-    const mid = [71, 85, 105] as const;
-    const light = [120, 130, 150] as const;
+    const mid = [100, 116, 139] as const;
+    const accent = [71, 85, 105] as const;
+    let y = 15;
+
+    // ── Logo ──
     const logoUrl = org?.logoUrl || (org as any)?.['logo_url'] || (org as any)?.['logo'];
-    let y = 8;
-
     if (logoUrl) {
-      try { doc.addImage(logoUrl, 'PNG', pw / 2 - 6, y, 12, 12); y += 14; } catch { /* skip */ }
+      try { doc.addImage(logoUrl, 'PNG', pw / 2 - 15, y, 30, 30); y += 35; } catch { /* skip */ }
     }
 
-    doc.setFontSize(8);
+    // ── Nombre organización ──
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...dark);
-    doc.text(org?.organizationName || 'JASS', pw / 2, y, { align: 'center' });
-    y += 3.5;
-    doc.setFontSize(5.5);
+    const orgName = org?.organizationName || 'JASS';
+    const orgNameLines = doc.splitTextToSize(orgName.toUpperCase(), cw);
+    doc.text(orgNameLines, pw / 2, y, { align: 'center' });
+    y += orgNameLines.length * 6;
+
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...light);
-    const loc = [org?.district, org?.province, org?.department].filter(Boolean).join(', ');
-    if (loc) { doc.text(loc, pw / 2, y, { align: 'center' }); y += 3; }
-    if (org?.address) { doc.text(org.address, pw / 2, y, { align: 'center' }); y += 3; }
+    doc.setTextColor(...mid);
+    const loc = [org?.district, org?.province, org?.department].filter(Boolean).join(' - ');
+    if (loc) { doc.text(loc, pw / 2, y, { align: 'center' }); y += 6; }
 
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(m, y, pw - m, y);
-    y += 4;
+    y += 5;
 
-    doc.setFontSize(7);
+    // ── Título RECIBO DE INGRESO ──
+    doc.setFillColor(51, 65, 85);
+    doc.roundedRect(mg, y, cw, 12, 2, 2, 'F');
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...dark);
-    doc.text('RECIBO DE PAGO', pw / 2, y, { align: 'center' });
-    y += 4;
+    doc.setTextColor(255, 255, 255);
+    doc.text('RECIBO DE PAGO', pw / 2, y + 8, { align: 'center' });
+    y += 18;
 
-    doc.setFontSize(5.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...mid);
-    doc.text(`N\u00b0: ${payment.receiptNumber || '-'}`, m, y);
-    doc.text(`Fecha: ${new Date(payment.paymentDate).toLocaleDateString('es-PE')}`, pw - m, y, { align: 'right' });
-    y += 4;
-
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(m, y, pw - m, y);
-    y += 4;
-
-    doc.setFontSize(5.5);
-    doc.setTextColor(...mid);
-    doc.text('Cliente:', m, y);
-    doc.setTextColor(...dark);
+    // ── N° y Fecha ──
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    const userName = ub.user?.lastName ? `${ub.user.lastName}, ${ub.user.firstName}` : (payment.userFullName || '-');
-    doc.text(userName, m + 14, y);
-    y += 3.5;
+    doc.setTextColor(...accent);
+    const receiptNum = (payment.receiptNumber || '').replace(/^PAY-/, '');
+    doc.text(`N\u00b0 ${receiptNum}`, mg, y);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...mid);
-    doc.text('DNI:', m, y);
-    doc.setTextColor(...dark);
-    doc.text(ub.user?.documentNumber || '-', m + 14, y);
-    y += 3.5;
-    doc.setTextColor(...mid);
-    doc.text('Suministro:', m, y);
-    doc.setTextColor(...dark);
-    doc.text(ub.box?.boxCode || '-', m + 14, y);
-    y += 3.5;
-    doc.setTextColor(...mid);
-    doc.text('Direcci\u00f3n:', m, y);
-    doc.setTextColor(...dark);
-    const addr = ub.user?.address || ub.box?.address || '-';
-    const addrLines = doc.splitTextToSize(addr, cw - 16);
-    doc.text(addrLines, m + 14, y);
-    y += addrLines.length * 3 + 2;
+    doc.text(new Date(payment.paymentDate).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }), pw - mg, y, { align: 'right' });
+    y += 8;
 
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(m, y, pw - m, y);
-    y += 3;
-
-    doc.setFontSize(5.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...dark);
-    doc.text('CONCEPTO', m, y);
-    doc.text('MONTO', pw - m, y, { align: 'right' });
-    y += 2;
-    doc.setLineWidth(0.3);
-    doc.setLineDashPattern([], 0);
-    doc.line(m, y, pw - m, y);
-    y += 3;
-
-    doc.setFont('helvetica', 'normal');
-    if (payment.details && payment.details.length > 0) {
-      for (const d of payment.details) {
-        doc.setTextColor(...mid);
-        const descLines = doc.splitTextToSize(d.description, cw - 20);
-        doc.text(descLines, m, y);
-        doc.setTextColor(...dark);
-        doc.text(`S/ ${d.amount.toFixed(2)}`, pw - m, y, { align: 'right' });
-        y += descLines.length * 3 + 1.5;
-      }
-    } else {
-      doc.setTextColor(...mid);
-      doc.text('Pago mensual', m, y);
-      doc.setTextColor(...dark);
-      doc.text(`S/ ${payment.totalAmount.toFixed(2)}`, pw - m, y, { align: 'right' });
-      y += 4;
-    }
-
-    y += 1;
+    doc.setDrawColor(220, 220, 220);
     doc.setLineWidth(0.5);
-    doc.setLineDashPattern([], 0);
-    doc.line(m, y, pw - m, y);
-    y += 4;
+    doc.line(mg, y, pw - mg, y);
+    y += 8;
 
-    doc.setFontSize(7);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...dark);
-    doc.text('TOTAL:', m, y);
-    doc.text(`S/ ${payment.totalAmount.toFixed(2)}`, pw - m, y, { align: 'right' });
-    y += 4;
+    // ── Datos del usuario ──
+    const userName = ub.user?.lastName ? `${ub.user.lastName}, ${ub.user.firstName}` : (payment.userFullName || '-');
+    const drawField = (label: string, value: string) => {
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...mid);
+      doc.text(label, mg, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...dark);
+      const valueLines = doc.splitTextToSize(value, cw - 40);
+      doc.text(valueLines, mg + 38, y);
+      y += valueLines.length * 6 + 2;
+    };
 
-    doc.setFontSize(5.5);
+    drawField('Recibí de:', userName);
+    drawField('DNI:', ub.user?.documentNumber || '-');
+    if (ub.box?.boxCode) drawField('Suministro:', ub.box.boxCode);
+    const addr = ub.user?.address || ub.box?.address || '';
+    if (addr) drawField('Dirección:', addr);
+
+    y += 3;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(mg, y, pw - mg, y);
+    y += 8;
+
+    // ── Concepto ──
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const monthlyDetails = (payment.details || []).filter(d => d.paymentType === 'MONTHLY_FEE');
+    const extraDetails = (payment.details || []).filter(d => d.paymentType !== 'MONTHLY_FEE');
+
+    // Calculate period description
+    let periodText = '';
+    if (monthlyDetails.length > 0) {
+      const sorted = [...monthlyDetails].sort((a, b) => {
+        const ya = a.periodYear || 0, yb = b.periodYear || 0;
+        return ya !== yb ? ya - yb : (a.periodMonth || 0) - (b.periodMonth || 0);
+      });
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+      if (sorted.length === 1) {
+        periodText = `${monthNames[(first.periodMonth || 1) - 1]} ${first.periodYear}`;
+      } else {
+        periodText = `${monthNames[(first.periodMonth || 1) - 1]} ${first.periodYear} - ${monthNames[(last.periodMonth || 1) - 1]} ${last.periodYear}`;
+      }
+    }
+
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...mid);
-    doc.text(`M\u00e9todo: ${this.getMethodLabel(payment.paymentMethod)}`, m, y);
-    y += 4;
+    doc.text('Concepto de:', mg, y);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...dark);
+    doc.text('Servicio de agua potable', mg + 38, y);
+    y += 7;
 
-    doc.setLineDashPattern([1, 1], 0);
-    doc.setLineWidth(0.2);
-    doc.line(m, y, pw - m, y);
-    y += 4;
+    if (periodText) {
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...mid);
+      doc.text('Período:', mg, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...accent);
+      doc.text(periodText, mg + 38, y);
+      y += 8;
+    }
 
-    doc.setFontSize(5);
+    // ── Tabla de conceptos ──
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(mg, y, pw - mg, y);
+    y += 6;
+
+    const drawRow = (label: string, amount: string, bold = false) => {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      const rc: [number, number, number] = bold ? [dark[0], dark[1], dark[2]] : [mid[0], mid[1], mid[2]];
+      doc.setTextColor(rc[0], rc[1], rc[2]);
+      doc.text(label, mg + 2, y);
+      doc.setTextColor(dark[0], dark[1], dark[2]);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.text(amount, pw - mg - 2, y, { align: 'right' });
+      y += 7;
+    };
+
+    // Monthly fee line
+    if (monthlyDetails.length > 0) {
+      const monthlyTotal = monthlyDetails.reduce((sum, d) => sum + d.amount, 0);
+      const monthLabel = monthlyDetails.length === 1
+        ? 'Cuota mensual'
+        : `Cuota mensual (${monthlyDetails.length} meses)`;
+      drawRow(monthLabel, `S/ ${monthlyTotal.toFixed(2)}`);
+    }
+
+    // Extra concepts
+    for (const d of extraDetails) {
+      drawRow(d.description || this.getConceptLabel(d.paymentType), `S/ ${d.amount.toFixed(2)}`);
+    }
+
+    // If no details at all
+    if (!payment.details || payment.details.length === 0) {
+      drawRow('Pago realizado', `S/ ${payment.totalAmount.toFixed(2)}`);
+    }
+
+    y += 3;
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(71, 85, 105);
+    doc.line(mg, y, pw - mg, y);
+    y += 8;
+
+    // ── TOTAL ──
+    doc.setFillColor(241, 245, 249);
+    doc.roundedRect(mg, y - 3, cw, 14, 2, 2, 'F');
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...dark);
+    doc.text('TOTAL:', mg + 5, y + 6);
+    doc.setTextColor(...accent);
+    doc.text(`S/ ${payment.totalAmount.toFixed(2)}`, pw - mg - 5, y + 6, { align: 'right' });
+    y += 18;
+
+    // ── Método de pago ──
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...mid);
+    doc.text(`Método de pago: ${this.getMethodLabel(payment.paymentMethod)}`, mg, y);
+    y += 6;
+
+    if (payment.notes) {
+      const noteLines = doc.splitTextToSize(`Nota: ${payment.notes}`, cw);
+      doc.text(noteLines, mg, y);
+      y += noteLines.length * 6;
+    }
+    y += 8;
+
+    // ── Separador final ──
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.3);
+    doc.setLineDashPattern([2, 2], 0);
+    doc.line(mg, y, pw - mg, y);
+    y += 12;
+
+    // ── Firma ──
+    doc.setLineDashPattern([], 0);
+    doc.setLineWidth(0.4);
+    doc.setDrawColor(180, 180, 180);
+    doc.line(pw / 2 - 30, y + 10, pw / 2 + 30, y + 10);
+    doc.setFontSize(9);
     doc.setTextColor(160, 160, 160);
-    doc.text('Gracias por su pago.', pw / 2, y, { align: 'center' });
-    y += 2.5;
-    doc.text('Este documento es su comprobante de pago.', pw / 2, y, { align: 'center' });
-    y += 2.5;
-    doc.text(org?.organizationName || '', pw / 2, y, { align: 'center' });
+    doc.text('RECIBÍ CONFORME', pw / 2, y + 15, { align: 'center' });
+    y += 25;
 
-    const finalH = y + 8;
-    (doc.internal.pageSize as any).setHeight(finalH);
+    // ── Footer ──
+    doc.setFontSize(9);
+    doc.setTextColor(180, 180, 180);
+    doc.text('Este documento es su comprobante de pago oficial.', pw / 2, y, { align: 'center' });
+    y += 5;
+    doc.text('Consérvelo para cualquier reclamo.', pw / 2, y, { align: 'center' });
+    y += 5;
+    doc.text(orgName, pw / 2, y, { align: 'center' });
 
     doc.save(`Recibo_${payment.receiptNumber || 'pago'}_${new Date().toISOString().split('T')[0]}.pdf`);
   }

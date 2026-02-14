@@ -18,6 +18,9 @@ public class CreatePaymentRequest {
      @NotBlank(message = "User ID is required")
      private String userId;
 
+     @NotBlank(message = "Organization ID is required")
+     private String organizationId;
+
      @NotNull(message = "Total amount is required")
      @DecimalMin(value = "0.01", message = "Total amount must be greater than 0")
      private Double totalAmount;

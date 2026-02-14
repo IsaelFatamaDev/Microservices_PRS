@@ -12,229 +12,230 @@ export type MovementType = 'IN' | 'OUT' | 'ADJUSTMENT';
 export type MovementCategory = 'SUPPLIES' | 'TRANSPORT' | 'FOOD' | 'EMERGENCY' | 'OTHER';
 
 export interface Debt {
-  id: string;
-  organizationId: string;
-  recordStatus: RecordStatus;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  userId: string;
-  userFullName?: string;
-  periodMonth: number;
-  periodYear: number;
-  periodDescription?: string;
-  originalAmount: number;
-  pendingAmount: number;
-  lateFee: number;
-  totalAmount?: number;
-  debtStatus: DebtStatus;
-  dueDate: string;
+     id: string;
+     organizationId: string;
+     recordStatus: RecordStatus;
+     createdAt: string;
+     createdBy: string;
+     updatedAt?: string;
+     updatedBy?: string;
+     userId: string;
+     userFullName?: string;
+     periodMonth: number;
+     periodYear: number;
+     periodDescription?: string;
+     originalAmount: number;
+     pendingAmount: number;
+     lateFee: number;
+     totalAmount?: number;
+     debtStatus: DebtStatus;
+     dueDate: string;
 }
 
 export interface CreateDebtRequest {
-  userId: string;
-  periodMonth: number;
-  periodYear: number;
-  originalAmount: number;
+     userId: string;
+     periodMonth: number;
+     periodYear: number;
+     originalAmount: number;
 }
 
 export interface UpdateDebtRequest {
-  pendingAmount?: number;
-  lateFee?: number;
-  debtStatus?: string;
+     pendingAmount?: number;
+     lateFee?: number;
+     debtStatus?: string;
 }
 
 export interface Receipt {
-  id: string;
-  organizationId: string;
-  recordStatus: RecordStatus;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  receiptNumber: string;
-  userId: string;
-  userFullName?: string;
-  periodMonth: number;
-  periodYear: number;
-  periodDescription?: string;
-  issueDate: string;
-  dueDate: string;
-  totalAmount: number;
-  paidAmount: number;
-  pendingAmount: number;
-  receiptStatus: ReceiptStatus;
-  notes?: string;
-  details?: ReceiptDetail[];
+     id: string;
+     organizationId: string;
+     recordStatus: RecordStatus;
+     createdAt: string;
+     createdBy: string;
+     updatedAt?: string;
+     updatedBy?: string;
+     receiptNumber: string;
+     userId: string;
+     userFullName?: string;
+     periodMonth: number;
+     periodYear: number;
+     periodDescription?: string;
+     issueDate: string;
+     dueDate: string;
+     totalAmount: number;
+     paidAmount: number;
+     pendingAmount: number;
+     receiptStatus: ReceiptStatus;
+     notes?: string;
+     details?: ReceiptDetail[];
 }
 
 export interface ReceiptDetail {
-  id: string;
-  receiptId: string;
-  conceptType: ConceptType;
-  description: string;
-  amount: number;
-  createdAt: string;
+     id: string;
+     receiptId: string;
+     conceptType: ConceptType;
+     description: string;
+     amount: number;
+     createdAt: string;
 }
 
 export interface CreateReceiptRequest {
-  userId: string;
-  periodMonth: number;
-  periodYear: number;
-  totalAmount: number;
-  notes?: string;
-  details: CreateReceiptDetailRequest[];
+     userId: string;
+     periodMonth: number;
+     periodYear: number;
+     totalAmount: number;
+     notes?: string;
+     details: CreateReceiptDetailRequest[];
 }
 
 export interface CreateReceiptDetailRequest {
-  conceptType: string;
-  description: string;
-  amount: number;
+     conceptType: string;
+     description: string;
+     amount: number;
 }
 
 export interface UpdateReceiptRequest {
-  paidAmount?: number;
-  receiptStatus?: string;
-  notes?: string;
+     paidAmount?: number;
+     receiptStatus?: string;
+     notes?: string;
 }
 
 export interface Payment {
-  id: string;
-  organizationId: string;
-  recordStatus: RecordStatus;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  userId: string;
-  userFullName?: string;
-  paymentDate: string;
-  totalAmount: number;
-  paymentMethod: PaymentMethod;
-  paymentStatus: PaymentStatus;
-  receiptNumber: string;
-  notes?: string;
-  details?: PaymentDetail[];
+     id: string;
+     organizationId: string;
+     recordStatus: RecordStatus;
+     createdAt: string;
+     createdBy: string;
+     updatedAt?: string;
+     updatedBy?: string;
+     userId: string;
+     userFullName?: string;
+     paymentDate: string;
+     totalAmount: number;
+     paymentMethod: PaymentMethod;
+     paymentStatus: PaymentStatus;
+     receiptNumber: string;
+     notes?: string;
+     details?: PaymentDetail[];
 }
 
 export interface PaymentDetail {
-  id: string;
-  paymentId: string;
-  paymentType: ConceptType;
-  description: string;
-  amount: number;
-  periodMonth?: number;
-  periodYear?: number;
-  periodDescription?: string;
-  createdAt: string;
+     id: string;
+     paymentId: string;
+     paymentType: ConceptType;
+     description: string;
+     amount: number;
+     periodMonth?: number;
+     periodYear?: number;
+     periodDescription?: string;
+     createdAt: string;
 }
 
 export interface CreatePaymentRequest {
-  userId: string;
-  totalAmount: number;
-  paymentMethod: string;
-  notes?: string;
-  details: CreatePaymentDetailRequest[];
+     userId: string;
+     organizationId: string;
+     totalAmount: number;
+     paymentMethod: string;
+     notes?: string;
+     details: CreatePaymentDetailRequest[];
 }
 
 export interface CreatePaymentDetailRequest {
-  paymentType: string;
-  description: string;
-  amount: number;
-  periodMonth?: number;
-  periodYear?: number;
+     paymentType: string;
+     description: string;
+     amount: number;
+     periodMonth?: number;
+     periodYear?: number;
 }
 
 export interface UpdatePaymentRequest {
-  paymentStatus?: string;
-  notes?: string;
+     paymentStatus?: string;
+     notes?: string;
 }
 
 export interface ServiceCut {
-  id: string;
-  organizationId: string;
-  recordStatus: RecordStatus;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  userId: string;
-  userFullName?: string;
-  waterBoxId: string;
-  scheduledDate: string;
-  executedDate?: string;
-  cutReason: CutReason;
-  debtAmount: number;
-  reconnectionDate?: string;
-  reconnectionFeePaid: boolean;
-  cutStatus: CutStatus;
-  notes?: string;
+     id: string;
+     organizationId: string;
+     recordStatus: RecordStatus;
+     createdAt: string;
+     createdBy: string;
+     updatedAt?: string;
+     updatedBy?: string;
+     userId: string;
+     userFullName?: string;
+     waterBoxId: string;
+     scheduledDate: string;
+     executedDate?: string;
+     cutReason: CutReason;
+     debtAmount: number;
+     reconnectionDate?: string;
+     reconnectionFeePaid: boolean;
+     cutStatus: CutStatus;
+     notes?: string;
 }
 
 export interface CreateServiceCutRequest {
-  userId: string;
-  waterBoxId: string;
-  scheduledDate: string;
-  cutReason: string;
-  debtAmount?: number;
-  notes?: string;
+     userId: string;
+     waterBoxId: string;
+     scheduledDate: string;
+     cutReason: string;
+     debtAmount?: number;
+     notes?: string;
 }
 
 export interface UpdateServiceCutRequest {
-  scheduledDate?: string;
-  cutStatus?: string;
-  notes?: string;
+     scheduledDate?: string;
+     cutStatus?: string;
+     notes?: string;
 }
 
 export interface PettyCash {
-  id: string;
-  organizationId: string;
-  recordStatus: RecordStatus;
-  createdAt: string;
-  createdBy: string;
-  updatedAt?: string;
-  updatedBy?: string;
-  responsibleUserId: string;
-  responsibleUserName?: string;
-  currentBalance: number;
-  maxAmountLimit: number;
-  pettyCashStatus: PettyCashStatus;
+     id: string;
+     organizationId: string;
+     recordStatus: RecordStatus;
+     createdAt: string;
+     createdBy: string;
+     updatedAt?: string;
+     updatedBy?: string;
+     responsibleUserId: string;
+     responsibleUserName?: string;
+     currentBalance: number;
+     maxAmountLimit: number;
+     pettyCashStatus: PettyCashStatus;
 }
 
 export interface CreatePettyCashRequest {
-  responsibleUserId: string;
-  initialBalance: number;
-  maxAmountLimit: number;
+     responsibleUserId: string;
+     initialBalance: number;
+     maxAmountLimit: number;
 }
 
 export interface UpdatePettyCashRequest {
-  responsibleUserId?: string;
-  maxAmountLimit?: number;
-  pettyCashStatus?: string;
+     responsibleUserId?: string;
+     maxAmountLimit?: number;
+     pettyCashStatus?: string;
 }
 
 export interface PettyCashMovement {
-  id: string;
-  organizationId: string;
-  createdAt: string;
-  createdBy: string;
-  pettyCashId: string;
-  movementDate: string;
-  movementType: MovementType;
-  amount: number;
-  category: MovementCategory;
-  description: string;
-  voucherNumber?: string;
-  previousBalance: number;
-  newBalance: number;
+     id: string;
+     organizationId: string;
+     createdAt: string;
+     createdBy: string;
+     pettyCashId: string;
+     movementDate: string;
+     movementType: MovementType;
+     amount: number;
+     category: MovementCategory;
+     description: string;
+     voucherNumber?: string;
+     previousBalance: number;
+     newBalance: number;
 }
 
 export interface RegisterMovementRequest {
-  pettyCashId: string;
-  movementType: string;
-  amount: number;
-  category: string;
-  description: string;
-  voucherNumber?: string;
+     pettyCashId: string;
+     movementType: string;
+     amount: number;
+     category: string;
+     description: string;
+     voucherNumber?: string;
 }

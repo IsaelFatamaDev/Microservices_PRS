@@ -39,9 +39,9 @@ public class PaymentRest {
                @Valid @RequestBody CreatePaymentRequest request,
                ServerWebExchange exchange) {
           return headersExtractor.extract(exchange)
-                    .flatMap(headers -> paymentRepository.generateReceiptNumber(headers.getOrganizationId())
+                    .flatMap(headers -> paymentRepository.generateReceiptNumber(request.getOrganizationId())
                               .flatMap(receiptNumber -> {
-                                   var payment = paymentMapper.toDomain(request, headers.getOrganizationId(),
+                                   var payment = paymentMapper.toDomain(request, request.getOrganizationId(),
                                              headers.getUserId(), receiptNumber);
                                    return createPaymentUseCase.execute(payment);
                               }))

@@ -1,0 +1,2377 @@
+{
+     "info": {
+          "_postman_id": "sistema-jass-completo-2025",
+          "name": "SISTEMA JASS - Flujo Completo (Todos los Microservicios)",
+          "description": "Colección completa del Sistema JASS con todos los microservicios.\n\nPuertos:\n- Authentication: 8082\n- Users: 8081\n- Organizations: 8083\n- Commercial: 8094\n- Infrastructure: 8089\n- Distribution: 8091\n- Claims/Incidents: 8085\n- Notifications: 8090\n\nHeaders del Gateway:\n- X-User-Id\n- X-Organization-Id\n- X-User-Roles",
+          "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+     },
+     "variable": [
+          { "key": "auth_host", "value": "http://localhost:8082" },
+          { "key": "users_host", "value": "http://localhost:8081" },
+          { "key": "orgs_host", "value": "http://localhost:8083" },
+          { "key": "commercial_host", "value": "http://localhost:8094" },
+          { "key": "infra_host", "value": "http://localhost:8089" },
+          { "key": "distribution_host", "value": "http://localhost:8091" },
+          { "key": "claims_host", "value": "http://localhost:8085" },
+          { "key": "notifications_host", "value": "http://localhost:8090" },
+          { "key": "access_token", "value": "" },
+          { "key": "refresh_token", "value": "" },
+          { "key": "user_id", "value": "1" },
+          { "key": "organization_id", "value": "1" }
+     ],
+     "item": [
+          {
+               "name": "1. Authentication (8082)",
+               "item": [
+                    {
+                         "name": "Login",
+                         "event": [
+                              {
+                                   "listen": "test",
+                                   "script": {
+                                        "exec": [
+                                             "var jsonData = pm.response.json();",
+                                             "if (jsonData.data && jsonData.data.accessToken) {",
+                                             "    pm.collectionVariables.set('access_token', jsonData.data.accessToken);",
+                                             "    pm.collectionVariables.set('refresh_token', jsonData.data.refreshToken);",
+                                             "}"
+                                        ],
+                                        "type": "text/javascript"
+                                   }
+                              }
+                         ],
+                         "request": {
+                              "method": "POST",
+                              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                              "body": {
+                                   "mode": "raw",
+                                   "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\",\n  \"clientId\": \"jass-users-service\",\n  \"rememberMe\": false\n}"
+                              },
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/login", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "login" ] }
+                         }
+                    },
+                    {
+                         "name": "Refresh Token",
+                         "request": {
+                              "method": "POST",
+                              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                              "body": {
+                                   "mode": "raw",
+                                   "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\",\n  \"clientId\": \"jass-users-service\"\n}"
+                              },
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/refresh", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "refresh" ] }
+                         }
+                    },
+                    {
+                         "name": "Logout (refresh token)",
+                         "request": {
+                              "method": "POST",
+                              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                              "body": {
+                                   "mode": "raw",
+                                   "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\",\n  \"clientId\": \"jass-users-service\"\n}"
+                              },
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/logout", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "logout" ] }
+                         }
+                    },
+                    {
+                         "name": "Logout (access token)",
+                         "request": {
+                              "method": "POST",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/logout/token", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "logout", "token" ] }
+                         }
+                    },
+                    {
+                         "name": "Validate Token",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/validate", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "validate" ] }
+                         }
+                    },
+                    {
+                         "name": "User Info",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/userInfo", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "userInfo" ] }
+                         }
+                    },
+                    {
+                         "name": "Introspect Token",
+                         "request": {
+                              "method": "POST",
+                              "header": [ { "key": "Content-Type", "value": "application/x-www-form-urlencoded" } ],
+                              "body": {
+                                   "mode": "urlencoded",
+                                   "urlencoded": [
+                                        { "key": "token", "value": "{{access_token}}" },
+                                        { "key": "clientId", "value": "jass-users-service" }
+                                   ]
+                              },
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/introspect", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "introspect" ] }
+                         }
+                    },
+                    {
+                         "name": "Health Check",
+                         "request": {
+                              "method": "GET",
+                              "url": { "raw": "{{auth_host}}/api/v1/auth/health", "host": [ "{{auth_host}}" ], "path": [ "api", "v1", "auth", "health" ] }
+                         }
+                    }
+               ]
+          },
+          {
+               "name": "2. Users (8081)",
+               "item": [
+                    {
+                         "name": "Mi Perfil",
+                         "request": {
+                              "method": "GET",
+                              "header": [
+                                   { "key": "Authorization", "value": "Bearer {{access_token}}" },
+                                   { "key": "X-User-Id", "value": "{{user_id}}" }
+                              ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/me", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "me" ] }
+                         }
+                    },
+                    {
+                         "name": "Crear Usuario",
+                         "request": {
+                              "method": "POST",
+                              "header": [
+                                   { "key": "Content-Type", "value": "application/json" },
+                                   { "key": "Authorization", "value": "Bearer {{access_token}}" },
+                                   { "key": "X-User-Id", "value": "{{user_id}}" },
+                                   { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                              ],
+                              "body": {
+                                   "mode": "raw",
+                                   "raw": "{\n  \"organizationId\": 1,\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Perez\",\n  \"documentType\": \"DNI\",\n  \"documentNumber\": \"12345678\",\n  \"email\": \"juan@example.com\",\n  \"phone\": \"987654321\",\n  \"address\": \"Jr. Lima 123\",\n  \"zoneId\": 1,\n  \"streetId\": 1,\n  \"role\": \"USER\"\n}"
+                              },
+                              "url": { "raw": "{{users_host}}/api/v1/users", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users" ] }
+                         }
+                    },
+                    {
+                         "name": "Obtener Usuario por ID",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/1", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "1" ] }
+                         }
+                    },
+                    {
+                         "name": "Obtener por Documento",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/document/12345678", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "document", "12345678" ] }
+                         }
+                    },
+                    {
+                         "name": "Obtener por Email",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/email/juan@example.com", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "email", "juan@example.com" ] }
+                         }
+                    },
+                    {
+                         "name": "Listar Usuarios Activos",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users" ] }
+                         }
+                    },
+                    {
+                         "name": "Listar Todos los Usuarios",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/all", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "all" ] }
+                         }
+                    },
+                    {
+                         "name": "Usuarios de Mi Organización",
+                         "request": {
+                              "method": "GET",
+                              "header": [
+                                   { "key": "Authorization", "value": "Bearer {{access_token}}" },
+                                   { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                              ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/organization?includeInactive=false", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "organization" ], "query": [ { "key": "includeInactive", "value": "false" } ] }
+                         }
+                    },
+                    {
+                         "name": "Usuarios por Organización ID",
+                         "request": {
+                              "method": "GET",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/organization/1?includeInactive=false", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "organization", "1" ], "query": [ { "key": "includeInactive", "value": "false" } ] }
+                         }
+                    },
+                    {
+                         "name": "Actualizar Usuario",
+                         "request": {
+                              "method": "PUT",
+                              "header": [
+                                   { "key": "Content-Type", "value": "application/json" },
+                                   { "key": "Authorization", "value": "Bearer {{access_token}}" }
+                              ],
+                              "body": {
+                                   "mode": "raw",
+                                   "raw": "{\n  \"firstName\": \"Juan Actualizado\",\n  \"lastName\": \"Perez\",\n  \"email\": \"juan.updated@example.com\",\n  \"phone\": \"999888777\",\n  \"address\": \"Av. Principal 456\"\n}"
+                              },
+                              "url": { "raw": "{{users_host}}/api/v1/users/1", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "1" ] }
+                         }
+                    },
+                    {
+                         "name": "Eliminar Usuario (soft)",
+                         "request": {
+                              "method": "DELETE",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/1?reason=Prueba eliminación", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "1" ], "query": [ { "key": "reason", "value": "Prueba eliminación" } ] }
+                         }
+                    },
+                    {
+                         "name": "Restaurar Usuario",
+                         "request": {
+                              "method": "PATCH",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/1/restore", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "1", "restore" ] }
+                         }
+                    },
+                    {
+                         "name": "Eliminar Permanente (purge)",
+                         "request": {
+                              "method": "DELETE",
+                              "header": [ { "key": "Authorization", "value": "Bearer {{access_token}}" } ],
+                              "url": { "raw": "{{users_host}}/api/v1/users/1/purge?reason=Eliminación permanente", "host": [ "{{users_host}}" ], "path": [ "api", "v1", "users", "1", "purge" ], "query": [ { "key": "reason", "value": "Eliminación permanente" } ] }
+                         }
+                    }
+               ]
+          },
+          {
+               "name": "3. Organizations (8083)",
+               "item": [
+                    {
+                         "name": "Organizaciones",
+                         "item": [
+                              {
+                                   "name": "Crear Organización",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationName\": \"JASS San Pedro\",\n  \"district\": \"San Pedro\",\n  \"province\": \"Canchis\",\n  \"department\": \"Cusco\",\n  \"address\": \"Plaza Principal S/N\",\n  \"phone\": \"084-123456\",\n  \"email\": \"jass.sanpedro@example.com\",\n  \"logoUrl\": \"\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Organización por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Verificar Existencia",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/1/exists", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "1", "exists" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Activas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Todas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/all", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "all" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Organización",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationName\": \"JASS San Pedro Actualizado\",\n  \"district\": \"San Pedro\",\n  \"province\": \"Canchis\",\n  \"department\": \"Cusco\",\n  \"address\": \"Plaza Principal S/N\",\n  \"phone\": \"084-654321\",\n  \"email\": \"jass.sanpedro@example.com\",\n  \"logoUrl\": \"\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Organización (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Prueba eliminación\"\n}" },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Organización",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [ { "key": "X-User-Id", "value": "{{user_id}}" } ],
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/1/restore", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Verificar Zona en Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/1/zones/1/exists", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "1", "zones", "1", "exists" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Validar Calle en Zona y Org",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/organizations/1/zones/1/streets/1/validate", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "organizations", "1", "zones", "1", "streets", "1", "validate" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Zonas",
+                         "item": [
+                              {
+                                   "name": "Crear Zona",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"zoneName\": \"Zona Centro\",\n  \"description\": \"Zona central del pueblo\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Zona por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Zonas Activas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Todas las Zonas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/all", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "all" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Zonas por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/organization/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "organization", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Zonas Activas por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/organization/1/active", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "organization", "1", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Zona",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"zoneName\": \"Zona Centro Actualizada\",\n  \"description\": \"Descripción actualizada\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Zona (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Prueba\"\n}" },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Zona",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [ { "key": "X-User-Id", "value": "{{user_id}}" } ],
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/1/restore", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Verificar Calle en Zona",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/zones/1/streets/1/exists", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "zones", "1", "streets", "1", "exists" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Calles",
+                         "item": [
+                              {
+                                   "name": "Crear Calle",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"zoneId\": 1,\n  \"streetType\": \"JIRON\",\n  \"streetName\": \"Jr. Lima\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Calle por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Calles Activas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Todas las Calles",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets/all", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets", "all" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Calles por Zona",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets/zone/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets", "zone", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Calles Activas por Zona",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets/zone/1/active", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets", "zone", "1", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Calle",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"streetType\": \"AVENIDA\",\n  \"streetName\": \"Av. Principal\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Calle (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Prueba\"\n}" },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Calle",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [ { "key": "X-User-Id", "value": "{{user_id}}" } ],
+                                        "url": { "raw": "{{orgs_host}}/api/v1/streets/1/restore", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "streets", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Tarifas",
+                         "item": [
+                              {
+                                   "name": "Crear Tarifa",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"fareType\": \"DOMESTIC\",\n  \"amount\": 15.00,\n  \"description\": \"Tarifa doméstica mensual\",\n  \"validFrom\": \"2025-01-01\",\n  \"validTo\": \"2025-12-31\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Tarifa por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Tarifas Activas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Todas las Tarifas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares/all", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares", "all" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Tarifas por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares/organization/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares", "organization", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Tarifas Activas por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares/organization/1/active", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares", "organization", "1", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Tarifa",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"fareType\": \"DOMESTIC\",\n  \"amount\": 20.00,\n  \"description\": \"Tarifa actualizada\",\n  \"validFrom\": \"2025-01-01\",\n  \"validTo\": \"2025-12-31\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Tarifa (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Prueba\"\n}" },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Tarifa",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [ { "key": "X-User-Id", "value": "{{user_id}}" } ],
+                                        "url": { "raw": "{{orgs_host}}/api/v1/fares/1/restore", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "fares", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Parámetros",
+                         "item": [
+                              {
+                                   "name": "Crear Parámetro",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"parameterType\": \"LATE_FEE_PERCENTAGE\",\n  \"parameterValue\": \"10\",\n  \"description\": \"Porcentaje de mora\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Parámetro por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Parámetros Activos",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Todos los Parámetros",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters/all", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters", "all" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Parámetros por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters/organization/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters", "organization", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Parámetros Activos por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters/organization/1/active", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters", "organization", "1", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Parámetro",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"parameterValue\": \"15\",\n  \"description\": \"Porcentaje de mora actualizado\"\n}"
+                                        },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Parámetro (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" }
+                                        ],
+                                        "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Prueba\"\n}" },
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters/1", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Parámetro",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [ { "key": "X-User-Id", "value": "{{user_id}}" } ],
+                                        "url": { "raw": "{{orgs_host}}/api/v1/parameters/1/restore", "host": [ "{{orgs_host}}" ], "path": [ "api", "v1", "parameters", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    }
+               ]
+          },
+          {
+               "name": "4. Commercial (8094)",
+               "item": [
+                    {
+                         "name": "Recibos",
+                         "item": [
+                              {
+                                   "name": "Crear Recibo",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"userId\": 1,\n  \"periodMonth\": 1,\n  \"periodYear\": 2025,\n  \"totalAmount\": 25.00,\n  \"notes\": \"Recibo enero 2025\",\n  \"details\": []\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Recibo por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Recibos",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts?page=0&size=10", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" } ] }
+                                   }
+                              },
+                              {
+                                   "name": "Recibos por Usuario",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts/user/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts", "user", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Recibos por Periodo",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts/period?month=1&year=2025", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts", "period" ], "query": [ { "key": "month", "value": "1" }, { "key": "year", "value": "2025" } ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Recibo",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"paidAmount\": 25.00,\n  \"receiptStatus\": \"PAID\",\n  \"notes\": \"Pagado completo\"\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Recibo",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Recibo",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts/1/restore", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Contar Recibos",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/receipts/count", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "receipts", "count" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Deudas",
+                         "item": [
+                              {
+                                   "name": "Crear Deuda",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"userId\": 1,\n  \"periodMonth\": 1,\n  \"periodYear\": 2025,\n  \"originalAmount\": 25.00\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Deuda por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Deudas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts?page=0&size=10", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" } ] }
+                                   }
+                              },
+                              {
+                                   "name": "Deudas por Usuario",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/user/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "user", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Deudas Pendientes",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/pending", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "pending" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Total Deuda por Usuario",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/user/1/total", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "user", "1", "total" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Deuda",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"pendingAmount\": 10.00,\n  \"lateFee\": 2.50,\n  \"debtStatus\": \"PARTIAL\"\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Deuda",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Deuda",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/1/restore", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Contar Deudas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/debts/count", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "debts", "count" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Pagos",
+                         "item": [
+                              {
+                                   "name": "Crear Pago",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"userId\": 1,\n  \"totalAmount\": 25.00,\n  \"paymentMethod\": \"CASH\",\n  \"notes\": \"Pago mensual enero\",\n  \"details\": []\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Pago por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Pagos",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments?page=0&size=10", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" } ] }
+                                   }
+                              },
+                              {
+                                   "name": "Pagos por Usuario",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments/user/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments", "user", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Pago",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"paymentStatus\": \"CONFIRMED\",\n  \"notes\": \"Pago confirmado\"\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Pago",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Pago",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments/1/restore", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Contar Pagos",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/payments/count", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "payments", "count" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Caja Chica",
+                         "item": [
+                              {
+                                   "name": "Crear Caja Chica",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"responsibleUserId\": 1,\n  \"initialBalance\": 500.00,\n  \"maxAmountLimit\": 1000.00\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Caja Chica por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Cajas Chicas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash?page=0&size=10", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" } ] }
+                                   }
+                              },
+                              {
+                                   "name": "Caja Chica Activa",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/active", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Movimientos de Caja",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/1/movements", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "1", "movements" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Registrar Movimiento",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"pettyCashId\": 1,\n  \"movementType\": \"INCOME\",\n  \"amount\": 100.00,\n  \"category\": \"PAYMENT_RECEIVED\",\n  \"description\": \"Pago recibido de usuario\",\n  \"voucherNumber\": \"VOC-001\"\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/movements", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "movements" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Caja Chica",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"responsibleUserId\": 1,\n  \"maxAmountLimit\": 2000.00,\n  \"pettyCashStatus\": \"ACTIVE\"\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Caja Chica",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Caja Chica",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/1/restore", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Contar Cajas Chicas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/petty-cash/count", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "petty-cash", "count" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Cortes de Servicio",
+                         "item": [
+                              {
+                                   "name": "Crear Corte de Servicio",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"userId\": 1,\n  \"waterBoxId\": 1,\n  \"scheduledDate\": \"2025-02-15\",\n  \"cutReason\": \"DEBT\",\n  \"debtAmount\": 150.00,\n  \"notes\": \"Deuda acumulada 3 meses\"\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Corte por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Cortes",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts?page=0&size=10", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" } ] }
+                                   }
+                              },
+                              {
+                                   "name": "Cortes por Usuario",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/user/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "user", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Cortes Pendientes",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/pending", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "pending" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Corte",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"scheduledDate\": \"2025-02-20\",\n  \"cutStatus\": \"SCHEDULED\",\n  \"notes\": \"Reprogramado\"\n}"
+                                        },
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Ejecutar Corte",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/1/execute", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "1", "execute" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Reconectar Servicio",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/1/reconnect", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "1", "reconnect" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Corte",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/1", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Corte",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/1/restore", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Contar Cortes",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{commercial_host}}/api/v1/service-cuts/count", "host": [ "{{commercial_host}}" ], "path": [ "api", "v1", "service-cuts", "count" ] }
+                                   }
+                              }
+                         ]
+                    }
+               ]
+          },
+          {
+               "name": "5. Infrastructure (8089)",
+               "item": [
+                    {
+                         "name": "Cajas de Agua",
+                         "item": [
+                              {
+                                   "name": "Crear Caja de Agua",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"boxCode\": \"WB-001\",\n  \"boxType\": \"RESIDENTIAL\",\n  \"installationDate\": \"2025-01-15\",\n  \"zoneId\": 1,\n  \"streetId\": 1,\n  \"address\": \"Jr. Lima 123\"\n}"
+                                        },
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Caja por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Todas las Cajas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Cajas Activas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/active", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Cajas por Zona",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/zone/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "zone", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Caja",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"boxCode\": \"WB-001-UPD\",\n  \"boxType\": \"COMMERCIAL\",\n  \"installationDate\": \"2025-01-15\",\n  \"zoneId\": 1,\n  \"streetId\": 1,\n  \"address\": \"Jr. Lima 123 Actualizado\"\n}"
+                                        },
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Caja",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Caja",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/1/restore", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "1", "restore" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Suspender Caja",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/1/suspend", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "1", "suspend" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Reconectar Caja",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-boxes/1/reconnect", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-boxes", "1", "reconnect" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Asignaciones de Caja",
+                         "item": [
+                              {
+                                   "name": "Asignar Caja a Usuario",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"waterBoxId\": 1,\n  \"userId\": 1\n}"
+                                        },
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-assignments", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-assignments" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Asignación por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-assignments/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-assignments", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Asignaciones",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-assignments", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-assignments" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Asignaciones por Caja",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-assignments/water-box/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-assignments", "water-box", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Asignaciones por Usuario",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-assignments/user/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-assignments", "user", "1" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Transferencias de Caja",
+                         "item": [
+                              {
+                                   "name": "Transferir Caja",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"waterBoxId\": 1,\n  \"fromUserId\": 1,\n  \"toUserId\": 2,\n  \"transferFee\": 50.00,\n  \"notes\": \"Transferencia por venta de propiedad\"\n}"
+                                        },
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-transfers", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-transfers" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Transferencia por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-transfers/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-transfers", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Listar Transferencias",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-transfers", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-transfers" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Transferencias por Caja",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{infra_host}}/api/v1/water-box-transfers/water-box/1", "host": [ "{{infra_host}}" ], "path": [ "api", "v1", "water-box-transfers", "water-box", "1" ] }
+                                   }
+                              }
+                         ]
+                    }
+               ]
+          },
+          {
+               "name": "6. Distribution (8091)",
+               "item": [
+                    {
+                         "name": "Programas",
+                         "item": [
+                              {
+                                   "name": "Listar Programas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/programs", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "programs" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Programas Activos",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/programs/active", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "programs", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Programa por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/programs/1", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "programs", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Crear Programa",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"scheduleId\": 1,\n  \"routeId\": 1,\n  \"zoneId\": 1,\n  \"streetId\": 1,\n  \"programDate\": \"2025-02-01\",\n  \"plannedStartTime\": \"08:00:00\",\n  \"plannedEndTime\": \"12:00:00\",\n  \"actualStartTime\": null,\n  \"actualEndTime\": null,\n  \"responsibleUserId\": 1,\n  \"observations\": \"Distribución matutina zona centro\"\n}"
+                                        },
+                                        "url": { "raw": "{{distribution_host}}/api/v1/programs", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "programs" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Programa",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"scheduleId\": 1,\n  \"routeId\": 1,\n  \"zoneId\": 1,\n  \"streetId\": 1,\n  \"programDate\": \"2025-02-01\",\n  \"plannedStartTime\": \"09:00:00\",\n  \"plannedEndTime\": \"13:00:00\",\n  \"actualStartTime\": \"09:15:00\",\n  \"actualEndTime\": null,\n  \"responsibleUserId\": 1,\n  \"observations\": \"Actualizado - inicio retrasado\"\n}"
+                                        },
+                                        "url": { "raw": "{{distribution_host}}/api/v1/programs/1", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "programs", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Desactivar Programa",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/programs/1/deactivate", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "programs", "1", "deactivate" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Programa",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/programs/1/restore", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "programs", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Rutas",
+                         "item": [
+                              {
+                                   "name": "Listar Rutas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/routes", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "routes" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Rutas Activas",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/routes/active", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "routes", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Ruta por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/routes/1", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "routes", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Crear Ruta",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"routeName\": \"Ruta Centro-Norte\",\n  \"zones\": [\n    { \"zoneId\": 1, \"order\": 1, \"estimatedDuration\": 60 },\n    { \"zoneId\": 2, \"order\": 2, \"estimatedDuration\": 45 }\n  ],\n  \"totalEstimatedDuration\": 105,\n  \"responsibleUserId\": 1\n}"
+                                        },
+                                        "url": { "raw": "{{distribution_host}}/api/v1/routes", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "routes" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Ruta",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"routeName\": \"Ruta Centro-Norte Actualizada\",\n  \"zones\": [\n    { \"zoneId\": 1, \"order\": 1, \"estimatedDuration\": 55 }\n  ],\n  \"totalEstimatedDuration\": 55,\n  \"responsibleUserId\": 1\n}"
+                                        },
+                                        "url": { "raw": "{{distribution_host}}/api/v1/routes/1", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "routes", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Desactivar Ruta",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/routes/1/deactivate", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "routes", "1", "deactivate" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Ruta",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/routes/1/restore", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "routes", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Horarios",
+                         "item": [
+                              {
+                                   "name": "Listar Horarios",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/schedules", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "schedules" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Horarios Activos",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/schedules/active", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "schedules", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Horario por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/schedules/1", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "schedules", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Crear Horario",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"zoneId\": 1,\n  \"streetId\": 1,\n  \"scheduleName\": \"Horario Mañana\",\n  \"daysOfWeek\": [\"MONDAY\", \"WEDNESDAY\", \"FRIDAY\"],\n  \"startTime\": \"06:00:00\",\n  \"endTime\": \"12:00:00\",\n  \"durationHours\": 6\n}"
+                                        },
+                                        "url": { "raw": "{{distribution_host}}/api/v1/schedules", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "schedules" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Horario",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"organizationId\": 1,\n  \"zoneId\": 1,\n  \"streetId\": 1,\n  \"scheduleName\": \"Horario Tarde\",\n  \"daysOfWeek\": [\"TUESDAY\", \"THURSDAY\"],\n  \"startTime\": \"14:00:00\",\n  \"endTime\": \"18:00:00\",\n  \"durationHours\": 4\n}"
+                                        },
+                                        "url": { "raw": "{{distribution_host}}/api/v1/schedules/1", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "schedules", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Desactivar Horario",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/schedules/1/deactivate", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "schedules", "1", "deactivate" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Horario",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{distribution_host}}/api/v1/schedules/1/restore", "host": [ "{{distribution_host}}" ], "path": [ "api", "v1", "schedules", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    }
+               ]
+          },
+          {
+               "name": "7. Claims & Incidents (8085)",
+               "item": [
+                    {
+                         "name": "Incidentes",
+                         "item": [
+                              {
+                                   "name": "Listar Incidentes",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Incidente por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Crear Incidente",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"incidentCode\": \"INC-001\",\n  \"title\": \"Fuga de agua en Jr. Lima\",\n  \"description\": \"Se detectó fuga de agua en la tubería principal\",\n  \"incidentTypeId\": 1,\n  \"incidentCategory\": \"LEAK\",\n  \"zoneId\": 1,\n  \"incidentDate\": \"2025-01-20T10:00:00\",\n  \"severity\": \"HIGH\",\n  \"status\": \"REPORTED\",\n  \"affectedBoxesCount\": 5,\n  \"organizationId\": 1,\n  \"reportedByUserId\": 1,\n  \"assignedToUserId\": null,\n  \"resolvedByUserId\": null,\n  \"resolved\": false,\n  \"resolutionNotes\": null,\n  \"recordStatus\": \"ACTIVE\"\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Incidente",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"title\": \"Fuga de agua - Actualizado\",\n  \"description\": \"Descripción actualizada\",\n  \"severity\": \"CRITICAL\",\n  \"status\": \"IN_PROGRESS\",\n  \"affectedBoxesCount\": 8,\n  \"resolutionNotes\": \"En proceso de reparación\"\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Asignar Incidente a Técnico",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"userId\": 2,\n  \"notes\": \"Asignado a técnico de campo\"\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/1/assign", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "1", "assign" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Resolver Incidente",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "Content-Type", "value": "application/json" },
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"resolutionType\": \"REPAIR\",\n  \"actionsTaken\": \"Se reparó la tubería principal\",\n  \"materialsUsed\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2,\n      \"unit\": \"METERS\",\n      \"unitCost\": 25.00\n    }\n  ],\n  \"laborHours\": 4,\n  \"totalCost\": 150.00,\n  \"qualityCheck\": true,\n  \"followUpRequired\": false,\n  \"resolutionNotes\": \"Reparación completada exitosamente\"\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/1/resolve", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "1", "resolve" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Cerrar Incidente",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/1/close", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "1", "close" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Incidentes por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/organization/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "organization", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Incidentes por Zona",
+                                   "request": {
+                                        "method": "GET",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/zone/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "zone", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Incidentes por Severidad",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/severity/HIGH", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "severity", "HIGH" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Incidentes por Estado",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/status/REPORTED", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "status", "REPORTED" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Incidente (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Incidente",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                             { "key": "X-User-Id", "value": "{{user_id}}" },
+                                             { "key": "X-Organization-Id", "value": "{{organization_id}}" }
+                                        ],
+                                        "url": { "raw": "{{claims_host}}/api/v1/incidents/1/restore", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incidents", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Resoluciones",
+                         "item": [
+                              {
+                                   "name": "Obtener Resolución por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-resolutions/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-resolutions", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Resolución por Incidente",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-resolutions/incident/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-resolutions", "incident", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Resoluciones por Técnico",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-resolutions/technician/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-resolutions", "technician", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Resoluciones por Tipo",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-resolutions/type/REPAIR", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-resolutions", "type", "REPAIR" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Tipos de Incidente",
+                         "item": [
+                              {
+                                   "name": "Listar Tipos",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Tipo por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Tipos por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types/organization/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types", "organization", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Tipos Activos por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types/organization/1/active", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types", "organization", "1", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Crear Tipo de Incidente",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"typeCode\": \"LEAK\",\n  \"typeName\": \"Fuga de Agua\",\n  \"description\": \"Fuga en tubería o conexión\",\n  \"priorityLevel\": \"HIGH\",\n  \"estimatedResolutionTime\": 24,\n  \"requiresExternalService\": false,\n  \"organizationId\": 1\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Tipo",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"typeName\": \"Fuga de Agua Actualizado\",\n  \"description\": \"Descripción actualizada\",\n  \"priorityLevel\": \"CRITICAL\",\n  \"estimatedResolutionTime\": 12,\n  \"requiresExternalService\": true\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Tipo (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Tipo",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "url": { "raw": "{{claims_host}}/api/v1/incident-types/1/restore", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "incident-types", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Quejas",
+                         "item": [
+                              {
+                                   "name": "Listar Quejas",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Queja por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Crear Queja",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"subject\": \"Agua turbia\",\n  \"description\": \"El agua llega turbia desde hace 3 días\",\n  \"categoryId\": 1,\n  \"waterBoxId\": 1,\n  \"priority\": \"MEDIUM\",\n  \"organizationId\": 1\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Queja",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"subject\": \"Agua turbia - Actualizado\",\n  \"description\": \"Descripción actualizada\",\n  \"priority\": \"HIGH\",\n  \"status\": \"IN_PROGRESS\",\n  \"assignedToUserId\": 2,\n  \"expectedResolutionDate\": \"2025-02-01\"\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Agregar Respuesta a Queja",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"responseType\": \"INTERNAL\",\n  \"message\": \"Se ha enviado un técnico a verificar\",\n  \"internalNotes\": \"Técnico asignado: Juan Pérez\"\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/1/responses", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "1", "responses" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Cerrar Queja",
+                                   "request": {
+                                        "method": "POST",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/1/close?satisfactionRating=4", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "1", "close" ], "query": [ { "key": "satisfactionRating", "value": "4" } ] }
+                                   }
+                              },
+                              {
+                                   "name": "Quejas por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/organization/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "organization", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Quejas por Usuario",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/user/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "user", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Quejas por Estado",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/status/OPEN", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "status", "OPEN" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Queja (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Queja",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaints/1/restore", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaints", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    },
+                    {
+                         "name": "Categorías de Queja",
+                         "item": [
+                              {
+                                   "name": "Listar Categorías",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Obtener Categoría por ID",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Categorías por Organización",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories/organization/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories", "organization", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Categorías Activas por Org",
+                                   "request": {
+                                        "method": "GET",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories/organization/1/active", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories", "organization", "1", "active" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Crear Categoría",
+                                   "request": {
+                                        "method": "POST",
+                                        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"categoryCode\": \"WATER_QUALITY\",\n  \"categoryName\": \"Calidad de Agua\",\n  \"description\": \"Problemas relacionados con la calidad del agua\",\n  \"priorityLevel\": \"HIGH\",\n  \"maxResponseTime\": 48,\n  \"organizationId\": 1\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Actualizar Categoría",
+                                   "request": {
+                                        "method": "PUT",
+                                        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                                        "body": {
+                                             "mode": "raw",
+                                             "raw": "{\n  \"categoryName\": \"Calidad de Agua Actualizado\",\n  \"description\": \"Descripción actualizada\",\n  \"priorityLevel\": \"CRITICAL\",\n  \"maxResponseTime\": 24\n}"
+                                        },
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Eliminar Categoría (soft)",
+                                   "request": {
+                                        "method": "DELETE",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories/1", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories", "1" ] }
+                                   }
+                              },
+                              {
+                                   "name": "Restaurar Categoría",
+                                   "request": {
+                                        "method": "PATCH",
+                                        "url": { "raw": "{{claims_host}}/api/v1/complaint-categories/1/restore", "host": [ "{{claims_host}}" ], "path": [ "api", "v1", "complaint-categories", "1", "restore" ] }
+                                   }
+                              }
+                         ]
+                    }
+               ]
+          },
+          {
+               "name": "8. Notifications (8090)",
+               "item": [
+                    {
+                         "name": "Enviar Notificación",
+                         "request": {
+                              "method": "POST",
+                              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                              "body": {
+                                   "mode": "raw",
+                                   "raw": "{\n  \"phoneNumber\": \"+51987654321\",\n  \"recipientName\": \"Juan Perez\",\n  \"type\": \"PAYMENT_REMINDER\",\n  \"variables\": {\n    \"amount\": \"25.00\",\n    \"month\": \"Enero\"\n  },\n  \"userId\": 1\n}"
+                              },
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications/send", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications", "send" ] }
+                         }
+                    },
+                    {
+                         "name": "Enviar WhatsApp",
+                         "request": {
+                              "method": "POST",
+                              "header": [ { "key": "Content-Type", "value": "application/json" } ],
+                              "body": {
+                                   "mode": "raw",
+                                   "raw": "{\n  \"phone\": \"+51987654321\",\n  \"template\": \"payment_reminder\",\n  \"params\": {\n    \"name\": \"Juan\",\n    \"amount\": \"25.00\"\n  }\n}"
+                              },
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications/whatsapp", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications", "whatsapp" ] }
+                         }
+                    },
+                    {
+                         "name": "Reintentar Notificación",
+                         "request": {
+                              "method": "POST",
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications/1/retry", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications", "1", "retry" ] }
+                         }
+                    },
+                    {
+                         "name": "Reintentar Todas las Fallidas",
+                         "request": {
+                              "method": "POST",
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications/retry-all", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications", "retry-all" ] }
+                         }
+                    },
+                    {
+                         "name": "Listar Notificaciones",
+                         "request": {
+                              "method": "GET",
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications" ] }
+                         }
+                    },
+                    {
+                         "name": "Obtener Notificación por ID",
+                         "request": {
+                              "method": "GET",
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications/1", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications", "1" ] }
+                         }
+                    },
+                    {
+                         "name": "Notificaciones por Usuario",
+                         "request": {
+                              "method": "GET",
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications/user/1", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications", "user", "1" ] }
+                         }
+                    },
+                    {
+                         "name": "Notificaciones por Estado",
+                         "request": {
+                              "method": "GET",
+                              "url": { "raw": "{{notifications_host}}/api/v1/notifications/status/SENT", "host": [ "{{notifications_host}}" ], "path": [ "api", "v1", "notifications", "status", "SENT" ] }
+                         }
+                    }
+               ]
+          }
+     ]
+}
