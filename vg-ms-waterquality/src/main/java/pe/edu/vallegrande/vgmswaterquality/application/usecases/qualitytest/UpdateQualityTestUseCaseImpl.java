@@ -23,7 +23,6 @@ public class UpdateQualityTestUseCaseImpl implements IUpdateQualityTestUseCase {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new QualityTestNotFoundException(id)))
                 .flatMap(existingTest -> {
-                    existingTest.setOrganizationId(test.getOrganizationId());
                     existingTest.setTestingPointId(test.getTestingPointId());
                     existingTest.setTestDate(test.getTestDate());
                     existingTest.setTestType(test.getTestType());

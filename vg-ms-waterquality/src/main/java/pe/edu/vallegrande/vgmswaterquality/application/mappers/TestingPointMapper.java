@@ -24,7 +24,6 @@ public class TestingPointMapper {
 
     public TestingPoint toDomain(UpdateTestingPointRequest request) {
         return TestingPoint.builder()
-                .organizationId(request.getOrganizationId())
                 .zoneId(request.getZoneId())
                 .pointName(request.getPointName())
                 .pointType(request.getPointType())

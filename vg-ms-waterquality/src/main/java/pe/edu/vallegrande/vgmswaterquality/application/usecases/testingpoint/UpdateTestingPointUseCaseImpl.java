@@ -23,7 +23,6 @@ public class UpdateTestingPointUseCaseImpl implements IUpdateTestingPointUseCase
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(new TestingPointNotFoundException(id)))
                 .flatMap(existing -> {
-                    existing.setOrganizationId(point.getOrganizationId());
                     existing.setZoneId(point.getZoneId());
                     existing.setPointName(point.getPointName());
                     existing.setPointType(point.getPointType());

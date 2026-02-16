@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateTestingPointRequest {
-    private String organizationId;
     private String zoneId;
 
     @Size(min = 2, max = 100, message = "Nombre debe tener entre 2 y 100 caracteres")

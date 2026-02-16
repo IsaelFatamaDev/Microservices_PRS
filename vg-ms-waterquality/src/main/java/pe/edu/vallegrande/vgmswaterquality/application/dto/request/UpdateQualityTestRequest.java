@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class UpdateQualityTestRequest {
-    private String organizationId;
     private String testingPointId;
     private String testType;
     private LocalDateTime testDate;

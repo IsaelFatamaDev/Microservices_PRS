@@ -29,7 +29,6 @@ public class QualityTestMapper {
 
     public QualityTest toDomain(UpdateQualityTestRequest request) {
         return QualityTest.builder()
-                .organizationId(request.getOrganizationId())
                 .testingPointId(request.getTestingPointId())
                 .testDate(request.getTestDate())
                 .testType(request.getTestType())
