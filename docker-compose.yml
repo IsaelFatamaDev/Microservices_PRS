@@ -111,14 +111,12 @@ services:
     image: atendai/evolution-api:v1.8.4
     container_name: evolution-apis
     mem_limit: 250m
-    ports:
-      - "9099:8080"
     environment:
       AUTHENTICATION_API_KEY: "JASS_EVOLUTION_KEY_2024"
       AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "true"
       SERVER_PORT: "8080"
       SERVER_TYPE: "http"
-      SERVER_URL: "http://localhost:8080"
+      SERVER_URL: "https://lab.vallegrande.edu.pe/jass/ms-evolution"
       DATABASE_ENABLED: "false"
       CACHE_REDIS_ENABLED: "true"
       CACHE_REDIS_URI: "redis://redis:6379/0"
