@@ -433,7 +433,8 @@ export class TestingPointsComponent implements OnInit, AfterViewChecked {
   }
 
   private async initMap(): Promise<void> {
-    const L = await import('leaflet');
+    const leafletModule = await import('leaflet');
+    const L = (leafletModule as any).default || leafletModule;
 
     const lat = this.formData.latitude ? parseFloat(this.formData.latitude) : -6.77;
     const lng = this.formData.longitude ? parseFloat(this.formData.longitude) : -76.12;
@@ -482,7 +483,8 @@ export class TestingPointsComponent implements OnInit, AfterViewChecked {
     const point = this.selectedPoint();
     if (!point?.latitude || !point?.longitude) return;
 
-    const L = await import('leaflet');
+    const leafletModule = await import('leaflet');
+    const L = (leafletModule as any).default || leafletModule;
     const lat = parseFloat(point.latitude);
     const lng = parseFloat(point.longitude);
 

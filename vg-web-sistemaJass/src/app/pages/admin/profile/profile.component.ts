@@ -85,7 +85,7 @@ import { ApiResponse, User as UserModel } from '../../../core';
             <lucide-icon [img]="userIcon" [size]="20" class="text-gray-400"></lucide-icon>
             <div>
               <p class="text-sm text-gray-500">DNI</p>
-              <p class="font-medium text-gray-800">{{ authService.user()?.dni }}</p>
+              <p class="font-medium text-gray-800">{{ authService.user()?.documentNumber }}</p>
             </div>
           </div>
 
