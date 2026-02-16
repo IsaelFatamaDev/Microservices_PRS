@@ -4,10 +4,7 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: jass-rabbitmq
-    mem_limit: 250m
-    ports:
-      - "5672:5672"
-      - "15672:15672"
+    mem_limit: 500m
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
@@ -55,7 +52,7 @@ services:
       DB_PASSWORD: SistemaJass12
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
+      RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
 
     networks: [ jass-net ]
@@ -73,7 +70,7 @@ services:
       MONGODB_URI: mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
+      RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
       EVOLUTION_API_BASE_URL: http://evolution-apis:8080
       EVOLUTION_API_KEY: JASS_EVOLUTION_KEY_2024
@@ -97,7 +94,7 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
+      RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KEYCLOAK_ADMIN_USERNAME: admin
@@ -107,6 +104,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      vg-ms-users:
+        condition: service_started
 
   evolution-apis:
     image: atendai/evolution-api:v1.8.4
@@ -200,7 +199,7 @@ services:
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
+      RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
       USER_SERVICE_URL: http://vg-ms-users:8081
       ORGANIZATION_SERVICE_URL: http://vg-ms-organizations:8083
@@ -223,7 +222,7 @@ services:
       DB_PASSWORD: SistemaJass12
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
+      RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
     networks: [ jass-net ]
     restart: unless-stopped
@@ -247,7 +246,7 @@ services:
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
+      RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
     networks: [ jass-net ]
     restart: unless-stopped
@@ -264,7 +263,7 @@ services:
       MONGODB_URI: mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
-      RABBITMQ_USER: admin
+      RABBITMQ_USERNAME: admin
       RABBITMQ_PASSWORD: admin
     networks: [ jass-net ]
     restart: unless-stopped

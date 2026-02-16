@@ -4,10 +4,10 @@ spring:
                uri: ${MONGODB_URI:mongodb://mongo_jass:27017/notifications_db}
 
      rabbitmq:
-          host: ${RABBITMQ_HOST:rabbit_jass}
+          host: ${RABBITMQ_HOST}
           port: ${RABBITMQ_PORT:5672}
-          username: ${RABBITMQ_USER:guest}
-          password: ${RABBITMQ_PASSWORD:guest}
+          username: ${RABBITMQ_USERNAME}
+          password: ${RABBITMQ_PASSWORD}
           publisher-confirm-type: correlated
           publisher-returns: true
 
@@ -25,15 +25,15 @@ logging:
           org.springframework.amqp: WARN
 
 resilience4j:
-  circuitbreaker:
-    instances:
-      organizationsApi:
-        registerHealthIndicator: true
-        slidingWindowSize: 10
-        priority: 1
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowType: COUNT_BASED
-        minimumNumberOfCalls: 5
-        waitDurationInOpenState: 10s
-        failureRateThreshold: 50
-        eventConsumerBufferSize: 10
+     circuitbreaker:
+          instances:
+               organizationsApi:
+                    registerHealthIndicator: true
+                    slidingWindowSize: 10
+                    priority: 1
+                    permittedNumberOfCallsInHalfOpenState: 3
+                    slidingWindowType: COUNT_BASED
+                    minimumNumberOfCalls: 5
+                    waitDurationInOpenState: 10s
+                    failureRateThreshold: 50
+                    eventConsumerBufferSize: 10
