@@ -2,6 +2,7 @@ package pe.edu.vallegrande.msdistribution.application.mappers;
 
 import org.springframework.stereotype.Component;
 import pe.edu.vallegrande.msdistribution.application.dto.request.DistributionProgramCreateRequest;
+import pe.edu.vallegrande.msdistribution.application.dto.request.DistributionProgramUpdateRequest;
 import pe.edu.vallegrande.msdistribution.application.dto.response.DistributionProgramResponse;
 import pe.edu.vallegrande.msdistribution.domain.models.DistributionProgram;
 import pe.edu.vallegrande.msdistribution.domain.models.valueobjects.RecordStatus;
@@ -21,11 +22,29 @@ public class DistributionProgramMapper {
                 .programDate(request.getProgramDate())
                 .plannedStartTime(request.getPlannedStartTime())
                 .plannedEndTime(request.getPlannedEndTime())
+                .actualStartTime(request.getActualStartTime())
+                .actualEndTime(request.getActualEndTime())
                 .responsibleUserId(request.getResponsibleUserId())
                 .observations(request.getObservations())
                 .recordStatus(RecordStatus.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public DistributionProgram toDomainForUpdate(DistributionProgramUpdateRequest request) {
+        return DistributionProgram.builder()
+                .scheduleId(request.getScheduleId())
+                .routeId(request.getRouteId())
+                .zoneId(request.getZoneId())
+                .streetId(request.getStreetId())
+                .programDate(request.getProgramDate())
+                .plannedStartTime(request.getPlannedStartTime())
+                .plannedEndTime(request.getPlannedEndTime())
+                .actualStartTime(request.getActualStartTime())
+                .actualEndTime(request.getActualEndTime())
+                .responsibleUserId(request.getResponsibleUserId())
+                .observations(request.getObservations())
                 .build();
     }
 

@@ -61,18 +61,29 @@ public class DistributionProgram {
                 .updatedAt(LocalDateTime.now())
                 .updatedBy(updatedBy);
 
-        if (changes.getOrganizationId() != null) builder.organizationId(changes.getOrganizationId());
-        if (changes.getScheduleId() != null) builder.scheduleId(changes.getScheduleId());
-        if (changes.getRouteId() != null) builder.routeId(changes.getRouteId());
-        if (changes.getZoneId() != null) builder.zoneId(changes.getZoneId());
-        if (changes.getStreetId() != null) builder.streetId(changes.getStreetId());
-        if (changes.getProgramDate() != null) builder.programDate(changes.getProgramDate());
-        if (changes.getPlannedStartTime() != null) builder.plannedStartTime(changes.getPlannedStartTime());
-        if (changes.getPlannedEndTime() != null) builder.plannedEndTime(changes.getPlannedEndTime());
-        if (changes.getActualStartTime() != null) builder.actualStartTime(changes.getActualStartTime());
-        if (changes.getActualEndTime() != null) builder.actualEndTime(changes.getActualEndTime());
-        if (changes.getResponsibleUserId() != null) builder.responsibleUserId(changes.getResponsibleUserId());
-        if (changes.getObservations() != null) builder.observations(changes.getObservations());
+        // organizationId is NEVER updated — it's set once at creation
+        if (changes.getScheduleId() != null)
+            builder.scheduleId(changes.getScheduleId());
+        if (changes.getRouteId() != null)
+            builder.routeId(changes.getRouteId());
+        if (changes.getZoneId() != null)
+            builder.zoneId(changes.getZoneId());
+        if (changes.getStreetId() != null)
+            builder.streetId(changes.getStreetId());
+        if (changes.getProgramDate() != null)
+            builder.programDate(changes.getProgramDate());
+        if (changes.getPlannedStartTime() != null)
+            builder.plannedStartTime(changes.getPlannedStartTime());
+        if (changes.getPlannedEndTime() != null)
+            builder.plannedEndTime(changes.getPlannedEndTime());
+        if (changes.getActualStartTime() != null)
+            builder.actualStartTime(changes.getActualStartTime());
+        if (changes.getActualEndTime() != null)
+            builder.actualEndTime(changes.getActualEndTime());
+        if (changes.getResponsibleUserId() != null)
+            builder.responsibleUserId(changes.getResponsibleUserId());
+        if (changes.getObservations() != null)
+            builder.observations(changes.getObservations());
 
         return builder.build();
     }

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pe.edu.vallegrande.msdistribution.application.dto.common.ApiResponse;
 import pe.edu.vallegrande.msdistribution.application.dto.request.DistributionProgramCreateRequest;
+import pe.edu.vallegrande.msdistribution.application.dto.request.DistributionProgramUpdateRequest;
 import pe.edu.vallegrande.msdistribution.application.dto.response.DistributionProgramResponse;
 import pe.edu.vallegrande.msdistribution.application.mappers.DistributionProgramMapper;
 import pe.edu.vallegrande.msdistribution.domain.ports.in.program.*;
@@ -66,10 +67,10 @@ public class DistributionProgramRest {
     @PutMapping("/{id}")
     public Mono<ApiResponse<DistributionProgramResponse>> update(
             @PathVariable String id,
-            @Valid @RequestBody DistributionProgramCreateRequest request,
+            @Valid @RequestBody DistributionProgramUpdateRequest request,
             ServerWebExchange exchange) {
         AuthenticatedUser user = headersExtractor.extract(exchange);
-        return updateUseCase.execute(id, mapper.toDomain(request), user.getUserId())
+        return updateUseCase.execute(id, mapper.toDomainForUpdate(request), user.getUserId())
                 .map(mapper::toResponse)
                 .map(ApiResponse::ok);
     }

@@ -6,7 +6,7 @@ import { LucideAngularModule, Calendar, Plus, Edit, Trash2, Search, RotateCcw, M
 import { environment } from '../../../../../environments/environment';
 import { AuthService, AlertService, DistributionService } from '../../../../core/services';
 import {
-  DistributionProgram, CreateProgramRequest, ApiResponse,
+  DistributionProgram, CreateProgramRequest, UpdateProgramRequest, ApiResponse,
   Zone, Street, DistributionSchedule, DistributionRoute, User
 } from '../../../../core/models';
 
@@ -397,24 +397,39 @@ export class ProgramsComponent implements OnInit {
     const orgId = this.auth.organizationId();
     if (!orgId || !this.isFormValid()) return;
 
-    const req: CreateProgramRequest = {
-      organizationId: orgId,
-      scheduleId: this.formData.scheduleId,
-      routeId: this.formData.routeId,
-      zoneId: this.formData.zoneId,
-      streetId: this.formData.streetId || undefined,
-      programDate: this.formData.programDate,
-      plannedStartTime: this.formData.plannedStartTime,
-      plannedEndTime: this.formData.plannedEndTime,
-      actualStartTime: this.formData.actualStartTime || undefined,
-      actualEndTime: this.formData.actualEndTime || undefined,
-      responsibleUserId: this.formData.responsibleUserId,
-      observations: this.formData.observations || undefined
-    };
-
-    const op = this.editMode()
-      ? this.dist.updateProgram(this.selectedId, req)
-      : this.dist.createProgram(req);
+    let op;
+    if (this.editMode()) {
+      const updateReq: UpdateProgramRequest = {
+        scheduleId: this.formData.scheduleId,
+        routeId: this.formData.routeId,
+        zoneId: this.formData.zoneId,
+        streetId: this.formData.streetId || undefined,
+        programDate: this.formData.programDate,
+        plannedStartTime: this.formData.plannedStartTime,
+        plannedEndTime: this.formData.plannedEndTime,
+        actualStartTime: this.formData.actualStartTime || null,
+        actualEndTime: this.formData.actualEndTime || null,
+        responsibleUserId: this.formData.responsibleUserId,
+        observations: this.formData.observations || null
+      };
+      op = this.dist.updateProgram(this.selectedId, updateReq);
+    } else {
+      const createReq: CreateProgramRequest = {
+        organizationId: orgId,
+        scheduleId: this.formData.scheduleId,
+        routeId: this.formData.routeId,
+        zoneId: this.formData.zoneId,
+        streetId: this.formData.streetId || undefined,
+        programDate: this.formData.programDate,
+        plannedStartTime: this.formData.plannedStartTime,
+        plannedEndTime: this.formData.plannedEndTime,
+        actualStartTime: this.formData.actualStartTime || undefined,
+        actualEndTime: this.formData.actualEndTime || undefined,
+        responsibleUserId: this.formData.responsibleUserId,
+        observations: this.formData.observations || undefined
+      };
+      op = this.dist.createProgram(createReq);
+    }
 
     op.subscribe({
       next: () => {
