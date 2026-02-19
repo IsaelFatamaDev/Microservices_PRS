@@ -15,6 +15,10 @@ import {
 } from '../../../core';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
+import {
+  sanitizeName, sanitizeDocument, sanitizePhone,
+  validateEmail as sharedValidateEmail, validatePhone as sharedValidatePhone
+} from '../../../core/validators/input-sanitizers';
 
 @Component({
   selector: 'app-user-form',
@@ -98,7 +102,7 @@ import { AuthService } from '../../../core/services/auth.service';
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Apellidos <span class="text-red-500">*</span></label>
               <input type="text" [ngModel]="form.lastName" name="lastName" required
-                (ngModelChange)="sanitizeName('lastName', $event)"
+                (ngModelChange)="onSanitizeName('lastName', $event)"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all"
                 [ngClass]="fieldErrors()['lastName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                 placeholder="Pérez García">
@@ -109,7 +113,7 @@ import { AuthService } from '../../../core/services/auth.service';
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombres <span class="text-red-500">*</span></label>
               <input type="text" [ngModel]="form.firstName" name="firstName" required
-                (ngModelChange)="sanitizeName('firstName', $event)"
+                (ngModelChange)="onSanitizeName('firstName', $event)"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all"
                 [ngClass]="fieldErrors()['firstName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                 placeholder="Juan Carlos">
@@ -129,7 +133,7 @@ import { AuthService } from '../../../core/services/auth.service';
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">N° Documento <span class="text-red-500">*</span></label>
               <input type="text" [ngModel]="form.documentNumber" name="documentNumber" required
-                (ngModelChange)="sanitizeDocument($event)" (blur)="checkDuplicate('documentNumber')"
+                (ngModelChange)="onSanitizeDocument($event)" (blur)="checkDuplicate('documentNumber')"
                 [maxlength]="form.documentType === 'DNI' ? 8 : 20"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all font-mono"
                 [ngClass]="fieldErrors()['documentNumber'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
@@ -158,7 +162,7 @@ import { AuthService } from '../../../core/services/auth.service';
               </label>
               <input type="text" [ngModel]="form.phone" name="phone"
                 [required]="selectedRole === 'OPERATOR'"
-                (ngModelChange)="sanitizePhone($event)" (blur)="checkDuplicate('phone')"
+                (ngModelChange)="onSanitizePhone($event)" (blur)="checkDuplicate('phone')"
                 maxlength="9"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all font-mono"
                 [ngClass]="fieldErrors()['phone'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
@@ -178,7 +182,7 @@ import { AuthService } from '../../../core/services/auth.service';
               </label>
               <input type="email" [(ngModel)]="form.email" name="email"
                 [required]="selectedRole === 'OPERATOR'"
-                (blur)="validateEmail()"
+                (blur)="onValidateEmail()"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all"
                 [ngClass]="fieldErrors()['email'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                 placeholder="usuario&#64;email.com">
@@ -540,18 +544,12 @@ export class UserFormComponent implements OnInit {
     this.router.navigate(['/admin/users']);
   }
 
-  // --- Validation methods ---
-
-  sanitizeName(field: 'firstName' | 'lastName', value: string): void {
-    this.form[field] = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+  onSanitizeName(field: 'firstName' | 'lastName', value: string): void {
+    this.form[field] = sanitizeName(value);
   }
 
-  sanitizeDocument(value: string): void {
-    if (this.form.documentType === 'DNI') {
-      this.form.documentNumber = value.replace(/\D/g, '').slice(0, 8);
-    } else {
-      this.form.documentNumber = value.replace(/[^a-zA-Z0-9]/g, '').slice(0, 20);
-    }
+  onSanitizeDocument(value: string): void {
+    this.form.documentNumber = sanitizeDocument(value, this.form.documentType);
     this.clearFieldError('documentNumber');
   }
 
@@ -560,26 +558,23 @@ export class UserFormComponent implements OnInit {
     this.clearFieldError('documentNumber');
   }
 
-  sanitizePhone(value: string): void {
-    this.form.phone = value.replace(/\D/g, '').slice(0, 9);
-    if (this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
-      this.setFieldError('phone', 'El número debe comenzar con 9');
+  onSanitizePhone(value: string): void {
+    this.form.phone = sanitizePhone(value);
+    const err = sharedValidatePhone(this.form.phone, false);
+    if (err && this.form.phone.length > 0) {
+      this.setFieldError('phone', err);
     } else {
       this.clearFieldError('phone');
     }
   }
 
-  validateEmail(): void {
-    if (!this.form.email) {
-      this.clearFieldError('email');
-      return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.form.email)) {
-      this.setFieldError('email', 'Ingrese un correo electrónico válido');
+  onValidateEmail(): void {
+    const err = sharedValidateEmail(this.form.email, false);
+    if (err) {
+      this.setFieldError('email', err);
     } else {
       this.clearFieldError('email');
-      this.checkDuplicate('email');
+      if (this.form.email) this.checkDuplicate('email');
     }
   }
 

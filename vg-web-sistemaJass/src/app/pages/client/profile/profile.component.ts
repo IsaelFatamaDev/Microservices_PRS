@@ -5,6 +5,10 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
+import {
+  sanitizeName, sanitizePhone,
+  validateEmail as sharedValidateEmail, validatePhone as sharedValidatePhone
+} from '../../../core/validators/input-sanitizers';
 
 @Component({
      selector: 'app-client-profile',
@@ -65,17 +69,27 @@ import { AlertService } from '../../../core/services/alert.service';
                                              <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
                                              <input
                                                   type="text"
-                                                  [(ngModel)]="formData.firstName"
-                                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                  [ngModel]="formData.firstName"
+                                                  (ngModelChange)="formData.firstName = onSanitizeName($event)"
+                                                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                  [ngClass]="firstNameError ? 'border-red-300 bg-red-50/30' : 'border-gray-300'"
                                                   placeholder="Ingresa tus nombres">
+                                             @if (firstNameError) {
+                                                  <p class="mt-1 text-xs text-red-500">{{ firstNameError }}</p>
+                                             }
                                         </div>
                                         <div>
                                              <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
                                              <input
                                                   type="text"
-                                                  [(ngModel)]="formData.lastName"
-                                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                  [ngModel]="formData.lastName"
+                                                  (ngModelChange)="formData.lastName = onSanitizeName($event)"
+                                                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                  [ngClass]="lastNameError ? 'border-red-300 bg-red-50/30' : 'border-gray-300'"
                                                   placeholder="Ingresa tus apellidos">
+                                             @if (lastNameError) {
+                                                  <p class="mt-1 text-xs text-red-500">{{ lastNameError }}</p>
+                                             }
                                         </div>
                                         <div>
                                              <label class="block text-sm font-medium text-gray-700 mb-1">DNI</label>
@@ -90,8 +104,13 @@ import { AlertService } from '../../../core/services/alert.service';
                                              <input
                                                   type="email"
                                                   [(ngModel)]="formData.email"
-                                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                  (blur)="onValidateEmail()"
+                                                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                  [ngClass]="emailError ? 'border-red-300 bg-red-50/30' : 'border-gray-300'"
                                                   placeholder="correo@ejemplo.com">
+                                             @if (emailError) {
+                                                  <p class="mt-1 text-xs text-red-500">{{ emailError }}</p>
+                                             }
                                         </div>
                                         <div>
                                              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
@@ -266,18 +285,23 @@ export class ClientProfileComponent implements OnInit {
      showNewPassword = false;
      showConfirmPassword = false;
      phoneError = '';
+     firstNameError = '';
+     lastNameError = '';
+     emailError = '';
+
+     onSanitizeName(value: string): string {
+          return sanitizeName(value);
+     }
 
      onPhoneInput(event: Event): void {
           const input = event.target as HTMLInputElement;
-          input.value = input.value.replace(/[^0-9]/g, '').slice(0, 9);
+          input.value = sanitizePhone(input.value);
           this.formData.phone = input.value;
-          if (this.formData.phone.length > 0 && !this.formData.phone.startsWith('9')) {
-               this.phoneError = 'Debe comenzar con 9';
-          } else if (this.formData.phone.length > 0 && this.formData.phone.length !== 9) {
-               this.phoneError = 'Debe tener 9 dígitos';
-          } else {
-               this.phoneError = '';
-          }
+          this.phoneError = this.formData.phone.length > 0 ? sharedValidatePhone(this.formData.phone) : '';
+     }
+
+     onValidateEmail(): void {
+          this.emailError = sharedValidateEmail(this.formData.email);
      }
 
      ngOnInit(): void {
@@ -319,8 +343,13 @@ export class ClientProfileComponent implements OnInit {
      }
 
      async updateProfile(): Promise<void> {
-          if (!this.formData.firstName || !this.formData.lastName) {
-               this.alertService.warning('Campos requeridos', 'Nombres y apellidos son obligatorios');
+          this.firstNameError = !this.formData.firstName?.trim() ? 'Nombres es obligatorio' : '';
+          this.lastNameError = !this.formData.lastName?.trim() ? 'Apellidos es obligatorio' : '';
+          this.emailError = sharedValidateEmail(this.formData.email);
+          this.phoneError = this.formData.phone ? sharedValidatePhone(this.formData.phone) : '';
+
+          if (this.firstNameError || this.lastNameError || this.emailError || this.phoneError) {
+               this.alertService.warning('Datos inválidos', this.firstNameError || this.lastNameError || this.emailError || this.phoneError);
                return;
           }
 

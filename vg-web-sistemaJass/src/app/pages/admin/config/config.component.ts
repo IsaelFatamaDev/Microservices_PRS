@@ -3,14 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import {
-     LucideAngularModule, Building2, MapPin, DollarSign, Settings,
-     Upload, X, Save, Loader2, Mail, Phone, Map as MapIcon
+  LucideAngularModule, Building2, MapPin, DollarSign, Settings,
+  Upload, X, Save, Loader2, Mail, Phone, Map as MapIcon
 } from 'lucide-angular';
 import { environment } from '../../../../environments/environment';
 import { Organization, ApiResponse } from '../../../core';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { UbigeoService } from '../../../core/services/ubigeo.service';
+import {
+  sanitizePhone,
+  validateEmail as sharedValidateEmail, validatePhone as sharedValidatePhone
+} from '../../../core/validators/input-sanitizers';
 
 import { ZonesComponent } from './zones/zones.component';
 import { FaresComponent } from './fares/fares.component';
@@ -19,22 +23,22 @@ import { ParametersComponent } from './parameters/parameters.component';
 type ConfigTab = 'organization' | 'zones' | 'fares' | 'parameters';
 
 interface TabItem {
-     key: ConfigTab;
-     label: string;
-     icon: any;
-     color: string;
-     bgActive: string;
-     textActive: string;
+  key: ConfigTab;
+  label: string;
+  icon: any;
+  color: string;
+  bgActive: string;
+  textActive: string;
 }
 
 @Component({
-     selector: 'app-config',
-     standalone: true,
-     imports: [
-          CommonModule, FormsModule, LucideAngularModule,
-          ZonesComponent, FaresComponent, ParametersComponent
-     ],
-     template: `
+  selector: 'app-config',
+  standalone: true,
+  imports: [
+    CommonModule, FormsModule, LucideAngularModule,
+    ZonesComponent, FaresComponent, ParametersComponent
+  ],
+  template: `
     <div class="space-y-6">
       <div>
         <h1 class="text-2xl font-bold text-gray-800">Configuración</h1>
@@ -131,9 +135,14 @@ interface TabItem {
                             <input
                               type="email"
                               [(ngModel)]="orgForm.email"
-                              class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all"
+                              (blur)="onOrgEmailBlur()"
+                              class="w-full pl-11 pr-4 py-2.5 border rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all"
+                              [ngClass]="orgEmailError ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                               placeholder="ejemplo&#64;jass.com">
                           </div>
+                          @if (orgEmailError) {
+                            <p class="mt-1 text-xs text-red-500">{{ orgEmailError }}</p>
+                          }
                         </div>
                         <div>
                           <label class="block text-sm font-semibold text-gray-800 mb-1.5">Teléfono</label>
@@ -146,9 +155,13 @@ interface TabItem {
                               [(ngModel)]="orgForm.phone"
                               maxlength="9"
                               (input)="onOrgPhoneInput($event)"
-                              class="w-full pl-11 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all font-mono"
+                              class="w-full pl-11 pr-4 py-2.5 border rounded-xl bg-gray-50/80 focus:bg-white focus:ring-2 focus:ring-gray-300 focus:border-gray-400 text-sm placeholder:text-gray-300 transition-all font-mono"
+                              [ngClass]="orgPhoneError ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                               placeholder="987654321">
                           </div>
+                          @if (orgPhoneError) {
+                            <p class="mt-1 text-xs text-red-500">{{ orgPhoneError }}</p>
+                          }
                         </div>
                       </div>
 
@@ -241,174 +254,188 @@ interface TabItem {
   `
 })
 export class ConfigComponent implements OnInit {
-     private http = inject(HttpClient);
-     private alertService = inject(AlertService);
-     private authService = inject(AuthService);
-     private ubigeoService = inject(UbigeoService);
+  private http = inject(HttpClient);
+  private alertService = inject(AlertService);
+  private authService = inject(AuthService);
+  private ubigeoService = inject(UbigeoService);
 
-     activeTab = signal<ConfigTab>('organization');
-     orgLoading = signal(false);
-     orgSaving = signal(false);
+  activeTab = signal<ConfigTab>('organization');
+  orgLoading = signal(false);
+  orgSaving = signal(false);
 
-     departments = signal<string[]>([]);
-     provinces = signal<string[]>([]);
-     districts = signal<string[]>([]);
+  departments = signal<string[]>([]);
+  provinces = signal<string[]>([]);
+  districts = signal<string[]>([]);
 
-     orgForm = {
-          organizationName: '',
-          email: '',
-          phone: '',
-          address: '',
-          department: '',
-          province: '',
-          district: '',
-          logoUrl: ''
-     };
+  orgForm = {
+    organizationName: '',
+    email: '',
+    phone: '',
+    address: '',
+    department: '',
+    province: '',
+    district: '',
+    logoUrl: ''
+  };
 
-     // Icons
-     buildingIcon = Building2;
-     mapPinIcon = MapPin;
-     mapIcon = MapIcon;
-     uploadIcon = Upload;
-     closeIcon = X;
-     saveIcon = Save;
-     loaderIcon = Loader2;
-     mailIcon = Mail;
-     phoneIcon = Phone;
+  // Icons
+  buildingIcon = Building2;
+  mapPinIcon = MapPin;
+  mapIcon = MapIcon;
+  uploadIcon = Upload;
+  closeIcon = X;
+  saveIcon = Save;
+  loaderIcon = Loader2;
+  mailIcon = Mail;
+  phoneIcon = Phone;
 
-     tabs: TabItem[] = [
-          { key: 'organization', label: 'Organización', icon: Building2, color: 'blue', bgActive: 'bg-blue-50', textActive: 'text-blue-700' },
-          { key: 'zones', label: 'Zonas y Calles', icon: MapPin, color: 'indigo', bgActive: 'bg-indigo-50', textActive: 'text-indigo-700' },
-          { key: 'fares', label: 'Tarifas', icon: DollarSign, color: 'emerald', bgActive: 'bg-emerald-50', textActive: 'text-emerald-700' },
-          { key: 'parameters', label: 'Parámetros', icon: Settings, color: 'amber', bgActive: 'bg-amber-50', textActive: 'text-amber-700' }
-     ];
+  tabs: TabItem[] = [
+    { key: 'organization', label: 'Organización', icon: Building2, color: 'blue', bgActive: 'bg-blue-50', textActive: 'text-blue-700' },
+    { key: 'zones', label: 'Zonas y Calles', icon: MapPin, color: 'indigo', bgActive: 'bg-indigo-50', textActive: 'text-indigo-700' },
+    { key: 'fares', label: 'Tarifas', icon: DollarSign, color: 'emerald', bgActive: 'bg-emerald-50', textActive: 'text-emerald-700' },
+    { key: 'parameters', label: 'Parámetros', icon: Settings, color: 'amber', bgActive: 'bg-amber-50', textActive: 'text-amber-700' }
+  ];
 
-     private get headers() {
-          return { 'X-User-Id': this.authService.userId() || '', 'Content-Type': 'application/json' };
-     }
+  private get headers() {
+    return { 'X-User-Id': this.authService.userId() || '', 'Content-Type': 'application/json' };
+  }
 
-     ngOnInit(): void {
-          this.loadOrganization();
-          this.ubigeoService.ensureDataLoaded().subscribe(() => {
-               this.departments.set(this.ubigeoService.getDepartments());
-          });
-     }
+  ngOnInit(): void {
+    this.loadOrganization();
+    this.ubigeoService.ensureDataLoaded().subscribe(() => {
+      this.departments.set(this.ubigeoService.getDepartments());
+    });
+  }
 
-     loadOrganization(): void {
-          const orgId = this.authService.organizationId();
-          if (!orgId) return;
-          this.orgLoading.set(true);
-          this.http.get<ApiResponse<Organization>>(`${environment.apiUrl}/organizations/${orgId}`).subscribe({
-               next: res => {
-                    const org = res.data;
-                    this.orgForm = {
-                         organizationName: org.organizationName || org.name || '',
-                         email: org.email || '',
-                         phone: org.phone || '',
-                         address: org.address || '',
-                         department: org.department || '',
-                         province: org.province || '',
-                         district: org.district || '',
-                         logoUrl: org.logoUrl || org.logo_url || org.logo || ''
-                    };
-                    // Populate ubigeo dropdowns
-                    if (org.department) {
-                         this.provinces.set(this.ubigeoService.getProvinces(org.department));
-                         if (org.province) {
-                              this.districts.set(this.ubigeoService.getDistricts(org.department, org.province));
-                         }
-                    }
-                    this.orgLoading.set(false);
-               },
-               error: () => {
-                    this.orgLoading.set(false);
-                    this.alertService.error('Error', 'No se pudo cargar la organización');
-               }
-          });
-     }
-
-     onDepartmentChange(): void {
-          this.orgForm.province = '';
-          this.orgForm.district = '';
-          this.districts.set([]);
-          if (this.orgForm.department) {
-               this.provinces.set(this.ubigeoService.getProvinces(this.orgForm.department));
-          } else {
-               this.provinces.set([]);
+  loadOrganization(): void {
+    const orgId = this.authService.organizationId();
+    if (!orgId) return;
+    this.orgLoading.set(true);
+    this.http.get<ApiResponse<Organization>>(`${environment.apiUrl}/organizations/${orgId}`).subscribe({
+      next: res => {
+        const org = res.data;
+        this.orgForm = {
+          organizationName: org.organizationName || org.name || '',
+          email: org.email || '',
+          phone: org.phone || '',
+          address: org.address || '',
+          department: org.department || '',
+          province: org.province || '',
+          district: org.district || '',
+          logoUrl: org.logoUrl || org.logo_url || org.logo || ''
+        };
+        // Populate ubigeo dropdowns
+        if (org.department) {
+          this.provinces.set(this.ubigeoService.getProvinces(org.department));
+          if (org.province) {
+            this.districts.set(this.ubigeoService.getDistricts(org.department, org.province));
           }
-     }
+        }
+        this.orgLoading.set(false);
+      },
+      error: () => {
+        this.orgLoading.set(false);
+        this.alertService.error('Error', 'No se pudo cargar la organización');
+      }
+    });
+  }
 
-     onProvinceChange(): void {
-          this.orgForm.district = '';
-          if (this.orgForm.department && this.orgForm.province) {
-               this.districts.set(this.ubigeoService.getDistricts(this.orgForm.department, this.orgForm.province));
-          } else {
-               this.districts.set([]);
-          }
-     }
+  onDepartmentChange(): void {
+    this.orgForm.province = '';
+    this.orgForm.district = '';
+    this.districts.set([]);
+    if (this.orgForm.department) {
+      this.provinces.set(this.ubigeoService.getProvinces(this.orgForm.department));
+    } else {
+      this.provinces.set([]);
+    }
+  }
 
-     onLogoSelected(event: Event): void {
-          const input = event.target as HTMLInputElement;
-          if (input.files && input.files[0]) {
-               const file = input.files[0];
-               if (file.size > 5 * 1024 * 1024) {
-                    this.alertService.warning('Archivo muy grande', 'El logo no debe superar los 5MB');
-                    return;
-               }
-               const reader = new FileReader();
-               reader.onload = (e) => {
-                    this.orgForm.logoUrl = e.target?.result as string;
-               };
-               reader.readAsDataURL(file);
-          }
-     }
+  onProvinceChange(): void {
+    this.orgForm.district = '';
+    if (this.orgForm.department && this.orgForm.province) {
+      this.districts.set(this.ubigeoService.getDistricts(this.orgForm.department, this.orgForm.province));
+    } else {
+      this.districts.set([]);
+    }
+  }
 
-     removeLogo(event: Event): void {
-          event.stopPropagation();
-          this.orgForm.logoUrl = '';
-     }
+  onLogoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        this.alertService.warning('Archivo muy grande', 'El logo no debe superar los 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.orgForm.logoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 
-     onOrgPhoneInput(event: Event): void {
-          const input = event.target as HTMLInputElement;
-          input.value = input.value.replace(/[^0-9]/g, '').slice(0, 9);
-          this.orgForm.phone = input.value;
-     }
+  removeLogo(event: Event): void {
+    event.stopPropagation();
+    this.orgForm.logoUrl = '';
+  }
 
-     saveOrganization(): void {
-          if (!this.orgForm.organizationName.trim()) {
-               this.alertService.warning('Campo requerido', 'El nombre de la organización es obligatorio');
-               return;
-          }
-          const orgId = this.authService.organizationId();
-          if (!orgId) return;
+  onOrgPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizePhone(input.value);
+    this.orgForm.phone = input.value;
+    this.orgPhoneError = this.orgForm.phone.length > 0 ? sharedValidatePhone(this.orgForm.phone) : '';
+  }
 
-          this.orgSaving.set(true);
-          this.http.put<ApiResponse<Organization>>(
-               `${environment.apiUrl}/organizations/${orgId}`,
-               {
-                    organizationName: this.orgForm.organizationName.trim(),
-                    email: this.orgForm.email.trim() || undefined,
-                    phone: this.orgForm.phone.trim() || undefined,
-                    address: this.orgForm.address.trim() || undefined,
-                    department: this.orgForm.department || undefined,
-                    province: this.orgForm.province || undefined,
-                    district: this.orgForm.district || undefined,
-                    logo: this.orgForm.logoUrl || undefined
-               },
-               { headers: this.headers }
-          ).subscribe({
-               next: (res) => {
-                    this.orgSaving.set(false);
-                    this.alertService.success('Guardado', 'Datos de la organización actualizados');
-                    // Update sidebar org name in real-time
-                    if (res.data) {
-                         this.authService.setOrganization(res.data);
-                    }
-               },
-               error: () => {
-                    this.orgSaving.set(false);
-                    this.alertService.error('Error', 'No se pudo guardar los cambios');
-               }
-          });
-     }
+  orgEmailError = '';
+  orgPhoneError = '';
+
+  onOrgEmailBlur(): void {
+    this.orgEmailError = sharedValidateEmail(this.orgForm.email);
+  }
+
+  saveOrganization(): void {
+    if (!this.orgForm.organizationName.trim()) {
+      this.alertService.warning('Campo requerido', 'El nombre de la organización es obligatorio');
+      return;
+    }
+    this.orgEmailError = sharedValidateEmail(this.orgForm.email);
+    this.orgPhoneError = this.orgForm.phone ? sharedValidatePhone(this.orgForm.phone) : '';
+    if (this.orgEmailError || this.orgPhoneError) {
+      this.alertService.warning('Datos inválidos', this.orgEmailError || this.orgPhoneError);
+      return;
+    }
+    const orgId = this.authService.organizationId();
+    if (!orgId) return;
+
+    this.orgSaving.set(true);
+    this.http.put<ApiResponse<Organization>>(
+      `${environment.apiUrl}/organizations/${orgId}`,
+      {
+        organizationName: this.orgForm.organizationName.trim(),
+        email: this.orgForm.email.trim() || undefined,
+        phone: this.orgForm.phone.trim() || undefined,
+        address: this.orgForm.address.trim() || undefined,
+        department: this.orgForm.department || undefined,
+        province: this.orgForm.province || undefined,
+        district: this.orgForm.district || undefined,
+        logo: this.orgForm.logoUrl || undefined
+      },
+      { headers: this.headers }
+    ).subscribe({
+      next: (res) => {
+        this.orgSaving.set(false);
+        this.alertService.success('Guardado', 'Datos de la organización actualizados');
+        // Update sidebar org name in real-time
+        if (res.data) {
+          this.authService.setOrganization(res.data);
+        }
+      },
+      error: () => {
+        this.orgSaving.set(false);
+        this.alertService.error('Error', 'No se pudo guardar los cambios');
+      }
+    });
+  }
 }

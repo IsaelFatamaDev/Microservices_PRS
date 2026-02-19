@@ -7,6 +7,10 @@ import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import { ApiResponse, User as UserModel } from '../../../core';
+import {
+  sanitizeName, sanitizePhone,
+  validatePhone as sharedValidatePhone
+} from '../../../core/validators/input-sanitizers';
 
 @Component({
   selector: 'app-admin-profile',
@@ -37,7 +41,8 @@ import { ApiResponse, User as UserModel } from '../../../core';
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombres</label>
               <input
                 type="text"
-                [(ngModel)]="form.firstName"
+                [ngModel]="form.firstName"
+                (ngModelChange)="form.firstName = onSanitizeName($event)"
                 name="firstName"
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
@@ -45,7 +50,8 @@ import { ApiResponse, User as UserModel } from '../../../core';
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Apellidos</label>
               <input
                 type="text"
-                [(ngModel)]="form.lastName"
+                [ngModel]="form.lastName"
+                (ngModelChange)="form.lastName = onSanitizeName($event)"
                 name="lastName"
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
@@ -124,17 +130,15 @@ export class AdminProfileComponent {
 
   phoneError = '';
 
+  onSanitizeName(value: string): string {
+    return sanitizeName(value);
+  }
+
   onPhoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^0-9]/g, '').slice(0, 9);
+    input.value = sanitizePhone(input.value);
     this.form.phone = input.value;
-    if (this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
-      this.phoneError = 'Debe comenzar con 9';
-    } else if (this.form.phone.length > 0 && this.form.phone.length !== 9) {
-      this.phoneError = 'Debe tener 9 dígitos';
-    } else {
-      this.phoneError = '';
-    }
+    this.phoneError = this.form.phone.length > 0 ? sharedValidatePhone(this.form.phone) : '';
   }
 
   userIcon = User;

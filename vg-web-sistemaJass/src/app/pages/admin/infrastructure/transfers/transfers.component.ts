@@ -16,6 +16,10 @@ import {
 } from '../../../../core';
 import { AlertService } from '../../../../core/services/alert.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import {
+  sanitizeName, sanitizeDocument, sanitizePhone,
+  validateEmail as sharedValidateEmail, validatePhone as sharedValidatePhone
+} from '../../../../core/validators/input-sanitizers';
 
 interface TransferRow extends WaterBoxTransfer {
   fromUserName?: string;
@@ -356,7 +360,8 @@ type TransferStep = 'idle' | 'selectOwner' | 'selectBox' | 'createUser' | 'confi
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label class="block text-xs font-medium text-gray-600 mb-1.5">Apellidos <span class="text-red-500">*</span></label>
-                      <input type="text" [(ngModel)]="newUser.lastName"
+                      <input type="text" [ngModel]="newUser.lastName"
+                        (ngModelChange)="newUser.lastName = onSanitizeName($event)"
                         class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 placeholder:text-gray-300"
                         [ngClass]="formErrors['lastName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                         placeholder="Ej: García López">
@@ -366,7 +371,8 @@ type TransferStep = 'idle' | 'selectOwner' | 'selectBox' | 'createUser' | 'confi
                     </div>
                     <div>
                       <label class="block text-xs font-medium text-gray-600 mb-1.5">Nombres <span class="text-red-500">*</span></label>
-                      <input type="text" [(ngModel)]="newUser.firstName"
+                      <input type="text" [ngModel]="newUser.firstName"
+                        (ngModelChange)="newUser.firstName = onSanitizeName($event)"
                         class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 placeholder:text-gray-300"
                         [ngClass]="formErrors['firstName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                         placeholder="Ej: Juan Carlos">
@@ -802,6 +808,10 @@ export class TransfersComponent implements OnInit {
     });
   }
 
+  onSanitizeName(value: string): string {
+    return sanitizeName(value);
+  }
+
   isNewUserValid(): boolean {
     this.validateForm();
     return Object.keys(this.formErrors).length === 0 && !!(
@@ -820,27 +830,30 @@ export class TransfersComponent implements OnInit {
       this.formErrors['documentNumber'] = 'El N° de documento es obligatorio';
     } else if (this.newUser.documentType === 'DNI' && this.newUser.documentNumber.length !== 8) {
       this.formErrors['documentNumber'] = 'El DNI debe tener exactamente 8 dígitos';
+    } else if (this.newUser.documentType === 'CNE' && (this.newUser.documentNumber.length < 1 || this.newUser.documentNumber.length > 20)) {
+      this.formErrors['documentNumber'] = 'El CNE debe tener entre 1 y 20 caracteres';
     }
     if (this.newUser.phone && this.newUser.phone.length > 0) {
-      if (!this.newUser.phone.startsWith('9')) this.formErrors['phone'] = 'Debe comenzar con 9';
-      else if (this.newUser.phone.length !== 9) this.formErrors['phone'] = 'Debe tener 9 dígitos';
+      const phoneErr = sharedValidatePhone(this.newUser.phone);
+      if (phoneErr) this.formErrors['phone'] = phoneErr;
     }
-    if (this.newUser.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.newUser.email)) {
-      this.formErrors['email'] = 'Ingrese un correo válido';
+    if (this.newUser.email) {
+      const emailErr = sharedValidateEmail(this.newUser.email);
+      if (emailErr) this.formErrors['email'] = emailErr;
     }
     if (!this.transferNotes?.trim()) this.formErrors['notes'] = 'El motivo es obligatorio';
   }
 
   onPhoneInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^0-9]/g, '').slice(0, 9);
+    input.value = sanitizePhone(input.value);
     this.newUser.phone = input.value;
     this.validateForm();
   }
 
   onDocumentInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/[^0-9]/g, '');
+    input.value = sanitizeDocument(input.value, this.newUser.documentType || 'DNI');
     this.newUser.documentNumber = input.value;
     this.validateForm();
   }
