@@ -360,8 +360,8 @@ type TransferStep = 'idle' | 'selectOwner' | 'selectBox' | 'createUser' | 'confi
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label class="block text-xs font-medium text-gray-600 mb-1.5">Apellidos <span class="text-red-500">*</span></label>
-                      <input type="text" [ngModel]="newUser.lastName"
-                        (ngModelChange)="newUser.lastName = onSanitizeName($event)"
+                      <input type="text" [(ngModel)]="newUser.lastName"
+                        (input)="onNameInput($event, 'lastName')"
                         class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 placeholder:text-gray-300"
                         [ngClass]="formErrors['lastName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                         placeholder="Ej: García López">
@@ -371,8 +371,8 @@ type TransferStep = 'idle' | 'selectOwner' | 'selectBox' | 'createUser' | 'confi
                     </div>
                     <div>
                       <label class="block text-xs font-medium text-gray-600 mb-1.5">Nombres <span class="text-red-500">*</span></label>
-                      <input type="text" [ngModel]="newUser.firstName"
-                        (ngModelChange)="newUser.firstName = onSanitizeName($event)"
+                      <input type="text" [(ngModel)]="newUser.firstName"
+                        (input)="onNameInput($event, 'firstName')"
                         class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-violet-300 focus:border-violet-400 placeholder:text-gray-300"
                         [ngClass]="formErrors['firstName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                         placeholder="Ej: Juan Carlos">
@@ -808,8 +808,11 @@ export class TransfersComponent implements OnInit {
     });
   }
 
-  onSanitizeName(value: string): string {
-    return sanitizeName(value);
+  onNameInput(event: Event, field: 'firstName' | 'lastName'): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizeName(input.value);
+    (this.newUser as any)[field] = input.value;
+    this.validateForm();
   }
 
   isNewUserValid(): boolean {
@@ -824,6 +827,10 @@ export class TransfersComponent implements OnInit {
 
   validateForm(): void {
     this.formErrors = {};
+    if (this.newUser.firstName) this.newUser.firstName = sanitizeName(this.newUser.firstName);
+    if (this.newUser.lastName) this.newUser.lastName = sanitizeName(this.newUser.lastName);
+    if (this.newUser.documentNumber) this.newUser.documentNumber = sanitizeDocument(this.newUser.documentNumber, this.newUser.documentType || 'DNI');
+    if (this.newUser.phone) this.newUser.phone = sanitizePhone(this.newUser.phone);
     if (!this.newUser.lastName?.trim()) this.formErrors['lastName'] = 'Los apellidos son obligatorios';
     if (!this.newUser.firstName?.trim()) this.formErrors['firstName'] = 'Los nombres son obligatorios';
     if (!this.newUser.documentNumber?.trim()) {

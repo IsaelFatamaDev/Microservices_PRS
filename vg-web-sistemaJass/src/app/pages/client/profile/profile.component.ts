@@ -6,8 +6,8 @@ import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
 import {
-  sanitizeName, sanitizePhone,
-  validateEmail as sharedValidateEmail, validatePhone as sharedValidatePhone
+     sanitizeName, sanitizePhone,
+     validateEmail as sharedValidateEmail, validatePhone as sharedValidatePhone
 } from '../../../core/validators/input-sanitizers';
 
 @Component({
@@ -69,8 +69,8 @@ import {
                                              <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
                                              <input
                                                   type="text"
-                                                  [ngModel]="formData.firstName"
-                                                  (ngModelChange)="formData.firstName = onSanitizeName($event)"
+                                                  [(ngModel)]="formData.firstName"
+                                                  (input)="onNameInput($event, 'firstName')"
                                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                   [ngClass]="firstNameError ? 'border-red-300 bg-red-50/30' : 'border-gray-300'"
                                                   placeholder="Ingresa tus nombres">
@@ -82,8 +82,8 @@ import {
                                              <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
                                              <input
                                                   type="text"
-                                                  [ngModel]="formData.lastName"
-                                                  (ngModelChange)="formData.lastName = onSanitizeName($event)"
+                                                  [(ngModel)]="formData.lastName"
+                                                  (input)="onNameInput($event, 'lastName')"
                                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                   [ngClass]="lastNameError ? 'border-red-300 bg-red-50/30' : 'border-gray-300'"
                                                   placeholder="Ingresa tus apellidos">
@@ -289,8 +289,10 @@ export class ClientProfileComponent implements OnInit {
      lastNameError = '';
      emailError = '';
 
-     onSanitizeName(value: string): string {
-          return sanitizeName(value);
+     onNameInput(event: Event, field: 'firstName' | 'lastName'): void {
+          const input = event.target as HTMLInputElement;
+          input.value = sanitizeName(input.value);
+          this.formData[field] = input.value;
      }
 
      onPhoneInput(event: Event): void {
@@ -343,6 +345,10 @@ export class ClientProfileComponent implements OnInit {
      }
 
      async updateProfile(): Promise<void> {
+          this.formData.firstName = sanitizeName(this.formData.firstName);
+          this.formData.lastName = sanitizeName(this.formData.lastName);
+          if (this.formData.phone) this.formData.phone = sanitizePhone(this.formData.phone);
+
           this.firstNameError = !this.formData.firstName?.trim() ? 'Nombres es obligatorio' : '';
           this.lastNameError = !this.formData.lastName?.trim() ? 'Apellidos es obligatorio' : '';
           this.emailError = sharedValidateEmail(this.formData.email);

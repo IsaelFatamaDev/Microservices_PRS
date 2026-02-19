@@ -41,8 +41,8 @@ import {
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombres</label>
               <input
                 type="text"
-                [ngModel]="form.firstName"
-                (ngModelChange)="form.firstName = onSanitizeName($event)"
+                [(ngModel)]="form.firstName"
+                (input)="onNameInput($event, 'firstName')"
                 name="firstName"
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
@@ -50,8 +50,8 @@ import {
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Apellidos</label>
               <input
                 type="text"
-                [ngModel]="form.lastName"
-                (ngModelChange)="form.lastName = onSanitizeName($event)"
+                [(ngModel)]="form.lastName"
+                (input)="onNameInput($event, 'lastName')"
                 name="lastName"
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
@@ -130,8 +130,10 @@ export class AdminProfileComponent {
 
   phoneError = '';
 
-  onSanitizeName(value: string): string {
-    return sanitizeName(value);
+  onNameInput(event: Event, field: 'firstName' | 'lastName'): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizeName(input.value);
+    this.form[field] = input.value;
   }
 
   onPhoneInput(event: Event): void {
@@ -149,6 +151,23 @@ export class AdminProfileComponent {
   loaderIcon = Loader2;
 
   updateProfile(): void {
+    this.form.firstName = sanitizeName(this.form.firstName);
+    this.form.lastName = sanitizeName(this.form.lastName);
+    if (this.form.phone) this.form.phone = sanitizePhone(this.form.phone);
+
+    if (!this.form.firstName.trim() || !this.form.lastName.trim()) {
+      this.alertService.warning('Campos requeridos', 'Nombres y apellidos son obligatorios');
+      return;
+    }
+    if (this.form.phone) {
+      const phoneErr = sharedValidatePhone(this.form.phone);
+      if (phoneErr) {
+        this.phoneError = phoneErr;
+        this.alertService.warning('Teléfono inválido', phoneErr);
+        return;
+      }
+    }
+
     this.isSubmitting.set(true);
     const userId = this.authService.userId();
 

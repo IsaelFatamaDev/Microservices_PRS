@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule, Building2, Users, Plus, Activity, Server, Database, Shield, Clock } from 'lucide-angular';
 import { environment } from '../../../../environments/environment';
-import { Organization, ApiResponse } from '../../../core';
+import { Organization, ApiResponse, User } from '../../../core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -173,8 +173,11 @@ export class SuperAdminDashboardComponent implements OnInit {
       next: res => this.organizationsCount.set(res.data.length)
     });
 
-    // In a real app we might have a separate endpoint for admin count,
-    // for now we'll leave it as 0 or implement a fetch if available.
-    // this.adminsCount.set(0);
+    this.http.get<ApiResponse<User[]>>(`${environment.apiUrl}/users/all`).subscribe({
+      next: res => {
+        const admins = (res.data || []).filter(u => u.role === 'ADMIN' && u.recordStatus === 'ACTIVE');
+        this.adminsCount.set(admins.length);
+      }
+    });
   }
 }

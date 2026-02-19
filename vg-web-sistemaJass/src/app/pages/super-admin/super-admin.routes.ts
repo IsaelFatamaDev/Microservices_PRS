@@ -14,8 +14,12 @@ export const SUPER_ADMIN_ROUTES: Routes = [
           loadComponent: () => import('./organizations/organization-form.component').then(m => m.OrganizationFormComponent)
      },
      {
-          path: 'organizations/:id',
+          path: 'organizations/:id/edit',
           loadComponent: () => import('./organizations/organization-form.component').then(m => m.OrganizationFormComponent)
+     },
+     {
+          path: 'organizations/:id',
+          loadComponent: () => import('./organizations/organization-detail.component').then(m => m.OrganizationDetailComponent)
      },
      {
           path: 'profile',

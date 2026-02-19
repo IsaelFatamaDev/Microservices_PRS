@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { LucideAngularModule, Plus, Search, Edit, Trash2, RotateCcw, Building2 } from 'lucide-angular';
+import { LucideAngularModule, Plus, Search, Edit, Trash2, RotateCcw, Building2, Eye } from 'lucide-angular';
 import { environment } from '../../../../environments/environment';
 import { Organization, ApiResponse, RecordStatus } from '../../../core';
 import { AlertService } from '../../../core/services/alert.service';
@@ -129,6 +129,11 @@ import { AuthService } from '../../../core/services/auth.service';
                       <div class="flex items-center justify-end gap-1">
                         <a [routerLink]="['/super-admin/organizations', org.id]"
                            class="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                           title="Ver detalle">
+                          <lucide-icon [img]="eyeIcon" [size]="18"></lucide-icon>
+                        </a>
+                        <a [routerLink]="['/super-admin/organizations', org.id, 'edit']"
+                           class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
                            title="Editar">
                           <lucide-icon [img]="editIcon" [size]="18"></lucide-icon>
                         </a>
@@ -211,6 +216,11 @@ import { AuthService } from '../../../core/services/auth.service';
 
                 <div class="flex items-center justify-end gap-2 pt-2">
                   <a [routerLink]="['/super-admin/organizations', org.id]"
+                     class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-xl font-bold text-sm hover:bg-blue-100 transition-colors">
+                    <lucide-icon [img]="eyeIcon" [size]="16"></lucide-icon>
+                    Ver
+                  </a>
+                  <a [routerLink]="['/super-admin/organizations', org.id, 'edit']"
                      class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors">
                     <lucide-icon [img]="editIcon" [size]="16"></lucide-icon>
                     Editar
@@ -259,6 +269,7 @@ export class OrganizationsListComponent implements OnInit {
   trashIcon = Trash2;
   restoreIcon = RotateCcw;
   buildingIcon = Building2;
+  eyeIcon = Eye;
 
   ngOnInit(): void {
     this.loadOrganizations();

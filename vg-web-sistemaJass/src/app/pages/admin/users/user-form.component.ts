@@ -101,8 +101,8 @@ import {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Apellidos <span class="text-red-500">*</span></label>
-              <input type="text" [ngModel]="form.lastName" name="lastName" required
-                (ngModelChange)="onSanitizeName('lastName', $event)"
+              <input type="text" [(ngModel)]="form.lastName" name="lastName" required
+                (input)="onNameInput($event, 'lastName')"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all"
                 [ngClass]="fieldErrors()['lastName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                 placeholder="Pérez García">
@@ -112,8 +112,8 @@ import {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Nombres <span class="text-red-500">*</span></label>
-              <input type="text" [ngModel]="form.firstName" name="firstName" required
-                (ngModelChange)="onSanitizeName('firstName', $event)"
+              <input type="text" [(ngModel)]="form.firstName" name="firstName" required
+                (input)="onNameInput($event, 'firstName')"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all"
                 [ngClass]="fieldErrors()['firstName'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
                 placeholder="Juan Carlos">
@@ -132,8 +132,8 @@ import {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">N° Documento <span class="text-red-500">*</span></label>
-              <input type="text" [ngModel]="form.documentNumber" name="documentNumber" required
-                (ngModelChange)="onSanitizeDocument($event)" (blur)="checkDuplicate('documentNumber')"
+              <input type="text" [(ngModel)]="form.documentNumber" name="documentNumber" required
+                (input)="onDocumentInput($event)" (blur)="checkDuplicate('documentNumber')"
                 [maxlength]="form.documentType === 'DNI' ? 8 : 20"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all font-mono"
                 [ngClass]="fieldErrors()['documentNumber'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
@@ -160,9 +160,9 @@ import {
                   <span class="text-red-500">*</span>
                 }
               </label>
-              <input type="text" [ngModel]="form.phone" name="phone"
+              <input type="text" [(ngModel)]="form.phone" name="phone"
                 [required]="selectedRole === 'OPERATOR'"
-                (ngModelChange)="onSanitizePhone($event)" (blur)="checkDuplicate('phone')"
+                (input)="onPhoneInput($event)" (blur)="checkDuplicate('phone')"
                 maxlength="9"
                 class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-gray-300 focus:border-gray-400 placeholder:text-gray-300 transition-all font-mono"
                 [ngClass]="fieldErrors()['phone'] ? 'border-red-300 bg-red-50/30' : 'border-gray-200'"
@@ -472,25 +472,36 @@ export class UserFormComponent implements OnInit {
       this.alertService.warning('Datos inválidos', Object.values(currentErrors)[0]);
       return;
     }
-    if (!this.form.firstName || !this.form.lastName || !this.form.documentNumber) {
+    this.form.firstName = sanitizeName(this.form.firstName);
+    this.form.lastName = sanitizeName(this.form.lastName);
+    this.form.documentNumber = sanitizeDocument(this.form.documentNumber, this.form.documentType);
+    if (this.form.phone) this.form.phone = sanitizePhone(this.form.phone);
+
+    if (!this.form.firstName.trim() || !this.form.lastName.trim() || !this.form.documentNumber.trim()) {
       this.alertService.warning('Campos requeridos', 'Complete apellidos, nombres y N° de documento');
       return;
     }
-    if (this.form.documentType === 'DNI' && this.form.documentNumber.length !== 8) {
+    if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/.test(this.form.firstName) || /[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/.test(this.form.lastName)) {
+      this.alertService.warning('Nombre inválido', 'Los nombres y apellidos solo pueden contener letras');
+      return;
+    }
+    if (this.form.documentType === 'DNI' && (!/^\d+$/.test(this.form.documentNumber) || this.form.documentNumber.length !== 8)) {
       this.alertService.warning('Documento inválido', 'El DNI debe tener exactamente 8 dígitos numéricos');
       return;
     }
-    if (this.form.phone && this.form.phone.length > 0 && !this.form.phone.startsWith('9')) {
-      this.alertService.warning('Teléfono inválido', 'El número debe comenzar con 9');
-      return;
+    if (this.form.phone && this.form.phone.length > 0) {
+      const phoneErr = sharedValidatePhone(this.form.phone);
+      if (phoneErr) {
+        this.alertService.warning('Teléfono inválido', phoneErr);
+        return;
+      }
     }
-    if (this.form.phone && this.form.phone.length > 0 && this.form.phone.length !== 9) {
-      this.alertService.warning('Teléfono inválido', 'El número debe tener 9 dígitos');
-      return;
-    }
-    if (this.form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.form.email)) {
-      this.alertService.warning('Email inválido', 'Ingrese un correo electrónico válido');
-      return;
+    if (this.form.email) {
+      const emailErr = sharedValidateEmail(this.form.email);
+      if (emailErr) {
+        this.alertService.warning('Email inválido', emailErr);
+        return;
+      }
     }
     if (this.selectedRole === 'OPERATOR' && (!this.form.email || !this.form.phone)) {
       this.alertService.warning('Campos requeridos', 'Para operadores el email y teléfono son obligatorios');
@@ -544,12 +555,16 @@ export class UserFormComponent implements OnInit {
     this.router.navigate(['/admin/users']);
   }
 
-  onSanitizeName(field: 'firstName' | 'lastName', value: string): void {
-    this.form[field] = sanitizeName(value);
+  onNameInput(event: Event, field: 'firstName' | 'lastName'): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizeName(input.value);
+    this.form[field] = input.value;
   }
 
-  onSanitizeDocument(value: string): void {
-    this.form.documentNumber = sanitizeDocument(value, this.form.documentType);
+  onDocumentInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizeDocument(input.value, this.form.documentType);
+    this.form.documentNumber = input.value;
     this.clearFieldError('documentNumber');
   }
 
@@ -558,8 +573,10 @@ export class UserFormComponent implements OnInit {
     this.clearFieldError('documentNumber');
   }
 
-  onSanitizePhone(value: string): void {
-    this.form.phone = sanitizePhone(value);
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizePhone(input.value);
+    this.form.phone = input.value;
     const err = sharedValidatePhone(this.form.phone, false);
     if (err && this.form.phone.length > 0) {
       this.setFieldError('phone', err);

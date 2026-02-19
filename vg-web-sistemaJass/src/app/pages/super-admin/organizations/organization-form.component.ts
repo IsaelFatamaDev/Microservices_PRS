@@ -9,6 +9,7 @@ import { Organization, ApiResponse } from '../../../core';
 import { AlertService } from '../../../core/services/alert.service';
 import { UbigeoService } from '../../../core/services/ubigeo.service';
 import { CustomValidators } from '../../../core/validators/custom-validators';
+import { sanitizeName, sanitizePhone } from '../../../core/validators/input-sanitizers';
 import { switchMap } from 'rxjs/operators';
 
 @Component({
@@ -32,7 +33,7 @@ import { switchMap } from 'rxjs/operators';
           <div class="relative">
             <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-100 rounded-full -z-10"></div>
             <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-blue-600 rounded-full transition-all duration-500 -z-10" [style.width]="currentStep() === 1 ? '50%' : '100%'"></div>
-            
+
             <div class="flex justify-between w-full">
               <div class="flex flex-col items-center gap-3 cursor-pointer" (click)="currentStep() === 2 ? prevStep() : null">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 shadow-md border-4"
@@ -69,7 +70,7 @@ import { switchMap } from 'rxjs/operators';
                 <div class="w-full aspect-square max-w-[280px] relative rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 hover:border-blue-400 transition-all group overflow-hidden"
                      (click)="fileInput.click()">
                   <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/*" class="hidden">
-                  
+
                   @if (logoPreview()) {
                     <img [src]="logoPreview()" alt="Logo preview" class="w-full h-full object-contain p-4">
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
@@ -95,8 +96,8 @@ import { switchMap } from 'rxjs/operators';
                     <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
                       <lucide-icon [img]="buildingIcon" [size]="18"></lucide-icon>
                     </div>
-                    <input formControlName="organizationName" type="text" 
-                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                    <input formControlName="organizationName" type="text"
+                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                            placeholder="Ej. JASS San Pedro del Valle">
                   </div>
                   @if (orgForm.get('organizationName')?.touched && orgForm.get('organizationName')?.invalid) {
@@ -112,8 +113,8 @@ import { switchMap } from 'rxjs/operators';
                     <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
                       <lucide-icon [img]="mailIcon" [size]="18"></lucide-icon>
                     </div>
-                    <input formControlName="email" type="email" 
-                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                    <input formControlName="email" type="email"
+                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                            placeholder="ejemplo@jass.com">
                   </div>
                 </div>
@@ -125,7 +126,7 @@ import { switchMap } from 'rxjs/operators';
                       <lucide-icon [img]="phoneIcon" [size]="18"></lucide-icon>
                     </div>
                     <input formControlName="phone" type="text" maxlength="9" (input)="onPhoneInput($event)"
-                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                            placeholder="987654321">
                   </div>
                 </div>
@@ -136,8 +137,8 @@ import { switchMap } from 'rxjs/operators';
                     <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
                       <lucide-icon [img]="mapPinIcon" [size]="18"></lucide-icon>
                     </div>
-                    <input formControlName="address" type="text" 
-                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                    <input formControlName="address" type="text"
+                           class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                            placeholder="Av. Principal S/N, Sector 2">
                   </div>
                 </div>
@@ -147,9 +148,9 @@ import { switchMap } from 'rxjs/operators';
                     <lucide-icon [img]="mapPinIcon" [size]="16" class="text-gray-400"></lucide-icon>
                     <span class="text-xs font-bold text-gray-500 uppercase">Ubicación Geográfica</span>
                   </div>
-                  
+
                   <div>
-                    <select formControlName="department" (change)="onDepartmentChange()" 
+                    <select formControlName="department" (change)="onDepartmentChange()"
                             class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-700 text-sm font-medium">
                       <option value="">Departamento</option>
                       @for (dep of departments(); track dep) {
@@ -159,7 +160,7 @@ import { switchMap } from 'rxjs/operators';
                   </div>
 
                   <div>
-                    <select formControlName="province" (change)="onProvinceChange()" 
+                    <select formControlName="province" (change)="onProvinceChange()"
                             class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-700 text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400"
                             [disabled]="!orgForm.get('department')?.value">
                       <option value="">Provincia</option>
@@ -170,7 +171,7 @@ import { switchMap } from 'rxjs/operators';
                   </div>
 
                   <div>
-                    <select formControlName="district" 
+                    <select formControlName="district"
                             class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-gray-700 text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400"
                             [disabled]="!orgForm.get('province')?.value">
                       <option value="">Distrito</option>
@@ -215,7 +216,7 @@ import { switchMap } from 'rxjs/operators';
                     <lucide-icon [img]="fileTextIcon" [size]="18"></lucide-icon>
                   </div>
                   <input formControlName="documentNumber" type="text" (input)="onDocumentInput($event)"
-                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                          [placeholder]="adminForm.get('documentType')?.value === 'DNI' ? '8 dígitos' : 'Número de documento'"
                          [maxlength]="adminForm.get('documentType')?.value === 'DNI' ? 8 : 20">
                 </div>
@@ -227,8 +228,8 @@ import { switchMap } from 'rxjs/operators';
                   <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
                     <lucide-icon [img]="userIcon" [size]="18"></lucide-icon>
                   </div>
-                  <input formControlName="firstName" type="text" 
-                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                  <input formControlName="firstName" type="text" (input)="onNameInput($event, 'firstName')"
+                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                          placeholder="Ingresar nombres">
                 </div>
               </div>
@@ -239,8 +240,8 @@ import { switchMap } from 'rxjs/operators';
                   <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
                     <lucide-icon [img]="userIcon" [size]="18"></lucide-icon>
                   </div>
-                  <input formControlName="lastName" type="text" 
-                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                  <input formControlName="lastName" type="text" (input)="onNameInput($event, 'lastName')"
+                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                          placeholder="Ingresar apellidos">
                 </div>
               </div>
@@ -251,8 +252,8 @@ import { switchMap } from 'rxjs/operators';
                   <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
                     <lucide-icon [img]="mailIcon" [size]="18"></lucide-icon>
                   </div>
-                  <input formControlName="email" type="email" 
-                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                  <input formControlName="email" type="email"
+                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                          placeholder="admin@personal.com">
                 </div>
               </div>
@@ -264,7 +265,7 @@ import { switchMap } from 'rxjs/operators';
                     <lucide-icon [img]="phoneIcon" [size]="18"></lucide-icon>
                   </div>
                   <input formControlName="phone" type="text" maxlength="9" (input)="onPhoneInput($event)"
-                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900" 
+                         class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none placeholder:text-gray-300 font-medium text-gray-900"
                          placeholder="987654321">
                 </div>
               </div>
@@ -278,7 +279,7 @@ import { switchMap } from 'rxjs/operators';
               <lucide-icon [img]="backIcon" [size]="18"></lucide-icon> Atrás
             </button>
           } @else {
-             <div></div> 
+             <div></div>
           }
 
           <div class="flex gap-4">
@@ -287,7 +288,7 @@ import { switchMap } from 'rxjs/operators';
             </a>
 
             @if (!isEditMode() && currentStep() === 1) {
-              <button type="button" (click)="nextStep()" 
+              <button type="button" (click)="nextStep()"
                       [disabled]="orgForm.invalid"
                       class="inline-flex items-center gap-2 px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-black disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-all font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5">
                 Siguiente
@@ -397,16 +398,22 @@ export class OrganizationFormComponent implements OnInit {
     const type = this.adminForm.get('documentType')?.value;
 
     if (type === 'DNI') {
-      // Allow only numbers
       input.value = input.value.replace(/[^0-9]/g, '');
       this.adminForm.get('documentNumber')?.setValue(input.value);
     }
   }
 
+  onNameInput(event: Event, field: 'firstName' | 'lastName') {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizeName(input.value);
+    this.adminForm.get(field)?.setValue(input.value);
+  }
+
   onPhoneInput(event: Event) {
     const input = event.target as HTMLInputElement;
     input.value = input.value.replace(/[^0-9]/g, '');
-    this.orgForm.get('phone')?.setValue(input.value); // Ensure this updates the correct form based on usage
+    const formGroup = this.currentStep() === 2 ? this.adminForm : this.orgForm;
+    formGroup.get('phone')?.setValue(input.value);
   }
 
   onDepartmentChange() {
