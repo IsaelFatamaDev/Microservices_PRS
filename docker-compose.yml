@@ -1,45 +1,4 @@
 services:
-  # ─── CAPA 1: INFRAESTRUCTURA ─────────────────────────────────────────────────
-  # Se levantan primero. Los microservicios no arrancan hasta que todos estén healthy.
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: jass-postgres
-    mem_limit: 300m
-    environment:
-      POSTGRES_DB: sistemajass
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: SistemaJass12
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks: [ jass-net ]
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d sistemajass" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-
-  mongo:
-    image: mongo:7
-    container_name: jass-mongo
-    mem_limit: 300m
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks: [ jass-net ]
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
-      interval: 10s
-      timeout: 5s
-      retries: 8
-      start_period: 20s
-
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: jass-rabbitmq
@@ -70,28 +29,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0.3
-    container_name: jass-keycloak
-    mem_limit: 512m
-    command: start-dev
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_HTTP_PORT: 8080
-    ports:
-      - "8180:8080"
-    volumes:
-      - keycloak_data:/opt/keycloak/data
-    networks: [ jass-net ]
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -sf http://localhost:8080/health/ready || exit 1" ]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 60s
 
   evolution-apis:
     image: atendai/evolution-api:v1.8.4
@@ -127,15 +64,13 @@ services:
         condition: service_healthy
 
   # ─── CAPA 2: MICROSERVICIOS ───────────────────────────────────────────────────
-  # Arrancan solo cuando TODA la infraestructura está healthy.
-
   vg-ms-organizations:
     image: isaelfatamadev/prs_microservices-vg-ms-organizations:latest
     container_name: vg-ms-organizations
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      MONGODB_URI: mongodb://mongo:27017/JASS_DIGITAL
+      MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: admin
@@ -148,17 +83,15 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      mongo:
-        condition: service_healthy
 
   vg-ms-users:
     image: isaelfatamadev/prs_microservices-vg-ms-users:latest
     container_name: vg-ms-users
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: postgres
-      DB_PORT: "5432"
+      DB_HOST: "144.126.140.79"
+      DB_PORT: "5410"
       DB_NAME: sistemajass
       DB_USER: postgres
       DB_PASSWORD: SistemaJass12
@@ -171,16 +104,14 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
 
   vg-ms-notifications:
     image: isaelfatamadev/prs_microservices-vg-ms-notifications:latest
     container_name: vg-ms-notifications
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      MONGODB_URI: mongodb://mongo:27017/JASS_DIGITAL
+      MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: admin
@@ -195,18 +126,16 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      mongo:
-        condition: service_healthy
       evolution-apis:
         condition: service_started
 
   vg-ms-authentication:
     image: isaelfatamadev/prs_microservices-vg-ms-authentication:latest
     container_name: vg-ms-authentication
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_URL: "https://lab.vallegrande.edu.pe/jass/keycloak"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: admin
@@ -219,18 +148,16 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      keycloak:
-        condition: service_healthy
       vg-ms-users:
         condition: service_started
 
   vg-ms-distribution:
     image: isaelfatamadev/prs_microservices-vg-ms-distribution:latest
     container_name: vg-ms-distribution
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      MONGODB_URI: mongodb://mongo:27017/JASS_DIGITAL
+      MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: admin
@@ -238,24 +165,18 @@ services:
     networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
 
   vg-ms-claims:
     image: isaelfatamadev/prs_microservices-vg-ms-claims:latest
     container_name: vg-ms-claims
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      MONGODB_URI: mongodb://mongo:27017/JASS_DIGITAL
+      MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: admin
@@ -265,28 +186,22 @@ services:
     networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
 
   vg-ms-infrastructure:
     image: isaelfatamadev/prs_microservices-vg-ms-infrastructure:latest
     container_name: vg-ms-infrastructure
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DATABASE_URL: r2dbc:postgresql://postgres:5432/sistemajass
-      DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/sistemajass
+      DATABASE_URL: "r2dbc:postgresql://144.126.140.79:5410/sistemajass"
+      DATABASE_JDBC_URL: "jdbc:postgresql://144.126.140.79:5410/sistemajass"
       DATABASE_USER: postgres
       DATABASE_PASSWORD: SistemaJass12
-      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/sistemajass
+      SPRING_FLYWAY_URL: "jdbc:postgresql://144.126.140.79:5410/sistemajass"
       SPRING_FLYWAY_USER: postgres
       SPRING_FLYWAY_PASSWORD: SistemaJass12
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
@@ -299,25 +214,19 @@ services:
     networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
 
   vg-ms-commercial:
     image: isaelfatamadev/prs_microservices-vg-ms-commercial:latest
     container_name: vg-ms-commercial
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: postgres
-      DB_PORT: "5432"
+      DB_HOST: "144.126.140.79"
+      DB_PORT: "5410"
       DB_NAME: sistemajass
       DB_USER: postgres
       DB_PASSWORD: SistemaJass12
@@ -328,28 +237,22 @@ services:
     networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
 
   vg-ms-inventory-purchases:
     image: isaelfatamadev/prs_microservices-vg-ms-inventory-purchases:latest
     container_name: vg-ms-inventory-purchases
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DATABASE_URL: r2dbc:postgresql://postgres:5432/sistemajass
-      DATABASE_JDBC_URL: jdbc:postgresql://postgres:5432/sistemajass
+      DATABASE_URL: "r2dbc:postgresql://144.126.140.79:5410/sistemajass"
+      DATABASE_JDBC_URL: "jdbc:postgresql://144.126.140.79:5410/sistemajass"
       DATABASE_USER: postgres
       DATABASE_PASSWORD: SistemaJass12
-      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/sistemajass
+      SPRING_FLYWAY_URL: "jdbc:postgresql://144.126.140.79:5410/sistemajass"
       SPRING_FLYWAY_USER: postgres
       SPRING_FLYWAY_PASSWORD: SistemaJass12
       SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
@@ -360,24 +263,18 @@ services:
     networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
 
   vg-ms-water-quality:
     image: isaelfatamadev/prs_microservices-vg-ms-water-quality:latest
     container_name: vg-ms-water-quality
-    mem_limit: 350m
+    mem_limit: 5000m
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      MONGODB_URI: mongodb://mongo:27017/JASS_DIGITAL
+      MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USERNAME: admin
@@ -385,35 +282,27 @@ services:
     networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongo:
-        condition: service_healthy
       rabbitmq:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      keycloak:
         condition: service_healthy
 
   vg-ms-gateway:
     image: isaelfatamadev/prs_microservices-vg-ms-gateway:latest
     container_name: vg-ms-gateway
-    mem_limit: 350m
+    mem_limit: 5000m
     ports:
       - "9095:9095"
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/sistema-jass
-      KEYCLOAK_JWK_URI: http://keycloak:8080/realms/sistema-jass/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER_URI: "https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass"
+      KEYCLOAK_JWK_URI: "https://lab.vallegrande.edu.pe/jass/keycloak/realms/sistema-jass/protocol/openid-connect/certs"
       REDIS_HOST: redis
       REDIS_PORT: 6379
       CORS_ALLOWED_ORIGINS: http://localhost:4200
     networks: [ jass-net ]
     restart: unless-stopped
     depends_on:
-      keycloak:
-        condition: service_healthy
       redis:
         condition: service_healthy
       vg-ms-authentication:
@@ -445,6 +334,3 @@ volumes:
   rabbitmq_data:
   evolution_data:
   evolution_store:
-  postgres_data:
-  mongo_data:
-  keycloak_data:
