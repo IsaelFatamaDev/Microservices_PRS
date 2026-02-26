@@ -4,25 +4,25 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import {
-     LucideAngularModule, ArrowLeft, Building2, Mail, Phone, MapPin,
-     User, UserPlus, Edit, Trash2, RotateCcw, Shield, Calendar, Hash,
-     FileText, Save, Loader2, X, Eye, EyeOff
+  LucideAngularModule, ArrowLeft, Building2, Mail, Phone, MapPin,
+  User, UserPlus, Edit, Trash2, RotateCcw, Shield, Calendar, Hash,
+  FileText, Save, Loader2, X, Eye, EyeOff
 } from 'lucide-angular';
 import { environment } from '../../../../environments/environment';
 import { Organization, ApiResponse, User as UserModel } from '../../../core';
 import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import {
-     sanitizeName, sanitizeDocument, sanitizePhone,
-     validateEmail as sharedValidateEmail,
-     validatePhone as sharedValidatePhone
+  sanitizeName, sanitizeDocument, sanitizePhone,
+  validateEmail as sharedValidateEmail,
+  validatePhone as sharedValidatePhone
 } from '../../../core/validators/input-sanitizers';
 
 @Component({
-     selector: 'app-organization-detail',
-     standalone: true,
-     imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule],
-     template: `
+  selector: 'app-organization-detail',
+  standalone: true,
+  imports: [CommonModule, RouterLink, FormsModule, LucideAngularModule],
+  template: `
     <div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
       <div class="flex items-center gap-4">
         <a routerLink="/super-admin/organizations" class="p-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-all shadow-sm">
@@ -47,7 +47,7 @@ import {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div class="lg:col-span-1 space-y-6">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 flex flex-col items-center">
+              <div class="bg-linear-to-br from-blue-600 to-indigo-700 p-6 flex flex-col items-center">
                 <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center overflow-hidden shadow-lg mb-3">
                   @if (org()?.logoUrl || org()?.logo) {
                     <img [src]="org()?.logoUrl || org()?.logo" [alt]="org()?.organizationName" class="w-full h-full object-cover">
@@ -299,216 +299,216 @@ import {
   `
 })
 export class OrganizationDetailComponent implements OnInit {
-     private http = inject(HttpClient);
-     private route = inject(ActivatedRoute);
-     private router = inject(Router);
-     private alertService = inject(AlertService);
-     private authService = inject(AuthService);
+  private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private alertService = inject(AlertService);
+  private authService = inject(AuthService);
 
-     backIcon = ArrowLeft;
-     buildingIcon = Building2;
-     mailIcon = Mail;
-     phoneIcon = Phone;
-     mapPinIcon = MapPin;
-     userIcon = User;
-     userPlusIcon = UserPlus;
-     editIcon = Edit;
-     trashIcon = Trash2;
-     restoreIcon = RotateCcw;
-     shieldIcon = Shield;
-     calendarIcon = Calendar;
-     hashIcon = Hash;
-     fileTextIcon = FileText;
-     saveIcon = Save;
-     loaderIcon = Loader2;
-     closeIcon = X;
+  backIcon = ArrowLeft;
+  buildingIcon = Building2;
+  mailIcon = Mail;
+  phoneIcon = Phone;
+  mapPinIcon = MapPin;
+  userIcon = User;
+  userPlusIcon = UserPlus;
+  editIcon = Edit;
+  trashIcon = Trash2;
+  restoreIcon = RotateCcw;
+  shieldIcon = Shield;
+  calendarIcon = Calendar;
+  hashIcon = Hash;
+  fileTextIcon = FileText;
+  saveIcon = Save;
+  loaderIcon = Loader2;
+  closeIcon = X;
 
-     orgId = signal<string>('');
-     org = signal<Organization | null>(null);
-     admin = signal<UserModel | null>(null);
-     allOrgUsers = signal<UserModel[]>([]);
-     isLoading = signal(true);
-     isLoadingAdmin = signal(false);
-     isSubmitting = signal(false);
-     showCreateForm = signal(false);
+  orgId = signal<string>('');
+  org = signal<Organization | null>(null);
+  admin = signal<UserModel | null>(null);
+  allOrgUsers = signal<UserModel[]>([]);
+  isLoading = signal(true);
+  isLoadingAdmin = signal(false);
+  isSubmitting = signal(false);
+  showCreateForm = signal(false);
 
-     formErrors: Record<string, string> = {};
+  formErrors: Record<string, string> = {};
 
-     newAdmin = {
-          firstName: '', lastName: '', documentType: 'DNI' as 'DNI' | 'CNE',
-          documentNumber: '', email: '', phone: ''
-     };
+  newAdmin = {
+    firstName: '', lastName: '', documentType: 'DNI' as 'DNI' | 'CNE',
+    documentNumber: '', email: '', phone: ''
+  };
 
-     ngOnInit(): void {
-          const id = this.route.snapshot.paramMap.get('id');
-          if (!id) {
-               this.router.navigate(['/super-admin/organizations']);
-               return;
-          }
-          this.orgId.set(id);
-          this.loadOrganization();
-          this.loadAdmin();
-     }
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.router.navigate(['/super-admin/organizations']);
+      return;
+    }
+    this.orgId.set(id);
+    this.loadOrganization();
+    this.loadAdmin();
+  }
 
-     private loadOrganization(): void {
-          this.isLoading.set(true);
-          this.http.get<ApiResponse<Organization>>(`${environment.apiUrl}/organizations/${this.orgId()}`).subscribe({
-               next: res => {
-                    this.org.set(res.data);
-                    this.isLoading.set(false);
-               },
-               error: () => {
-                    this.alertService.error('Error', 'No se pudo cargar la organización');
-                    this.router.navigate(['/super-admin/organizations']);
-               }
-          });
-     }
+  private loadOrganization(): void {
+    this.isLoading.set(true);
+    this.http.get<ApiResponse<Organization>>(`${environment.apiUrl}/organizations/${this.orgId()}`).subscribe({
+      next: res => {
+        this.org.set(res.data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.alertService.error('Error', 'No se pudo cargar la organización');
+        this.router.navigate(['/super-admin/organizations']);
+      }
+    });
+  }
 
-     private loadAdmin(): void {
-          this.isLoadingAdmin.set(true);
-          this.http.get<ApiResponse<UserModel[]>>(`${environment.apiUrl}/users/organization/${this.orgId()}?includeInactive=true`).subscribe({
-               next: res => {
-                    const users = res.data || [];
-                    this.allOrgUsers.set(users);
-                    const adminUser = users.find(u => u.role === 'ADMIN');
-                    this.admin.set(adminUser || null);
-                    this.isLoadingAdmin.set(false);
-               },
-               error: () => {
-                    this.isLoadingAdmin.set(false);
-               }
-          });
-     }
+  private loadAdmin(): void {
+    this.isLoadingAdmin.set(true);
+    this.http.get<ApiResponse<UserModel[]>>(`${environment.apiUrl}/users/organization/${this.orgId()}?includeInactive=true`).subscribe({
+      next: res => {
+        const users = res.data || [];
+        this.allOrgUsers.set(users);
+        const adminUser = users.find(u => u.role === 'ADMIN');
+        this.admin.set(adminUser || null);
+        this.isLoadingAdmin.set(false);
+      },
+      error: () => {
+        this.isLoadingAdmin.set(false);
+      }
+    });
+  }
 
-     onNameInput(event: Event, field: 'firstName' | 'lastName'): void {
-          const input = event.target as HTMLInputElement;
-          input.value = sanitizeName(input.value);
-          (this.newAdmin as any)[field] = input.value;
-     }
+  onNameInput(event: Event, field: 'firstName' | 'lastName'): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizeName(input.value);
+    (this.newAdmin as any)[field] = input.value;
+  }
 
-     onDocumentInput(event: Event): void {
-          const input = event.target as HTMLInputElement;
-          input.value = sanitizeDocument(input.value, this.newAdmin.documentType);
-          this.newAdmin.documentNumber = input.value;
-     }
+  onDocumentInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizeDocument(input.value, this.newAdmin.documentType);
+    this.newAdmin.documentNumber = input.value;
+  }
 
-     onPhoneInput(event: Event): void {
-          const input = event.target as HTMLInputElement;
-          input.value = sanitizePhone(input.value);
-          this.newAdmin.phone = input.value;
-     }
+  onPhoneInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    input.value = sanitizePhone(input.value);
+    this.newAdmin.phone = input.value;
+  }
 
-     onDocTypeChange(): void {
-          this.newAdmin.documentNumber = '';
-     }
+  onDocTypeChange(): void {
+    this.newAdmin.documentNumber = '';
+  }
 
-     private validateForm(): boolean {
-          this.formErrors = {};
-          this.newAdmin.firstName = sanitizeName(this.newAdmin.firstName);
-          this.newAdmin.lastName = sanitizeName(this.newAdmin.lastName);
-          if (this.newAdmin.documentNumber) this.newAdmin.documentNumber = sanitizeDocument(this.newAdmin.documentNumber, this.newAdmin.documentType);
-          if (this.newAdmin.phone) this.newAdmin.phone = sanitizePhone(this.newAdmin.phone);
+  private validateForm(): boolean {
+    this.formErrors = {};
+    this.newAdmin.firstName = sanitizeName(this.newAdmin.firstName);
+    this.newAdmin.lastName = sanitizeName(this.newAdmin.lastName);
+    if (this.newAdmin.documentNumber) this.newAdmin.documentNumber = sanitizeDocument(this.newAdmin.documentNumber, this.newAdmin.documentType);
+    if (this.newAdmin.phone) this.newAdmin.phone = sanitizePhone(this.newAdmin.phone);
 
-          if (!this.newAdmin.lastName.trim()) this.formErrors['lastName'] = 'Los apellidos son obligatorios';
-          if (!this.newAdmin.firstName.trim()) this.formErrors['firstName'] = 'Los nombres son obligatorios';
-          if (!this.newAdmin.documentNumber.trim()) {
-               this.formErrors['documentNumber'] = 'El N° de documento es obligatorio';
-          } else if (this.newAdmin.documentType === 'DNI' && this.newAdmin.documentNumber.length !== 8) {
-               this.formErrors['documentNumber'] = 'El DNI debe tener 8 dígitos';
-          }
-          if (!this.newAdmin.email.trim()) {
-               this.formErrors['email'] = 'El correo es obligatorio';
-          } else {
-               const emailErr = sharedValidateEmail(this.newAdmin.email);
-               if (emailErr) this.formErrors['email'] = emailErr;
-          }
-          if (this.newAdmin.phone) {
-               const phoneErr = sharedValidatePhone(this.newAdmin.phone);
-               if (phoneErr) this.formErrors['phone'] = phoneErr;
-          }
+    if (!this.newAdmin.lastName.trim()) this.formErrors['lastName'] = 'Los apellidos son obligatorios';
+    if (!this.newAdmin.firstName.trim()) this.formErrors['firstName'] = 'Los nombres son obligatorios';
+    if (!this.newAdmin.documentNumber.trim()) {
+      this.formErrors['documentNumber'] = 'El N° de documento es obligatorio';
+    } else if (this.newAdmin.documentType === 'DNI' && this.newAdmin.documentNumber.length !== 8) {
+      this.formErrors['documentNumber'] = 'El DNI debe tener 8 dígitos';
+    }
+    if (!this.newAdmin.email.trim()) {
+      this.formErrors['email'] = 'El correo es obligatorio';
+    } else {
+      const emailErr = sharedValidateEmail(this.newAdmin.email);
+      if (emailErr) this.formErrors['email'] = emailErr;
+    }
+    if (this.newAdmin.phone) {
+      const phoneErr = sharedValidatePhone(this.newAdmin.phone);
+      if (phoneErr) this.formErrors['phone'] = phoneErr;
+    }
 
-          return Object.keys(this.formErrors).length === 0;
-     }
+    return Object.keys(this.formErrors).length === 0;
+  }
 
-     createAdmin(): void {
-          if (!this.validateForm()) return;
+  createAdmin(): void {
+    if (!this.validateForm()) return;
 
-          this.isSubmitting.set(true);
-          const body = {
-               organizationId: this.orgId(),
-               firstName: this.newAdmin.firstName.trim(),
-               lastName: this.newAdmin.lastName.trim(),
-               documentType: this.newAdmin.documentType,
-               documentNumber: this.newAdmin.documentNumber.trim(),
-               email: this.newAdmin.email.trim(),
-               phone: this.newAdmin.phone?.trim() || undefined,
-               address: this.org()?.address || 'Dirección de Organización',
-               role: 'ADMIN'
-          };
+    this.isSubmitting.set(true);
+    const body = {
+      organizationId: this.orgId(),
+      firstName: this.newAdmin.firstName.trim(),
+      lastName: this.newAdmin.lastName.trim(),
+      documentType: this.newAdmin.documentType,
+      documentNumber: this.newAdmin.documentNumber.trim(),
+      email: this.newAdmin.email.trim(),
+      phone: this.newAdmin.phone?.trim() || undefined,
+      address: this.org()?.address || 'Dirección de Organización',
+      role: 'ADMIN'
+    };
 
-          this.http.post<ApiResponse<UserModel>>(`${environment.apiUrl}/users`, body).subscribe({
-               next: () => {
-                    this.isSubmitting.set(false);
-                    this.alertService.success('Administrador creado', 'El administrador ha sido registrado exitosamente');
-                    this.showCreateForm.set(false);
-                    this.resetForm();
-                    this.loadAdmin();
-               },
-               error: err => {
-                    this.isSubmitting.set(false);
-                    const msg = err.error?.message || err.error?.errors?.[0]?.message || 'No se pudo crear el administrador';
-                    this.alertService.error('Error', msg);
-               }
-          });
-     }
+    this.http.post<ApiResponse<UserModel>>(`${environment.apiUrl}/users`, body).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.alertService.success('Administrador creado', 'El administrador ha sido registrado exitosamente');
+        this.showCreateForm.set(false);
+        this.resetForm();
+        this.loadAdmin();
+      },
+      error: err => {
+        this.isSubmitting.set(false);
+        const msg = err.error?.message || err.error?.errors?.[0]?.message || 'No se pudo crear el administrador';
+        this.alertService.error('Error', msg);
+      }
+    });
+  }
 
-     async deleteAdmin(): Promise<void> {
-          const a = this.admin();
-          if (!a) return;
-          const result = await this.alertService.confirmDelete(`${a.lastName}, ${a.firstName}`);
-          if (!result.isConfirmed) return;
+  async deleteAdmin(): Promise<void> {
+    const a = this.admin();
+    if (!a) return;
+    const result = await this.alertService.confirmDelete(`${a.lastName}, ${a.firstName}`);
+    if (!result.isConfirmed) return;
 
-          this.isSubmitting.set(true);
-          this.http.delete<ApiResponse<UserModel>>(`${environment.apiUrl}/users/${a.id}`).subscribe({
-               next: () => {
-                    this.isSubmitting.set(false);
-                    this.alertService.success('Eliminado', 'El administrador ha sido desactivado');
-                    this.loadAdmin();
-               },
-               error: () => {
-                    this.isSubmitting.set(false);
-                    this.alertService.error('Error', 'No se pudo eliminar el administrador');
-               }
-          });
-     }
+    this.isSubmitting.set(true);
+    this.http.delete<ApiResponse<UserModel>>(`${environment.apiUrl}/users/${a.id}`).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.alertService.success('Eliminado', 'El administrador ha sido desactivado');
+        this.loadAdmin();
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.alertService.error('Error', 'No se pudo eliminar el administrador');
+      }
+    });
+  }
 
-     async restoreAdmin(): Promise<void> {
-          const a = this.admin();
-          if (!a) return;
-          const result = await this.alertService.confirmRestore(`${a.lastName}, ${a.firstName}`);
-          if (!result.isConfirmed) return;
+  async restoreAdmin(): Promise<void> {
+    const a = this.admin();
+    if (!a) return;
+    const result = await this.alertService.confirmRestore(`${a.lastName}, ${a.firstName}`);
+    if (!result.isConfirmed) return;
 
-          this.isSubmitting.set(true);
-          this.http.patch<ApiResponse<UserModel>>(`${environment.apiUrl}/users/${a.id}/restore`, {}).subscribe({
-               next: () => {
-                    this.isSubmitting.set(false);
-                    this.alertService.success('Restaurado', 'El administrador ha sido restaurado');
-                    this.loadAdmin();
-               },
-               error: () => {
-                    this.isSubmitting.set(false);
-                    this.alertService.error('Error', 'No se pudo restaurar el administrador');
-               }
-          });
-     }
+    this.isSubmitting.set(true);
+    this.http.patch<ApiResponse<UserModel>>(`${environment.apiUrl}/users/${a.id}/restore`, {}).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.alertService.success('Restaurado', 'El administrador ha sido restaurado');
+        this.loadAdmin();
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.alertService.error('Error', 'No se pudo restaurar el administrador');
+      }
+    });
+  }
 
-     cancelCreate(): void {
-          this.showCreateForm.set(false);
-          this.resetForm();
-     }
+  cancelCreate(): void {
+    this.showCreateForm.set(false);
+    this.resetForm();
+  }
 
-     private resetForm(): void {
-          this.newAdmin = { firstName: '', lastName: '', documentType: 'DNI', documentNumber: '', email: '', phone: '' };
-          this.formErrors = {};
-     }
+  private resetForm(): void {
+    this.newAdmin = { firstName: '', lastName: '', documentType: 'DNI', documentNumber: '', email: '', phone: '' };
+    this.formErrors = {};
+  }
 }

@@ -40,15 +40,15 @@ const ALL_DAYS: { key: DayOfWeek; label: string }[] = [
 
       <!-- Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Total Horarios</p>
           <p class="text-3xl font-bold mt-1">{{ schedules().length }}</p>
         </div>
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Activos</p>
           <p class="text-3xl font-bold mt-1">{{ activeCount() }}</p>
         </div>
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-amber-500 to-orange-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Inactivos</p>
           <p class="text-3xl font-bold mt-1">{{ schedules().length - activeCount() }}</p>
         </div>
@@ -361,17 +361,22 @@ export class SchedulesComponent implements OnInit {
   }
 
   deactivate(s: DistributionSchedule) {
-    if (!confirm(`¿Desactivar horario "${s.scheduleName}"?`)) return;
-    this.dist.deactivateSchedule(s.id).subscribe({
-      next: () => { this.alert.success('Éxito', 'Horario desactivado'); this.load(); },
-      error: () => this.alert.error('Error', 'No se pudo desactivar')
+    this.alert.confirmDelete(s.scheduleName).then(result => {
+      if (!result.isConfirmed) return;
+      this.dist.deactivateSchedule(s.id).subscribe({
+        next: () => { this.alert.success('Éxito', 'Horario desactivado'); this.load(); },
+        error: () => this.alert.error('Error', 'No se pudo desactivar')
+      });
     });
   }
 
   restore(s: DistributionSchedule) {
-    this.dist.restoreSchedule(s.id).subscribe({
-      next: () => { this.alert.success('Éxito', 'Horario restaurado'); this.load(); },
-      error: () => this.alert.error('Error', 'No se pudo restaurar')
+    this.alert.confirmRestore(s.scheduleName).then(result => {
+      if (!result.isConfirmed) return;
+      this.dist.restoreSchedule(s.id).subscribe({
+        next: () => { this.alert.success('Éxito', 'Horario restaurado'); this.load(); },
+        error: () => this.alert.error('Error', 'No se pudo restaurar')
+      });
     });
   }
 }

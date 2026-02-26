@@ -263,28 +263,32 @@ export class ComplaintCategoriesComponent implements OnInit {
   }
 
   deleteCategory(cat: ComplaintCategory): void {
-    if (!confirm(`¿Estás seguro de que deseas eliminar "${cat.categoryName}"?`)) return;
-
-    this.claimsService.deleteComplaintCategory(cat.id).subscribe({
-      next: () => {
-        this.alertService.success('Categoría eliminada exitosamente');
-        this.loadData();
-      },
-      error: () => {
-        this.alertService.error('Error al eliminar la categoría');
-      }
+    this.alertService.confirmDelete(cat.categoryName).then(result => {
+      if (!result.isConfirmed) return;
+      this.claimsService.deleteComplaintCategory(cat.id).subscribe({
+        next: () => {
+          this.alertService.success('Categoría eliminada exitosamente');
+          this.loadData();
+        },
+        error: () => {
+          this.alertService.error('Error al eliminar la categoría');
+        }
+      });
     });
   }
 
   restoreCategory(cat: ComplaintCategory): void {
-    this.claimsService.restoreComplaintCategory(cat.id).subscribe({
-      next: () => {
-        this.alertService.success('Categoría restaurada exitosamente');
-        this.loadData();
-      },
-      error: () => {
-        this.alertService.error('Error al restaurar la categoría');
-      }
+    this.alertService.confirmRestore(cat.categoryName).then(result => {
+      if (!result.isConfirmed) return;
+      this.claimsService.restoreComplaintCategory(cat.id).subscribe({
+        next: () => {
+          this.alertService.success('Categoría restaurada exitosamente');
+          this.loadData();
+        },
+        error: () => {
+          this.alertService.error('Error al restaurar la categoría');
+        }
+      });
     });
   }
 

@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, ShoppingCart, Plus, Eye, Search, X } from 'lucide-angular';
+import { LucideAngularModule, ShoppingCart, Plus, Eye, Search, X, Check, Ban } from 'lucide-angular';
 import { AuthService, AlertService, InventoryService } from '../../../../core/services';
 import { Purchase, CreatePurchaseRequest, Supplier, Material, CreatePurchaseDetailRequest } from '../../../../core/models';
 
@@ -26,19 +26,19 @@ import { Purchase, CreatePurchaseRequest, Supplier, Material, CreatePurchaseDeta
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-violet-500 to-purple-600 rounded-xl p-6 text-white">
           <p class="text-sm opacity-90">Total Compras</p>
           <p class="text-3xl font-bold mt-1">{{ purchases().length }}</p>
         </div>
-        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white">
           <p class="text-sm opacity-90">Pendientes</p>
           <p class="text-3xl font-bold mt-1">{{ pendingCount() }}</p>
         </div>
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
           <p class="text-sm opacity-90">Recibidas</p>
           <p class="text-3xl font-bold mt-1">{{ receivedCount() }}</p>
         </div>
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-amber-500 to-orange-600 rounded-xl p-6 text-white">
           <p class="text-sm opacity-90">Monto Total</p>
           <p class="text-2xl font-bold mt-1">S/ {{ totalAmount().toFixed(2) }}</p>
         </div>
@@ -52,7 +52,7 @@ import { Purchase, CreatePurchaseRequest, Supplier, Material, CreatePurchaseDeta
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Número</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
@@ -61,10 +61,10 @@ import { Purchase, CreatePurchaseRequest, Supplier, Material, CreatePurchaseDeta
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            @for (p of filteredPurchases(); track p.id) {
+            @for (p of filteredPurchases(); track p.id; let i = $index) {
               <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-sm font-medium">{{ p.purchaseCode }}</td>
-                <td class="px-4 py-3 text-sm">{{ p.supplierName }}</td>
+                <td class="px-4 py-3 text-sm font-medium">{{ i + 1 }}</td>
+                <td class="px-4 py-3 text-sm">{{ getSupplierName(p.supplierId) }}</td>
                 <td class="px-4 py-3 text-sm">{{ p.purchaseDate | date:'dd/MM/yyyy' }}</td>
                 <td class="px-4 py-3 text-sm font-medium">S/ {{ p.totalAmount.toFixed(2) }}</td>
                 <td class="px-4 py-3">
@@ -86,132 +86,222 @@ import { Purchase, CreatePurchaseRequest, Supplier, Material, CreatePurchaseDeta
       </div>
 
       @if (showModal()) {
-        <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="closeModal()">
-          <div class="bg-white rounded-2xl max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-bold mb-4">Nueva Compra</h3>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeModal()">
+          <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
 
-            <div class="mb-4">
-              <label class="text-sm text-gray-600 mb-1 block">Proveedor *</label>
-              <select [(ngModel)]="formData.supplierId" class="w-full px-3 py-2 border border-gray-100 rounded-xl">
-                <option value="">Seleccione proveedor...</option>
-                @for (s of suppliers(); track s.id) {
-                  <option [value]="s.id">{{ s.supplierName }}</option>
-                }
-              </select>
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h3 class="text-lg font-bold text-gray-800">Nueva Compra</h3>
+                <p class="text-xs text-gray-400 mt-0.5">Registra una nueva orden de compra</p>
+              </div>
+              <button (click)="closeModal()" class="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
+                <lucide-icon [img]="xIcon" [size]="18"></lucide-icon>
+              </button>
             </div>
 
-            <div class="mb-4">
-              <div class="flex justify-between items-center mb-2">
-                <label class="text-sm font-medium text-gray-700">Detalles de Compra</label>
-                <button (click)="addDetail()" type="button" class="px-3 py-1 text-xs bg-violet-50 text-violet-600 rounded-lg">
-                  <lucide-icon [img]="plusIcon" [size]="14"></lucide-icon>
-                  Agregar Material
-                </button>
+            <div class="p-6 space-y-5">
+
+              <!-- Proveedor -->
+              <div class="bg-gray-50 rounded-xl p-4">
+                <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Proveedor *</label>
+                <select [(ngModel)]="formData.supplierId" class="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-800 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-colors">
+                  <option value="">Seleccione proveedor...</option>
+                  @for (s of suppliers(); track s.id) {
+                    <option [value]="s.id">{{ s.supplierName }}</option>
+                  }
+                </select>
               </div>
 
-              <div class="grid grid-cols-12 gap-2 mb-2 px-3">
-                <div class="col-span-6"><span class="text-xs font-medium text-gray-500 uppercase">Material</span></div>
-                <div class="col-span-2"><span class="text-xs font-medium text-gray-500 uppercase">Cantidad</span></div>
-                <div class="col-span-3"><span class="text-xs font-medium text-gray-500 uppercase">Costo Unit.</span></div>
-                <div class="col-span-1"></div>
-              </div>
-
-              @for (detail of formData.details; track $index; let i = $index) {
-                <div class="border rounded-xl p-3 mb-2">
-                  <div class="grid grid-cols-12 gap-2">
-                    <div class="col-span-6">
-                      <select [(ngModel)]="detail.materialId" class="w-full px-2 py-1.5 border border-gray-100 rounded-lg text-sm">
-                        <option value="">Seleccione material...</option>
-                        @for (m of availableMaterials(i); track m.id) {
-                          <option [value]="m.id">{{ m.materialName }}</option>
-                        }
-                      </select>
-                    </div>
-                    <div class="col-span-2">
-                      <input [(ngModel)]="detail.quantity" type="number" min="1" placeholder="Cant." class="w-full px-2 py-1.5 border rounded-lg text-sm placeholder:text-gray-400" [class.border-red-400]="detail.quantity <= 0" [class.border-gray-100]="detail.quantity > 0">
-                      @if (detail.quantity <= 0) {
-                        <span class="text-[10px] text-red-500">Mín. 1</span>
-                      }
-                    </div>
-                    <div class="col-span-3">
-                      <input [(ngModel)]="detail.unitPrice" type="number" min="0.01" step="0.01" placeholder="Costo" class="w-full px-2 py-1.5 border rounded-lg text-sm placeholder:text-gray-400" [class.border-red-400]="detail.unitPrice <= 0" [class.border-gray-100]="detail.unitPrice > 0">
-                      @if (detail.unitPrice <= 0) {
-                        <span class="text-[10px] text-red-500">Debe ser mayor a 0</span>
-                      }
-                    </div>
-                    <div class="col-span-1 flex items-center">
-                      <button (click)="removeDetail(i)" type="button" class="p-1 hover:bg-red-50 text-red-600 rounded">
-                        <lucide-icon [img]="xIcon" [size]="16"></lucide-icon>
-                      </button>
-                    </div>
+              <!-- Materiales -->
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div>
+                    <h4 class="text-sm font-semibold text-gray-700">Materiales</h4>
+                    <p class="text-xs text-gray-400">Agrega los materiales a comprar</p>
                   </div>
+                  <button (click)="addDetail()" type="button"
+                          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-violet-50 text-violet-600 hover:bg-violet-100 rounded-lg transition-colors">
+                    <lucide-icon [img]="plusIcon" [size]="13"></lucide-icon>
+                    Agregar Material
+                  </button>
                 </div>
-              }
-            </div>
 
-            <div class="bg-gray-50 rounded-xl p-4 mb-4">
-              <div class="flex justify-between items-center">
-                <span class="font-medium text-gray-700">Total:</span>
+                @if (formData.details.length > 0) {
+                  <!-- Header columnas -->
+                  <div class="grid grid-cols-12 gap-2 px-3 mb-1.5">
+                    <div class="col-span-6"><span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Material</span></div>
+                    <div class="col-span-2"><span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Cantidad</span></div>
+                    <div class="col-span-3"><span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Costo Unit.</span></div>
+                    <div class="col-span-1"></div>
+                  </div>
+
+                  <div class="space-y-2">
+                    @for (detail of formData.details; track $index; let i = $index) {
+                      <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                        <div class="grid grid-cols-12 gap-2 items-start">
+                          <div class="col-span-6">
+                            <select [(ngModel)]="detail.materialId"
+                                    class="w-full px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-800 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-colors">
+                              <option value="">Seleccione...</option>
+                              @for (m of availableMaterials(i); track m.id) {
+                                <option [value]="m.id">{{ m.materialName }}</option>
+                              }
+                            </select>
+                          </div>
+                          <div class="col-span-2">
+                            <input [(ngModel)]="detail.quantity" type="number" min="1" placeholder="0"
+                                   class="w-full px-2.5 py-2 bg-white border rounded-lg text-sm text-gray-800 outline-none focus:ring-2 focus:ring-violet-500/20 transition-colors"
+                                   [class.border-red-300]="detail.quantity <= 0"
+                                   [class.border-gray-200]="detail.quantity > 0">
+                            @if (detail.quantity <= 0) {
+                              <span class="text-[10px] text-red-500 mt-0.5 block">Mín. 1</span>
+                            }
+                          </div>
+                          <div class="col-span-3">
+                            <input [(ngModel)]="detail.unitPrice" type="number" min="0.01" step="0.01" placeholder="0.00"
+                                   class="w-full px-2.5 py-2 bg-white border rounded-lg text-sm text-gray-800 outline-none focus:ring-2 focus:ring-violet-500/20 transition-colors"
+                                   [class.border-red-300]="detail.unitPrice <= 0"
+                                   [class.border-gray-200]="detail.unitPrice > 0">
+                            @if (detail.unitPrice <= 0) {
+                              <span class="text-[10px] text-red-500 mt-0.5 block">Requerido</span>
+                            }
+                          </div>
+                          <div class="col-span-1 flex items-center justify-center pt-1">
+                            <button (click)="removeDetail(i)" type="button"
+                                    class="p-1.5 hover:bg-red-50 text-red-400 hover:text-red-600 rounded-lg transition-colors">
+                              <lucide-icon [img]="xIcon" [size]="14"></lucide-icon>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 text-sm">
+                    Sin materiales — haz clic en "Agregar Material"
+                  </div>
+                }
+              </div>
+
+              <!-- Total -->
+              <div class="flex items-center justify-between bg-violet-50 border border-violet-100 rounded-xl px-5 py-4">
+                <div>
+                  <p class="text-xs text-violet-500 font-medium uppercase tracking-wider">Total de la Compra</p>
+                </div>
                 <span class="text-2xl font-bold text-violet-600">S/ {{ calculateTotal().toFixed(2) }}</span>
               </div>
+
             </div>
 
-            <div class="flex gap-2">
-              <button (click)="closeModal()" class="flex-1 px-4 py-2 border rounded-xl">Cancelar</button>
-              <button (click)="save()" [disabled]="!canSave()" class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-xl disabled:opacity-50">
+            <!-- Footer -->
+            <div class="flex gap-3 px-6 pb-6">
+              <button (click)="closeModal()"
+                      class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors">
+                Cancelar
+              </button>
+              <button (click)="save()" [disabled]="!canSave()"
+                      class="flex-1 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                 Registrar Compra
               </button>
             </div>
+
           </div>
         </div>
       }
 
       @if (showDetailModal() && selectedPurchase()) {
-        <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="closeDetailModal()">
-          <div class="bg-white rounded-2xl max-w-3xl w-full p-6" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-bold mb-4">Detalle de Compra</h3>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div><label class="text-xs text-gray-500">Número</label><p class="font-medium">{{ selectedPurchase()!.purchaseCode }}</p></div>
-              <div><label class="text-xs text-gray-500">Proveedor</label><p class="font-medium">{{ selectedPurchase()!.supplierName }}</p></div>
-              <div><label class="text-xs text-gray-500">Fecha</label><p>{{ selectedPurchase()!.purchaseDate | date:'dd/MM/yyyy' }}</p></div>
-              <div><label class="text-xs text-gray-500">Estado</label>
-                <p><span [class]="getStatusBadge(selectedPurchase()!.purchaseStatus)" class="px-2 py-1 text-xs rounded-lg">{{ getStatusLabel(selectedPurchase()!.purchaseStatus) }}</span></p>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeDetailModal()">
+          <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h3 class="text-lg font-bold text-gray-800">Detalle de Compra</h3>
+                <p class="text-xs text-gray-400 mt-0.5">{{ selectedPurchase()!.purchaseCode }}</p>
+              </div>
+              <button (click)="closeDetailModal()" class="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
+                <lucide-icon [img]="xIcon" [size]="18"></lucide-icon>
+              </button>
+            </div>
+
+            <div class="p-6 space-y-5">
+              <!-- Info general -->
+              <div class="grid grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+                <div>
+                  <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Proveedor</label>
+                  <p class="text-sm font-medium text-gray-800 mt-0.5">{{ getSupplierName(selectedPurchase()!.supplierId) }}</p>
+                </div>
+                <div>
+                  <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Estado</label>
+                  <p class="mt-0.5"><span [class]="getStatusBadge(selectedPurchase()!.purchaseStatus)" class="px-2.5 py-1 text-xs rounded-lg font-medium">{{ getStatusLabel(selectedPurchase()!.purchaseStatus) }}</span></p>
+                </div>
+                <div>
+                  <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Fecha</label>
+                  <p class="text-sm text-gray-700 mt-0.5">{{ selectedPurchase()!.purchaseDate | date:'dd/MM/yyyy' }}</p>
+                </div>
+                <div>
+                  <label class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Factura</label>
+                  <p class="text-sm text-gray-700 mt-0.5">{{ selectedPurchase()!.invoiceNumber || '-' }}</p>
+                </div>
+              </div>
+
+              <!-- Materiales -->
+              @if (selectedPurchase()!.details && selectedPurchase()!.details!.length > 0) {
+                <div>
+                  <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Materiales</h4>
+                  <div class="border border-gray-100 rounded-xl overflow-hidden">
+                    <table class="w-full text-sm">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-4 py-2.5 text-left text-[10px] font-semibold text-gray-400 uppercase">Material</th>
+                          <th class="px-4 py-2.5 text-right text-[10px] font-semibold text-gray-400 uppercase">Cantidad</th>
+                          <th class="px-4 py-2.5 text-right text-[10px] font-semibold text-gray-400 uppercase">Costo Unit.</th>
+                          <th class="px-4 py-2.5 text-right text-[10px] font-semibold text-gray-400 uppercase">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-100">
+                        @for (d of selectedPurchase()!.details; track d.id) {
+                          <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2.5 text-gray-800">{{ getMaterialName(d.materialId) }}</td>
+                            <td class="px-4 py-2.5 text-right">{{ d.quantity }}</td>
+                            <td class="px-4 py-2.5 text-right">S/ {{ d.unitPrice.toFixed(2) }}</td>
+                            <td class="px-4 py-2.5 text-right font-medium text-gray-800">S/ {{ d.subtotal.toFixed(2) }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Total -->
+              <div class="flex items-center justify-between bg-violet-50 border border-violet-100 rounded-xl px-5 py-4">
+                <p class="text-xs text-violet-500 font-medium uppercase tracking-wider">Total de Compra</p>
+                <span class="text-2xl font-bold text-violet-600">S/ {{ selectedPurchase()!.totalAmount.toFixed(2) }}</span>
               </div>
             </div>
 
-            @if (selectedPurchase()!.details && selectedPurchase()!.details!.length > 0) {
-              <div class="mt-4">
-                <h4 class="font-medium text-sm mb-2">Materiales</h4>
-                <div class="border rounded-xl overflow-hidden">
-                  <table class="w-full text-sm">
-                    <thead class="bg-gray-50">
-                      <tr>
-                        <th class="px-3 py-2 text-left">Material</th>
-                        <th class="px-3 py-2 text-right">Cantidad</th>
-                        <th class="px-3 py-2 text-right">Costo Unit.</th>
-                        <th class="px-3 py-2 text-right">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                      @for (d of selectedPurchase()!.details; track d.id) {
-                        <tr>
-                          <td class="px-3 py-2">{{ d.materialName }}</td>
-                          <td class="px-3 py-2 text-right">{{ d.quantity }}</td>
-                          <td class="px-3 py-2 text-right">S/ {{ d.unitPrice.toFixed(2) }}</td>
-                          <td class="px-3 py-2 text-right font-medium">S/ {{ d.subtotal.toFixed(2) }}</td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-                <div class="mt-3 flex justify-end">
-                  <div class="text-right">
-                    <p class="text-sm text-gray-500">Total de Compra</p>
-                    <p class="text-2xl font-bold text-violet-600">S/ {{ selectedPurchase()!.totalAmount.toFixed(2) }}</p>
-                  </div>
-                </div>
-              </div>
-            }
+            <!-- Footer con acciones -->
+            <div class="flex gap-3 px-6 pb-6">
+              <button (click)="closeDetailModal()"
+                      class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors">
+                Cerrar
+              </button>
+              @if (selectedPurchase()!.purchaseStatus === 'PENDING') {
+                <button (click)="cancelSelectedPurchase()"
+                        class="px-4 py-2.5 border border-red-200 text-red-600 font-medium rounded-xl hover:bg-red-50 transition-colors flex items-center gap-2">
+                  <lucide-icon [img]="banIcon" [size]="16"></lucide-icon>
+                  Cancelar Compra
+                </button>
+                <button (click)="receiveSelectedPurchase()"
+                        class="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2">
+                  <lucide-icon [img]="checkIcon" [size]="16"></lucide-icon>
+                  Marcar como Recibida
+                </button>
+              }
+            </div>
+
           </div>
         </div>
       }
@@ -223,7 +313,7 @@ export class PurchasesComponent {
   private alert = inject(AlertService);
   private inv = inject(InventoryService);
 
-  cartIcon = ShoppingCart; plusIcon = Plus; eyeIcon = Eye; searchIcon = Search; xIcon = X;
+  cartIcon = ShoppingCart; plusIcon = Plus; eyeIcon = Eye; searchIcon = Search; xIcon = X; checkIcon = Check; banIcon = Ban;
 
   purchases = signal<Purchase[]>([]);
   filteredPurchases = signal<Purchase[]>([]);
@@ -382,5 +472,62 @@ export class PurchasesComponent {
       CANCELLED: 'Cancelada'
     };
     return map[status] || status;
+  }
+
+  getSupplierName(supplierId: string): string {
+    return this.suppliers().find(s => s.id === supplierId)?.supplierName || '-';
+  }
+
+  getMaterialName(materialId: string): string {
+    return this.materials().find(m => m.id === materialId)?.materialName || materialId;
+  }
+
+  receiveSelectedPurchase(): void {
+    const purchase = this.selectedPurchase();
+    if (!purchase) return;
+
+    this.alert.confirm(
+      '¿Marcar como recibida?',
+      'Esto actualizará el stock de los materiales automáticamente. Esta acción no se puede deshacer.',
+      'Sí, recibida'
+    ).then(result => {
+      if (!result.isConfirmed) return;
+      this.inv.receivePurchase(purchase.id).subscribe({
+        next: () => {
+          this.alert.success('Recibida', 'Compra marcada como recibida. El stock fue actualizado.');
+          this.closeDetailModal();
+          this.load();
+          this.loadMaterials();
+        },
+        error: (err) => {
+          const msg = err.error?.message || 'No se pudo recibir la compra';
+          this.alert.error('Error', msg);
+        }
+      });
+    });
+  }
+
+  cancelSelectedPurchase(): void {
+    const purchase = this.selectedPurchase();
+    if (!purchase) return;
+
+    this.alert.confirm(
+      '¿Cancelar compra?',
+      'Esta acción no se puede deshacer.',
+      'Sí, cancelar'
+    ).then(result => {
+      if (!result.isConfirmed) return;
+      this.inv.cancelPurchase(purchase.id).subscribe({
+        next: () => {
+          this.alert.success('Cancelada', 'Compra cancelada correctamente');
+          this.closeDetailModal();
+          this.load();
+        },
+        error: (err) => {
+          const msg = err.error?.message || 'No se pudo cancelar la compra';
+          this.alert.error('Error', msg);
+        }
+      });
+    });
   }
 }

@@ -30,15 +30,15 @@ import { DistributionRoute, CreateRouteRequest, ZoneOrder, ApiResponse, Zone, Us
 
       <!-- Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Total Rutas</p>
           <p class="text-3xl font-bold mt-1">{{ routes().length }}</p>
         </div>
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Activas</p>
           <p class="text-3xl font-bold mt-1">{{ activeCount() }}</p>
         </div>
-        <div class="bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-cyan-500 to-blue-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Zonas cubiertas</p>
           <p class="text-3xl font-bold mt-1">{{ totalZones() }}</p>
         </div>
@@ -388,17 +388,22 @@ export class RoutesComponent implements OnInit {
   }
 
   deactivate(r: DistributionRoute) {
-    if (!confirm(`¿Desactivar ruta "${r.routeName}"?`)) return;
-    this.dist.deactivateRoute(r.id).subscribe({
-      next: () => { this.alert.success('Éxito', 'Ruta desactivada'); this.load(); },
-      error: () => this.alert.error('Error', 'No se pudo desactivar')
+    this.alert.confirmDelete(r.routeName).then(result => {
+      if (!result.isConfirmed) return;
+      this.dist.deactivateRoute(r.id).subscribe({
+        next: () => { this.alert.success('Éxito', 'Ruta desactivada'); this.load(); },
+        error: () => this.alert.error('Error', 'No se pudo desactivar')
+      });
     });
   }
 
   restore(r: DistributionRoute) {
-    this.dist.restoreRoute(r.id).subscribe({
-      next: () => { this.alert.success('Éxito', 'Ruta restaurada'); this.load(); },
-      error: () => this.alert.error('Error', 'No se pudo restaurar')
+    this.alert.confirmRestore(r.routeName).then(result => {
+      if (!result.isConfirmed) return;
+      this.dist.restoreRoute(r.id).subscribe({
+        next: () => { this.alert.success('Éxito', 'Ruta restaurada'); this.load(); },
+        error: () => this.alert.error('Error', 'No se pudo restaurar')
+      });
     });
   }
 }

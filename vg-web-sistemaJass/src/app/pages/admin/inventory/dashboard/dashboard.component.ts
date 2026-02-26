@@ -17,7 +17,7 @@ import { Material, Supplier, Purchase, InventoryMovement, ProductCategory } from
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-violet-500 to-purple-600 rounded-xl p-6 text-white">
           <div class="flex items-center gap-3 mb-2">
             <lucide-icon [img]="packageIcon" [size]="32"></lucide-icon>
             <div>
@@ -28,7 +28,7 @@ import { Material, Supplier, Purchase, InventoryMovement, ProductCategory } from
           <a routerLink="/admin/inventory/materials" class="text-xs opacity-90 hover:underline">Ver materiales →</a>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-blue-500 to-cyan-600 rounded-xl p-6 text-white">
           <div class="flex items-center gap-3 mb-2">
             <lucide-icon [img]="usersIcon" [size]="32"></lucide-icon>
             <div>
@@ -39,7 +39,7 @@ import { Material, Supplier, Purchase, InventoryMovement, ProductCategory } from
           <a routerLink="/admin/inventory/suppliers" class="text-xs opacity-90 hover:underline">Ver proveedores →</a>
         </div>
 
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
           <div class="flex items-center gap-3 mb-2">
             <lucide-icon [img]="cartIcon" [size]="32"></lucide-icon>
             <div>
@@ -50,7 +50,7 @@ import { Material, Supplier, Purchase, InventoryMovement, ProductCategory } from
           <a routerLink="/admin/inventory/purchases" class="text-xs opacity-90 hover:underline">Ver compras →</a>
         </div>
 
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-amber-500 to-orange-600 rounded-xl p-6 text-white">
           <div class="flex items-center gap-3 mb-2">
             <lucide-icon [img]="dollarIcon" [size]="32"></lucide-icon>
             <div>

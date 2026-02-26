@@ -33,15 +33,15 @@ import {
 
       <!-- Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-violet-500 to-purple-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Total Programas</p>
           <p class="text-3xl font-bold mt-1">{{ programs().length }}</p>
         </div>
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Activos</p>
           <p class="text-3xl font-bold mt-1">{{ activeCount() }}</p>
         </div>
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-5 text-white">
+        <div class="bg-linear-to-br from-amber-500 to-orange-600 rounded-xl p-5 text-white">
           <p class="text-sm opacity-90">Inactivos</p>
           <p class="text-3xl font-bold mt-1">{{ programs().length - activeCount() }}</p>
         </div>
@@ -442,17 +442,22 @@ export class ProgramsComponent implements OnInit {
   }
 
   deactivate(p: DistributionProgram) {
-    if (!confirm('¿Desactivar este programa?')) return;
-    this.dist.deactivateProgram(p.id).subscribe({
-      next: () => { this.alert.success('Éxito', 'Programa desactivado'); this.load(); },
-      error: () => this.alert.error('Error', 'No se pudo desactivar')
+    this.alert.confirm('¿Desactivar programa?', 'El programa será desactivado', 'Sí, desactivar').then(result => {
+      if (!result.isConfirmed) return;
+      this.dist.deactivateProgram(p.id).subscribe({
+        next: () => { this.alert.success('Éxito', 'Programa desactivado'); this.load(); },
+        error: () => this.alert.error('Error', 'No se pudo desactivar')
+      });
     });
   }
 
   restore(p: DistributionProgram) {
-    this.dist.restoreProgram(p.id).subscribe({
-      next: () => { this.alert.success('Éxito', 'Programa restaurado'); this.load(); },
-      error: () => this.alert.error('Error', 'No se pudo restaurar')
+    this.alert.confirmRestore('este programa').then(result => {
+      if (!result.isConfirmed) return;
+      this.dist.restoreProgram(p.id).subscribe({
+        next: () => { this.alert.success('Éxito', 'Programa restaurado'); this.load(); },
+        error: () => this.alert.error('Error', 'No se pudo restaurar')
+      });
     });
   }
 }

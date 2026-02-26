@@ -274,28 +274,32 @@ export class IncidentTypesComponent implements OnInit {
   }
 
   deleteType(type: IncidentType): void {
-    if (!confirm(`¿Estás seguro de que deseas eliminar "${type.typeName}"?`)) return;
-
-    this.claimsService.deleteIncidentType(type.id).subscribe({
-      next: () => {
-        this.alertService.success('Tipo eliminado exitosamente');
-        this.loadData();
-      },
-      error: () => {
-        this.alertService.error('Error al eliminar el tipo');
-      }
+    this.alertService.confirmDelete(type.typeName).then(result => {
+      if (!result.isConfirmed) return;
+      this.claimsService.deleteIncidentType(type.id).subscribe({
+        next: () => {
+          this.alertService.success('Tipo eliminado exitosamente');
+          this.loadData();
+        },
+        error: () => {
+          this.alertService.error('Error al eliminar el tipo');
+        }
+      });
     });
   }
 
   restoreType(type: IncidentType): void {
-    this.claimsService.restoreIncidentType(type.id).subscribe({
-      next: () => {
-        this.alertService.success('Tipo restaurado exitosamente');
-        this.loadData();
-      },
-      error: () => {
-        this.alertService.error('Error al restaurar el tipo');
-      }
+    this.alertService.confirmRestore(type.typeName).then(result => {
+      if (!result.isConfirmed) return;
+      this.claimsService.restoreIncidentType(type.id).subscribe({
+        next: () => {
+          this.alertService.success('Tipo restaurado exitosamente');
+          this.loadData();
+        },
+        error: () => {
+          this.alertService.error('Error al restaurar el tipo');
+        }
+      });
     });
   }
 

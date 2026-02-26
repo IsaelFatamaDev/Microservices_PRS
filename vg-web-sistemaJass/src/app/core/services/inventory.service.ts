@@ -177,6 +177,16 @@ export class InventoryService {
                .pipe(map(res => res.data!));
      }
 
+     receivePurchase(id: string): Observable<Purchase> {
+          return this.http.patch<ApiResponse<Purchase>>(`${this.apiUrl}/purchases/${id}/receive`, {})
+               .pipe(map(res => res.data!));
+     }
+
+     cancelPurchase(id: string): Observable<Purchase> {
+          return this.http.patch<ApiResponse<Purchase>>(`${this.apiUrl}/purchases/${id}/cancel`, {})
+               .pipe(map(res => res.data!));
+     }
+
      // ==================== INVENTORY MOVEMENTS ====================
      getMovements(): Observable<InventoryMovement[]> {
           return this.http.get<ApiResponse<InventoryMovement[]>>(`${this.apiUrl}/inventory-movements`)

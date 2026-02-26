@@ -192,23 +192,7 @@ import {
             </div>
           </div>
 
-          @if (!isEditMode()) {
-            <div class="mt-4 pt-4 border-t border-gray-100">
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <div class="relative">
-                  <input type="checkbox" [(ngModel)]="hasWhatsApp" name="hasWhatsApp" class="sr-only peer">
-                  <div class="w-11 h-6 rounded-full transition-colors peer-checked:bg-green-500 bg-gray-300"></div>
-                  <div class="absolute left-0.5 top-0.5 w-5 h-5 rounded-full bg-white transition-transform shadow-sm peer-checked:translate-x-5"></div>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-700 group-hover:text-gray-900">El usuario tiene WhatsApp</p>
-                  <p class="text-xs text-gray-400">
-                    {{ hasWhatsApp ? 'Las credenciales se enviarán por WhatsApp' : 'Se generará un reporte de credenciales para imprimir' }}
-                  </p>
-                </div>
-              </label>
-            </div>
-          }
+
         </div>
 
         @if (selectedRole === 'CLIENT' || selectedRole === 'OPERATOR') {

@@ -5,12 +5,13 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import {
   LucideAngularModule, Plus, Trash2, RotateCcw,
-  Settings, X, Save, Loader2
+  Settings, X, Save, Loader2, WifiOff, Wifi
 } from 'lucide-angular';
 import { environment } from '../../../../../environments/environment';
 import { Parameter, ApiResponse } from '../../../../core';
 import { AlertService } from '../../../../core/services/alert.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { EvolutionApiService } from '../../../../core/services/evolution-api.service';
 
 @Component({
   selector: 'app-parameters',
@@ -160,6 +161,43 @@ import { AuthService } from '../../../../core/services/auth.service';
           </div>
         }
       </div>
+
+    <!-- WhatsApp / Evolution API -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="p-4 bg-gray-50/50 border-b border-gray-100 flex items-center gap-3">
+        <div class="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center">
+          <lucide-icon [img]="wifiIcon" [size]="18" class="text-green-600"></lucide-icon>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-800">Integración WhatsApp</h3>
+          <p class="text-xs text-gray-400">Gestión de conexión con Evolution API</p>
+        </div>
+      </div>
+      <div class="p-5 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-2.5 h-2.5 rounded-full" [class]="whatsappStatus() === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-gray-300'"></div>
+          <p class="text-sm text-gray-600">
+            @if (whatsappStatus() === 'connected') {
+              <span class="font-medium text-green-700">Conectado</span> — la instancia está activa en Evolution API
+            } @else {
+              <span class="text-gray-400">Sin conexión activa con WhatsApp</span>
+            }
+          </p>
+        </div>
+        <button
+          (click)="disconnectWhatsApp()"
+          [disabled]="isDisconnecting()"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (isDisconnecting()) {
+            <lucide-icon [img]="loaderIcon" [size]="16" class="animate-spin"></lucide-icon>
+            <span>Desconectando...</span>
+          } @else {
+            <lucide-icon [img]="wifiOffIcon" [size]="16"></lucide-icon>
+            <span>Desconectar WhatsApp</span>
+          }
+        </button>
+      </div>
+    </div>
     </div>
 
     @if (showModal()) {
@@ -261,6 +299,11 @@ export class ParametersComponent implements OnInit {
   typeFilter = 'ALL';
   paramForm = { parameterType: '', parameterValue: '', description: '' };
 
+  private evolutionApi = inject(EvolutionApiService);
+
+  whatsappStatus = this.evolutionApi.connectionStatus;
+  isDisconnecting = signal(false);
+
   plusIcon = Plus;
   trashIcon = Trash2;
   restoreIcon = RotateCcw;
@@ -268,6 +311,8 @@ export class ParametersComponent implements OnInit {
   closeIcon = X;
   saveIcon = Save;
   loaderIcon = Loader2;
+  wifiIcon = Wifi;
+  wifiOffIcon = WifiOff;
 
   parameterTypeOptions = [
     { value: 'MESES_MAX_DEUDA', label: 'Meses Máx. Deuda' },
@@ -323,6 +368,29 @@ export class ParametersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadParameters();
+    this.evolutionApi.checkConnection().subscribe();
+  }
+
+  async disconnectWhatsApp(): Promise<void> {
+    const result = await this.alertService.confirm(
+      '¿Desconectar WhatsApp?',
+      'Se cerrará la sesión de WhatsApp en Evolution API. Deberás escanear el QR nuevamente para reconectarte.',
+      'Desconectar',
+      'Cancelar'
+    );
+    if (!result.isConfirmed) return;
+
+    this.isDisconnecting.set(true);
+    this.evolutionApi.logout().subscribe({
+      next: () => {
+        this.isDisconnecting.set(false);
+        this.alertService.success('Desconectado', 'WhatsApp desconectado correctamente');
+      },
+      error: () => {
+        this.isDisconnecting.set(false);
+        this.alertService.error('Error', 'No se pudo desconectar WhatsApp');
+      }
+    });
   }
 
   loadParameters(): void {

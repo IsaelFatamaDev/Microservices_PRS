@@ -75,15 +75,19 @@ export class AdminDashboardComponent implements OnInit {
     const orgId = this.authService.organizationId();
     if (!orgId) return;
 
+    // Contar usuarios con rol CLIENT de la organización
+    this.http.get<ApiResponse<any[]>>(`${environment.apiUrl}/users/organization/${orgId}`).subscribe({
+      next: res => {
+        const clients = (res.data || []).filter((u: any) => u.role === 'CLIENT');
+        this.updateStat('totalUsers', clients.length);
+      },
+      error: () => console.warn('Failed to load users count')
+    });
+
     const fetchCount = (url: string) =>
       this.http.get<ApiResponse<PageResponse<any>>>(`${environment.apiUrl}/${url}`, {
         params: { organizationId: orgId, page: 0, size: 1 }
       });
-
-    fetchCount('users').subscribe({
-      next: res => this.updateStat('totalUsers', res.data?.totalElements || 0),
-      error: () => console.warn('Failed to load users count')
-    });
 
     fetchCount('water-boxes').subscribe({
       next: res => this.updateStat('totalWaterBoxes', res.data?.totalElements || 0),

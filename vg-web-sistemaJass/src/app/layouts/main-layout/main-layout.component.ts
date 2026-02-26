@@ -59,7 +59,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
                 <p class="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{{ authService.userFullName() }}</p>
                 <p class="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-full inline-block">{{ roleLabel() }}</p>
               </div>
-              <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl shadow-lg shadow-blue-600/20 flex items-center justify-center font-bold text-sm ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
+              <div class="w-10 h-10 bg-linear-to-br from-blue-600 to-blue-700 text-white rounded-xl shadow-lg shadow-blue-600/20 flex items-center justify-center font-bold text-sm ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
                 {{ authService.userInitials() }}
               </div>
             </a>

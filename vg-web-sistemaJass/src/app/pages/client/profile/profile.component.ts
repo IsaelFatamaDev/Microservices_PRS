@@ -29,7 +29,7 @@ import {
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                          <div class="lg:col-span-1">
                               <div class="bg-white rounded-xl shadow-lg p-6 text-center">
-                                   <div class="w-24 h-24 mx-auto bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-4">
+                                   <div class="w-24 h-24 mx-auto bg-linear-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center mb-4">
                                         <span class="text-3xl font-bold text-white">
                                              {{ getInitials() }}
                                         </span>

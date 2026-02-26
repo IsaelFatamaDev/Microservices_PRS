@@ -260,8 +260,12 @@ export class DebtsComponent implements OnInit {
     const orgId = this.authService.organizationId();
     if (!orgId) return;
 
-    this.http.get<ApiResponse<User[]>>(`${environment.apiUrl}/users`).subscribe({
-      next: r => this.allUsers.set((r.data || []).filter(u => u.organizationId === orgId && u.role === 'CLIENT'))
+    this.http.get<ApiResponse<User[]>>(
+      `${environment.apiUrl}/users/organization/${orgId}`,
+      { params: { includeInactive: 'true' } }
+    ).subscribe({
+      next: r => this.allUsers.set(r.data || []),
+      error: () => this.allUsers.set([])
     });
 
     this.commercialService.getDebts().subscribe({
@@ -294,7 +298,7 @@ export class DebtsComponent implements OnInit {
 
   getUserName(userId: string): string {
     const u = this.allUsers().find(x => x.id === userId);
-    return u ? `${u.lastName}, ${u.firstName}` : userId;
+    return u ? `${u.lastName}, ${u.firstName}` : 'Usuario no encontrado';
   }
 
   getMonthLabel(m: number): string {

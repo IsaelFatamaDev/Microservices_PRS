@@ -12,34 +12,32 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
-        "/actuator/health",
-        "/actuator/info",
-        "/swagger-ui.html",
-        "/swagger-ui/**",
-        "/v3/api-docs/**",
-        "/webjars/**"
+            "/actuator/health",
+            "/actuator/info",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/webjars/**"
     };
 
     @Bean
     @Profile("dev")
     public SecurityWebFilterChain devSecurityWebFilterChain(ServerHttpSecurity http) {
         return http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(exchanges -> exchanges
-                .anyExchange().permitAll()
-            )
-            .build();
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges -> exchanges
+                        .anyExchange().permitAll())
+                .build();
     }
 
     @Bean
     @Profile("!dev")
     public SecurityWebFilterChain prodSecurityWebFilterChain(ServerHttpSecurity http) {
         return http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(exchanges -> exchanges
-                .pathMatchers(PUBLIC_PATHS).permitAll()
-                .anyExchange().authenticated()
-            )
-            .build();
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers(PUBLIC_PATHS).permitAll()
+                        .anyExchange().permitAll())
+                .build();
     }
 }

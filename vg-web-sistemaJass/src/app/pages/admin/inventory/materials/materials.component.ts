@@ -26,15 +26,15 @@ import { Material, CreateMaterialRequest, ProductCategory } from '../../../../co
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-violet-500 to-purple-600 rounded-xl p-6 text-white">
           <p class="text-sm opacity-90">Total Materiales</p>
           <p class="text-3xl font-bold mt-1">{{ materials().length }}</p>
         </div>
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-amber-500 to-orange-600 rounded-xl p-6 text-white">
           <p class="text-sm opacity-90">Stock Bajo</p>
           <p class="text-3xl font-bold mt-1">{{ lowStockCount() }}</p>
         </div>
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
+        <div class="bg-linear-to-br from-emerald-500 to-teal-600 rounded-xl p-6 text-white">
           <p class="text-sm opacity-90">Valor Total</p>
           <p class="text-3xl font-bold mt-1">S/ {{ totalValue().toFixed(2) }}</p>
         </div>
@@ -43,7 +43,7 @@ import { Material, CreateMaterialRequest, ProductCategory } from '../../../../co
       <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
         <div class="relative">
           <lucide-icon [img]="searchIcon" [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></lucide-icon>
-          <input [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" type="text" placeholder="Buscar materiales..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20">
+          <input [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" type="text" placeholder="Buscar materiales..." class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20 placeholder:text-gray-300">
         </div>
       </div>
 
@@ -52,6 +52,7 @@ import { Material, CreateMaterialRequest, ProductCategory } from '../../../../co
           <table class="w-full">
             <thead class="bg-gray-50">
               <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Material</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoría</th>
                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
@@ -61,15 +62,21 @@ import { Material, CreateMaterialRequest, ProductCategory } from '../../../../co
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-              @for (m of filteredMaterials(); track m.id) {
+              @for (m of filteredMaterials(); track m.id; let i = $index) {
                 <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm text-gray-500">{{ i + 1 }}</td>
                   <td class="px-4 py-3">
                     <div class="text-sm font-medium text-gray-800">{{ m.materialName }}</div>
-                    @if (m.materialCode) {
-                      <div class="text-xs text-gray-500">{{ m.materialCode }}</div>
+                  </td>
+                  <td class="px-4 py-3 text-sm">
+                    @if (getCategoryName(m.categoryId)) {
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-lg bg-violet-50 text-violet-700 text-xs font-medium">
+                        {{ getCategoryName(m.categoryId) }}
+                      </span>
+                    } @else {
+                      <span class="text-gray-400">-</span>
                     }
                   </td>
-                  <td class="px-4 py-3 text-sm">{{ m.categoryName || '-' }}</td>
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                       <span class="text-sm font-medium">{{ m.currentStock }}</span>
@@ -91,7 +98,7 @@ import { Material, CreateMaterialRequest, ProductCategory } from '../../../../co
                   </td>
                 </tr>
               } @empty {
-                <tr><td colspan="6" class="text-center py-12 text-gray-400">No hay materiales</td></tr>
+                <tr><td colspan="7" class="text-center py-12 text-gray-400">No hay materiales</td></tr>
               }
             </tbody>
           </table>
@@ -99,49 +106,56 @@ import { Material, CreateMaterialRequest, ProductCategory } from '../../../../co
       </div>
 
       @if (showModal()) {
-        <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="closeModal()">
-          <div class="bg-white rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-bold mb-4">{{ editMode() ? 'Editar' : 'Nuevo' }} Material</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div class="md:col-span-2">
-                <label class="text-sm text-gray-600 mb-1 block">Nombre *</label>
-                <input [(ngModel)]="formData.materialName" placeholder="Nombre del material" class="w-full px-3 py-2 border border-gray-100 rounded-xl placeholder:text-gray-400">
-              </div>
-
-              <div>
-                <label class="text-sm text-gray-600 mb-1 block">Categoría *</label>
-                <select [(ngModel)]="formData.categoryId" class="w-full px-3 py-2 border border-gray-100 rounded-xl">
-                  <option value="">Seleccione...</option>
-                  @for (c of categories(); track c.id) {
-                    <option [value]="c.id">{{ c.categoryName }}</option>
+        <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" (click)="closeModal()">
+          <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 class="text-lg font-bold text-gray-800">{{ editMode() ? 'Editar' : 'Nuevo' }} Material</h3>
+            </div>
+            <div class="p-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="md:col-span-2">
+                  <label class="text-sm text-gray-600 mb-1 block">Nombre *</label>
+                  <input [(ngModel)]="formData.materialName" placeholder="Nombre del material" class="w-full px-3 py-2 border border-gray-200 rounded-xl placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                  @if (duplicateNameError) {
+                    <p class="text-xs text-red-500 mt-1">Ya existe un material con ese nombre</p>
                   }
-                </select>
-              </div>
-              <div>
-                <label class="text-sm text-gray-600 mb-1 block">Unidad *</label>
-                <select [(ngModel)]="formData.unit" class="w-full px-3 py-2 border border-gray-100 rounded-xl">
-                  <option value="">Seleccione...</option>
-                  <option value="UNIDAD">Unidad</option>
-                  <option value="KILOGRAMO">Kilogramo</option>
-                  <option value="GRAMO">Gramo</option>
-                  <option value="LITRO">Litro</option>
-                  <option value="METRO">Metro</option>
-                  <option value="CAJA">Caja</option>
-                  <option value="PAQUETE">Paquete</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-sm text-gray-600 mb-1 block">Stock Mínimo *</label>
-                <input [(ngModel)]="formData.minStock" type="number" min="0" placeholder="0" class="w-full px-3 py-2 border border-gray-100 rounded-xl placeholder:text-gray-400">
-              </div>
-              <div>
-                <label class="text-sm text-gray-600 mb-1 block">Precio Unitario (S/) *</label>
-                <input [(ngModel)]="formData.unitPrice" type="number" min="0" step="0.01" placeholder="0.00" class="w-full px-3 py-2 border border-gray-100 rounded-xl placeholder:text-gray-400">
+                </div>
+
+                <div>
+                  <label class="text-sm text-gray-600 mb-1 block">Categoría *</label>
+                  <select [(ngModel)]="formData.categoryId" class="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                    <option value="">Seleccione...</option>
+                    @for (c of categories(); track c.id) {
+                      <option [value]="c.id">{{ c.categoryName }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label class="text-sm text-gray-600 mb-1 block">Unidad *</label>
+                  <select [(ngModel)]="formData.unit" class="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                    <option value="">Seleccione...</option>
+                    <option value="UNIDAD">Unidad</option>
+                    <option value="KILOGRAMO">Kilogramo</option>
+                    <option value="GRAMO">Gramo</option>
+                    <option value="LITRO">Litro</option>
+                    <option value="METRO">Metro</option>
+                    <option value="CAJA">Caja</option>
+                    <option value="PAQUETE">Paquete</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-sm text-gray-600 mb-1 block">Stock Mínimo *</label>
+                  <input [(ngModel)]="formData.minStock" type="number" min="0" placeholder="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                </div>
+                <div>
+                  <label class="text-sm text-gray-600 mb-1 block">Precio Unitario (S/) *</label>
+                  <input [(ngModel)]="formData.unitPrice" type="number" min="0" step="0.01" placeholder="0.00" class="w-full px-3 py-2 border border-gray-200 rounded-xl placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400">
+                </div>
               </div>
             </div>
-            <div class="flex gap-2 mt-6">
-              <button (click)="closeModal()" class="flex-1 px-4 py-2 border rounded-xl hover:bg-gray-50">Cancelar</button>
-              <button (click)="save()" [disabled]="!isFormValid()" class="flex-1 px-4 py-2 bg-violet-600 text-white rounded-xl disabled:opacity-50">Guardar</button>
+            <div class="flex gap-3 px-6 pb-6">
+              <button (click)="closeModal()" class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors">Cancelar</button>
+              <button (click)="save()" [disabled]="!isFormValid() || duplicateNameError" class="flex-1 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Guardar</button>
             </div>
           </div>
         </div>
@@ -165,9 +179,14 @@ export class MaterialsComponent {
   editMode = signal(false);
   selectedId = '';
   formData: any = {};
+  duplicateNameError = false;
 
   lowStockCount = signal(0);
   totalValue = signal(0);
+
+  getCategoryName(categoryId: string): string {
+    return this.categories().find(c => c.id === categoryId)?.categoryName || '';
+  }
 
   ngOnInit() {
     this.load();
@@ -203,8 +222,7 @@ export class MaterialsComponent {
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(m =>
-        m.materialName.toLowerCase().includes(term) ||
-        m.materialCode?.toLowerCase().includes(term)
+        m.materialName.toLowerCase().includes(term)
       );
     }
     this.filteredMaterials.set(filtered);
@@ -213,6 +231,7 @@ export class MaterialsComponent {
   openModal() {
     this.editMode.set(false);
     this.formData = { minStock: 10, unitPrice: 0 };
+    this.duplicateNameError = false;
     this.showModal.set(true);
   }
 
@@ -230,7 +249,18 @@ export class MaterialsComponent {
       minStock: m.minStock,
       unitPrice: m.unitPrice
     };
+    this.duplicateNameError = false;
     this.showModal.set(true);
+  }
+
+  checkDuplicateName(): boolean {
+    const name = this.formData.materialName?.trim().toLowerCase();
+    if (!name) return false;
+    const duplicate = this.materials().some(m =>
+      m.materialName.trim().toLowerCase() === name && (!this.editMode() || m.id !== this.selectedId)
+    );
+    this.duplicateNameError = duplicate;
+    return duplicate;
   }
 
   isFormValid() {
@@ -241,6 +271,11 @@ export class MaterialsComponent {
   save() {
     const orgId = this.auth.organizationId();
     if (!orgId || !this.isFormValid()) return;
+
+    if (this.checkDuplicateName()) {
+      this.alert.warning('Nombre duplicado', 'Ya existe un material con ese nombre');
+      return;
+    }
 
     const req: CreateMaterialRequest = {
       organizationId: orgId,
@@ -264,13 +299,15 @@ export class MaterialsComponent {
   }
 
   delete(m: Material) {
-    if (!confirm(`¿Eliminar "${m.materialName}"?`)) return;
-    this.inv.deleteMaterial(m.id).subscribe({
-      next: () => {
-        this.alert.success('Éxito', 'Material eliminado');
-        this.load();
-      },
-      error: () => this.alert.error('Error', 'No se pudo eliminar')
+    this.alert.confirmDelete(m.materialName).then(result => {
+      if (!result.isConfirmed) return;
+      this.inv.deleteMaterial(m.id).subscribe({
+        next: () => {
+          this.alert.success('Éxito', 'Material eliminado');
+          this.load();
+        },
+        error: () => this.alert.error('Error', 'No se pudo eliminar')
+      });
     });
   }
 }
