@@ -1,6 +1,6 @@
 export const environment = {
      production: true,
-     apiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-gateway/api',
-     evolutionApiUrl: 'https://lab.vallegrande.edu.pe/jass/ms-evolution',
+     apiUrl: 'http://localhost:9095/api',
+     evolutionApiUrl: 'http://localhost:8084',
      evolutionApiKey: 'JASS_EVOLUTION_KEY_2024'
 };
