@@ -67,7 +67,7 @@ services:
   vg-ms-organizations:
     image: isaelfatamadev/prs_microservices-vg-ms-organizations:latest
     container_name: vg-ms-organizations
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
@@ -87,7 +87,7 @@ services:
   vg-ms-users:
     image: isaelfatamadev/prs_microservices-vg-ms-users:latest
     container_name: vg-ms-users
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_HOST: "144.126.140.79"
@@ -108,7 +108,7 @@ services:
   vg-ms-notifications:
     image: isaelfatamadev/prs_microservices-vg-ms-notifications:latest
     container_name: vg-ms-notifications
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
@@ -132,7 +132,7 @@ services:
   vg-ms-authentication:
     image: isaelfatamadev/prs_microservices-vg-ms-authentication:latest
     container_name: vg-ms-authentication
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       KEYCLOAK_URL: "https://lab.vallegrande.edu.pe/jass/keycloak"
@@ -154,7 +154,7 @@ services:
   vg-ms-distribution:
     image: isaelfatamadev/prs_microservices-vg-ms-distribution:latest
     container_name: vg-ms-distribution
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
@@ -173,7 +173,7 @@ services:
   vg-ms-claims:
     image: isaelfatamadev/prs_microservices-vg-ms-claims:latest
     container_name: vg-ms-claims
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
@@ -194,7 +194,7 @@ services:
   vg-ms-infrastructure:
     image: isaelfatamadev/prs_microservices-vg-ms-infrastructure:latest
     container_name: vg-ms-infrastructure
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DATABASE_URL: "r2dbc:postgresql://144.126.140.79:5410/sistemajass"
@@ -222,7 +222,7 @@ services:
   vg-ms-commercial:
     image: isaelfatamadev/prs_microservices-vg-ms-commercial:latest
     container_name: vg-ms-commercial
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DB_HOST: "144.126.140.79"
@@ -245,7 +245,7 @@ services:
   vg-ms-inventory-purchases:
     image: isaelfatamadev/prs_microservices-vg-ms-inventory-purchases:latest
     container_name: vg-ms-inventory-purchases
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       DATABASE_URL: "r2dbc:postgresql://144.126.140.79:5410/sistemajass"
@@ -271,7 +271,7 @@ services:
   vg-ms-water-quality:
     image: isaelfatamadev/prs_microservices-vg-ms-water-quality:latest
     container_name: vg-ms-water-quality
-    mem_limit: 5000m
+    mem_limit: 500m
     environment:
       SPRING_PROFILES_ACTIVE: prod
       MONGODB_URI: "mongodb+srv://sistemajass:ZC7O1Ok40SwkfEje@sistemajass.jn6cpoz.mongodb.net/JASS_DIGITAL?retryWrites=true&w=majority&maxPoolSize=10&minPoolSize=2&maxIdleTimeMS=30000&serverSelectionTimeoutMS=3000&heartbeatFrequencyMS=30000"
@@ -290,7 +290,7 @@ services:
   vg-ms-gateway:
     image: isaelfatamadev/prs_microservices-vg-ms-gateway:latest
     container_name: vg-ms-gateway
-    mem_limit: 5000m
+    mem_limit: 500m
     ports:
       - "9095:9095"
     environment:

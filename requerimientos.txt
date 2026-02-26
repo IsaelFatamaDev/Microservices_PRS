@@ -52,3 +52,12 @@ isaelfatamadev@iMac-de-Isael ~ % curl -X POST https://lab.vallegrande.edu.pe/jas
   }'
 
   28. el rol operator no realiza ninguna accion dentro del sistema, solo es usado para ingresar datos pero el no puede loguearse ni gestionar nada
+
+
+
+curl -X POST http://localhost:8084/instance/create   -H "apikey: JASS_EVOLUTION_KEY_2024"   -H "Content-Type: application/json"   -d '{
+    "instanceName": "jass-whatsapp",
+    "integration": "WHATSAPP-BAILEYS",
+    "token": "",
+    "qrcode": true
+}'
