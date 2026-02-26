@@ -681,7 +681,12 @@ export class UserFormComponent implements OnInit {
     ).subscribe({
       next: res => {
         this.allStreets.set((res.data || []).filter(s => s.recordStatus === 'ACTIVE'));
-        if (this.selectedZoneId) this.onZoneChange();
+        if (this.selectedZoneId) {
+          // Filtrar calles sin resetear la calle seleccionada (puede venir de loadUser)
+          this.filteredStreets.set(
+            this.allStreets().filter(s => s.zoneId === this.selectedZoneId && s.recordStatus === 'ACTIVE')
+          );
+        }
       }
     });
   }

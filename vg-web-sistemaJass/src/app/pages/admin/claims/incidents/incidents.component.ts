@@ -460,7 +460,8 @@ interface Zone {
                 <button type="button" (click)="closeResolveModal()" class="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
                   Cancelar
                 </button>
-                <button type="submit" [disabled]="saving() || !resolveForm.valid" class="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="submit" [disabled]="saving() || !resolveForm.valid || hasAnyStockIssue()" class="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        [title]="hasAnyStockIssue() ? 'Hay materiales con stock insuficiente' : ''">
                   {{ saving() ? 'Resolviendo...' : 'Resolver Incidencia' }}
                 </button>
               </div>
@@ -840,6 +841,11 @@ export class IncidentsComponent implements OnInit {
 
   getStockWarning(index: number): string | undefined {
     return this.stockWarnings().get(index);
+  }
+
+  hasAnyStockIssue(): boolean {
+    if (this.materialsArray.length === 0) return false;
+    return this.materialsArray.controls.some((_, i) => !!this.getStockWarning(i));
   }
 
   getProductStock(index: number): number | null {

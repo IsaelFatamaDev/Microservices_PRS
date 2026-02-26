@@ -244,9 +244,10 @@ interface WaterBoxDetail {
                             <lucide-icon [img]="dropletsIcon" [size]="16"></lucide-icon>
                           </button>
                         }
-                        <a [routerLink]="['/admin/users', user.id]"
-                           class="p-2 text-gray-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
-                           title="Editar">
+                        <a [routerLink]="user.recordStatus === 'ACTIVE' ? ['/admin/users', user.id] : null"
+                           class="p-2 rounded-lg transition-all"
+                           [class]="user.recordStatus === 'ACTIVE' ? 'text-gray-500 hover:text-amber-600 hover:bg-amber-50 cursor-pointer' : 'text-gray-300 cursor-not-allowed pointer-events-none'"
+                           [title]="user.recordStatus === 'ACTIVE' ? 'Editar' : 'No se puede editar un usuario inactivo'">
                           <lucide-icon [img]="editIcon" [size]="16"></lucide-icon>
                         </a>
                         @if (user.recordStatus === 'ACTIVE') {
@@ -372,8 +373,10 @@ interface WaterBoxDetail {
                           <lucide-icon [img]="dropletsIcon" [size]="16"></lucide-icon>
                         </button>
                       }
-                      <a [routerLink]="['/admin/users', user.id]"
-                         class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
+                      <a [routerLink]="user.recordStatus === 'ACTIVE' ? ['/admin/users', user.id] : null"
+                         class="p-1.5 rounded-lg transition-colors"
+                         [class]="user.recordStatus === 'ACTIVE' ? 'text-amber-600 hover:bg-amber-50 cursor-pointer' : 'text-gray-300 cursor-not-allowed pointer-events-none'"
+                         [title]="user.recordStatus === 'ACTIVE' ? 'Editar' : 'No se puede editar un usuario inactivo'">
                         <lucide-icon [img]="editIcon" [size]="16"></lucide-icon>
                       </a>
                       @if (user.recordStatus === 'ACTIVE') {
